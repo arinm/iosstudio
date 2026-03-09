@@ -1,0 +1,657 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0A9969BD5EC845900F7B3F89 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF9514901F1810413CBB8517 /* ExportView.swift */; };
+		0AE899DD5A28E8C4338E2041 /* PanelConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FD0F2B4D2086D6BABBCA34 /* PanelConfigurationTests.swift */; };
+		1679A9C1CF4FE8403B60B597 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1860A656819D52DA215175F /* EditorView.swift */; };
+		1FD456904AC0984F76D1F0D3 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2F8883BD944E1F4A65B85E /* PaywallView.swift */; };
+		2E78491515925DBDCEEF3585 /* DevicePresetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C381EAC438AE7ADE2594EDCB /* DevicePresetTests.swift */; };
+		2FD76804E33DB8BF66FD106E /* ExportPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 242188A911A2D1C4DB782FF9 /* ExportPreset.swift */; };
+		31C59A50994AD375DF197DC4 /* TemplateGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3CE0707C508C45FF8092EF /* TemplateGalleryView.swift */; };
+		32E7AE84CCF8946DC3E558A1 /* ThemeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA47866F7E090BFC05C68AB /* ThemeConfiguration.swift */; };
+		338F89E8442B697FB0D466CA /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9102F37413FDECD970B8E998 /* ExportService.swift */; };
+		404D9B597FFF795A8DFDA75E /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D750714A2F76AC3BBF14FC /* MainTabView.swift */; };
+		4D29A5FC4356930F85141FE7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3152A659220D46E2ED3FA83C /* Assets.xcassets */; };
+		54BAB16E441AA13025779B0D /* SubscriptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B172F4FBD704E1A0004ACD8F /* SubscriptionManagerTests.swift */; };
+		5B3F6DF2980429F90D7B9748 /* PanelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1749CC5B776A2DDBD56C605B /* PanelConfiguration.swift */; };
+		75EDF8BF95620B148C72B559 /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1052EEE3FFD89FF4E561760D /* TodoItem.swift */; };
+		7868F63D0D89359F1A64A9EE /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B85642FC6CBF026B05F52 /* PreviewView.swift */; };
+		7AB8662DBA9100B0A9F36EEC /* ExportHistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EE77BC484C7D03F21A907B /* ExportHistoryItem.swift */; };
+		7E9D56DF82A01685154807CF /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA06C15D65A0B6BD481222E9 /* OnboardingView.swift */; };
+		8B406269998AE174C99D7BFC /* WallpaperRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A4206D42660E5F348F437C /* WallpaperRenderer.swift */; };
+		931D4ECABC8551AA5834B8F7 /* LockScreenStudioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C9946BFF913B0051ECE8D7 /* LockScreenStudioApp.swift */; };
+		9B9A9E492267A9ACBD936D21 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69F64CCA973679D4799E824 /* CalendarService.swift */; };
+		B5358E4F9D759039FB2EBB44 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BB0DA1EA2E40D543FF1DE3 /* SubscriptionManager.swift */; };
+		B90B81912634C45F46B30689 /* AppIconOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AF28D0307605484ECFE0B8 /* AppIconOption.swift */; };
+		BF978F71B4DE7324B99ED81E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D93E2CEC642F6F2B39345B /* SettingsView.swift */; };
+		C35B73EAA9D28DB7CB50F5BC /* DashboardProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 993D5A534F20151FD8F0BE59 /* DashboardProject.swift */; };
+		DF2784565CDF17E3BC984BEC /* TemplateSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2881C7EF871861714D65DF64 /* TemplateSeeder.swift */; };
+		E3900AA9BD2D04AE7B1E47F6 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CBE4E5AE08C56C5101CDAF /* GradientPreset.swift */; };
+		E4A195B552DD5CFDB71739D9 /* PanelDataBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 779EF975D5C8B355BAF5D2AC /* PanelDataBuilder.swift */; };
+		E890C37CF4A27D74064DD3F7 /* WallpaperRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9230E5259A0D07930E84D465 /* WallpaperRendererTests.swift */; };
+		F0E6588F39FB1D686BC49C26 /* WallpaperIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96272C8411EF64DC7E33D6E /* WallpaperIntents.swift */; };
+		F4EDF928532A52008A773035 /* ShortcutsGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B33633B740A28F639951BC /* ShortcutsGuideView.swift */; };
+		F6D1708682364B31BE3B0A41 /* ExportHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 984A9A206C694854E03B8D21 /* ExportHistoryView.swift */; };
+		F82BEFF835FD250F7C1734DC /* WallpaperTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF351495945507C66158306 /* WallpaperTemplate.swift */; };
+		FB25170565AA096CDCB48A39 /* ThemePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD31E5BE2AA90344E1F947F /* ThemePickerSheet.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9F721ABE6A0D7AA784E4CD68 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AD9A1B24C9D43D01A89D74F7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E587B7DCA4AE36EB69BA9503;
+			remoteInfo = LockScreenStudio;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0E529239EF3FBC3FF88241BA /* LockScreenStudioTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LockScreenStudioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1052EEE3FFD89FF4E561760D /* TodoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItem.swift; sourceTree = "<group>"; };
+		1749CC5B776A2DDBD56C605B /* PanelConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelConfiguration.swift; sourceTree = "<group>"; };
+		1AB267F36B9B0673DEED5819 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		242188A911A2D1C4DB782FF9 /* ExportPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportPreset.swift; sourceTree = "<group>"; };
+		25BB0DA1EA2E40D543FF1DE3 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		2881C7EF871861714D65DF64 /* TemplateSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateSeeder.swift; sourceTree = "<group>"; };
+		2F3CE0707C508C45FF8092EF /* TemplateGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateGalleryView.swift; sourceTree = "<group>"; };
+		3152A659220D46E2ED3FA83C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		779EF975D5C8B355BAF5D2AC /* PanelDataBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelDataBuilder.swift; sourceTree = "<group>"; };
+		845B85642FC6CBF026B05F52 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
+		8F2F8883BD944E1F4A65B85E /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		9102F37413FDECD970B8E998 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		9230E5259A0D07930E84D465 /* WallpaperRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperRendererTests.swift; sourceTree = "<group>"; };
+		984A9A206C694854E03B8D21 /* ExportHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportHistoryView.swift; sourceTree = "<group>"; };
+		993D5A534F20151FD8F0BE59 /* DashboardProject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardProject.swift; sourceTree = "<group>"; };
+		A6AF28D0307605484ECFE0B8 /* AppIconOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconOption.swift; sourceTree = "<group>"; };
+		ACD31E5BE2AA90344E1F947F /* ThemePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePickerSheet.swift; sourceTree = "<group>"; };
+		B172F4FBD704E1A0004ACD8F /* SubscriptionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManagerTests.swift; sourceTree = "<group>"; };
+		C381EAC438AE7ADE2594EDCB /* DevicePresetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePresetTests.swift; sourceTree = "<group>"; };
+		C5A4206D42660E5F348F437C /* WallpaperRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperRenderer.swift; sourceTree = "<group>"; };
+		C6B33633B740A28F639951BC /* ShortcutsGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsGuideView.swift; sourceTree = "<group>"; };
+		C9C9946BFF913B0051ECE8D7 /* LockScreenStudioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenStudioApp.swift; sourceTree = "<group>"; };
+		D0CBE4E5AE08C56C5101CDAF /* GradientPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientPreset.swift; sourceTree = "<group>"; };
+		D3FD0F2B4D2086D6BABBCA34 /* PanelConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelConfigurationTests.swift; sourceTree = "<group>"; };
+		D5D93E2CEC642F6F2B39345B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		DEA47866F7E090BFC05C68AB /* ThemeConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfiguration.swift; sourceTree = "<group>"; };
+		DF9514901F1810413CBB8517 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		E6EE77BC484C7D03F21A907B /* ExportHistoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportHistoryItem.swift; sourceTree = "<group>"; };
+		E7D750714A2F76AC3BBF14FC /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		E96272C8411EF64DC7E33D6E /* WallpaperIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperIntents.swift; sourceTree = "<group>"; };
+		EA390FBE79C39E163B206045 /* LockScreenStudio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LockScreenStudio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1860A656819D52DA215175F /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
+		F69F64CCA973679D4799E824 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		FA06C15D65A0B6BD481222E9 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		FBF351495945507C66158306 /* WallpaperTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperTemplate.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0117094F2439923974580751 /* LockScreenStudio */ = {
+			isa = PBXGroup;
+			children = (
+				FC4F046811F2858F49DA91E2 /* Resources */,
+				1C0FFBF54C4BE20FE633F238 /* Sources */,
+				64F9664606FA33CE2F3ABE1F /* Tests */,
+			);
+			path = LockScreenStudio;
+			sourceTree = "<group>";
+		};
+		1C0FFBF54C4BE20FE633F238 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				391E6DA86EBED9334BFCF40D /* App */,
+				9DDC21A7A1310BAEB13A82A5 /* Intents */,
+				6203D865E6ABB2FBFB2A3DF1 /* Models */,
+				67CC42984E224CBE4545BF46 /* Renderer */,
+				93E0B70C6DFAB756CEEEFA38 /* Services */,
+				3E7FD705063581CC9F02172D /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		391E6DA86EBED9334BFCF40D /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1AB267F36B9B0673DEED5819 /* Info.plist */,
+				C9C9946BFF913B0051ECE8D7 /* LockScreenStudioApp.swift */,
+				E7D750714A2F76AC3BBF14FC /* MainTabView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		3E7FD705063581CC9F02172D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				68783C117A4D5FA88AC982AF /* Components */,
+				FF0DB49EC30C4563996FBC3C /* Editor */,
+				474D1CA7E6B2EC90737A0970 /* Export */,
+				5B70EA0DC2E2CA5DDEF24AA7 /* Gallery */,
+				7EBEB7C24070C7084833E8C2 /* Onboarding */,
+				87D25EAEBAFF33BBD6D9F353 /* Paywall */,
+				4CF9359DC78805FB985D09C6 /* Preview */,
+				E5B90C45D7043031EA6B9EE8 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		474D1CA7E6B2EC90737A0970 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				DF9514901F1810413CBB8517 /* ExportView.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		4CF9359DC78805FB985D09C6 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				845B85642FC6CBF026B05F52 /* PreviewView.swift */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		5B70EA0DC2E2CA5DDEF24AA7 /* Gallery */ = {
+			isa = PBXGroup;
+			children = (
+				2F3CE0707C508C45FF8092EF /* TemplateGalleryView.swift */,
+			);
+			path = Gallery;
+			sourceTree = "<group>";
+		};
+		5C3066EA884610E092D5F63D = {
+			isa = PBXGroup;
+			children = (
+				0117094F2439923974580751 /* LockScreenStudio */,
+				D988E4BA4C0A8061F9E6F6EC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6203D865E6ABB2FBFB2A3DF1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A6AF28D0307605484ECFE0B8 /* AppIconOption.swift */,
+				993D5A534F20151FD8F0BE59 /* DashboardProject.swift */,
+				E6EE77BC484C7D03F21A907B /* ExportHistoryItem.swift */,
+				242188A911A2D1C4DB782FF9 /* ExportPreset.swift */,
+				D0CBE4E5AE08C56C5101CDAF /* GradientPreset.swift */,
+				1749CC5B776A2DDBD56C605B /* PanelConfiguration.swift */,
+				DEA47866F7E090BFC05C68AB /* ThemeConfiguration.swift */,
+				1052EEE3FFD89FF4E561760D /* TodoItem.swift */,
+				FBF351495945507C66158306 /* WallpaperTemplate.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		64F9664606FA33CE2F3ABE1F /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				C381EAC438AE7ADE2594EDCB /* DevicePresetTests.swift */,
+				D3FD0F2B4D2086D6BABBCA34 /* PanelConfigurationTests.swift */,
+				B172F4FBD704E1A0004ACD8F /* SubscriptionManagerTests.swift */,
+				9230E5259A0D07930E84D465 /* WallpaperRendererTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		67CC42984E224CBE4545BF46 /* Renderer */ = {
+			isa = PBXGroup;
+			children = (
+				779EF975D5C8B355BAF5D2AC /* PanelDataBuilder.swift */,
+				C5A4206D42660E5F348F437C /* WallpaperRenderer.swift */,
+			);
+			path = Renderer;
+			sourceTree = "<group>";
+		};
+		68783C117A4D5FA88AC982AF /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				ACD31E5BE2AA90344E1F947F /* ThemePickerSheet.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		7EBEB7C24070C7084833E8C2 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				FA06C15D65A0B6BD481222E9 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		87D25EAEBAFF33BBD6D9F353 /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				8F2F8883BD944E1F4A65B85E /* PaywallView.swift */,
+			);
+			path = Paywall;
+			sourceTree = "<group>";
+		};
+		93E0B70C6DFAB756CEEEFA38 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F69F64CCA973679D4799E824 /* CalendarService.swift */,
+				9102F37413FDECD970B8E998 /* ExportService.swift */,
+				25BB0DA1EA2E40D543FF1DE3 /* SubscriptionManager.swift */,
+				2881C7EF871861714D65DF64 /* TemplateSeeder.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		9DDC21A7A1310BAEB13A82A5 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				E96272C8411EF64DC7E33D6E /* WallpaperIntents.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		D988E4BA4C0A8061F9E6F6EC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EA390FBE79C39E163B206045 /* LockScreenStudio.app */,
+				0E529239EF3FBC3FF88241BA /* LockScreenStudioTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E5B90C45D7043031EA6B9EE8 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				984A9A206C694854E03B8D21 /* ExportHistoryView.swift */,
+				D5D93E2CEC642F6F2B39345B /* SettingsView.swift */,
+				C6B33633B740A28F639951BC /* ShortcutsGuideView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		FC4F046811F2858F49DA91E2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3152A659220D46E2ED3FA83C /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		FF0DB49EC30C4563996FBC3C /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				F1860A656819D52DA215175F /* EditorView.swift */,
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D930B0769C0BD640EFAB1B1 /* LockScreenStudioTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4094C104E1878C766803FE27 /* Build configuration list for PBXNativeTarget "LockScreenStudioTests" */;
+			buildPhases = (
+				532DC183519FE3109286ED3B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8A9CB0902D2E0BACEDE09DA5 /* PBXTargetDependency */,
+			);
+			name = LockScreenStudioTests;
+			packageProductDependencies = (
+			);
+			productName = LockScreenStudioTests;
+			productReference = 0E529239EF3FBC3FF88241BA /* LockScreenStudioTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		E587B7DCA4AE36EB69BA9503 /* LockScreenStudio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6BEB99E9965BBBF19142CBCB /* Build configuration list for PBXNativeTarget "LockScreenStudio" */;
+			buildPhases = (
+				23D2BBD812B59483BE5DAF3A /* Sources */,
+				78A2490103218F2260F5DDCE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LockScreenStudio;
+			packageProductDependencies = (
+			);
+			productName = LockScreenStudio;
+			productReference = EA390FBE79C39E163B206045 /* LockScreenStudio.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AD9A1B24C9D43D01A89D74F7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2620;
+			};
+			buildConfigurationList = B4585CFFAA7F89330F31B8E1 /* Build configuration list for PBXProject "LockScreenStudio" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 5C3066EA884610E092D5F63D;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E587B7DCA4AE36EB69BA9503 /* LockScreenStudio */,
+				1D930B0769C0BD640EFAB1B1 /* LockScreenStudioTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		78A2490103218F2260F5DDCE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D29A5FC4356930F85141FE7 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		23D2BBD812B59483BE5DAF3A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B90B81912634C45F46B30689 /* AppIconOption.swift in Sources */,
+				9B9A9E492267A9ACBD936D21 /* CalendarService.swift in Sources */,
+				C35B73EAA9D28DB7CB50F5BC /* DashboardProject.swift in Sources */,
+				1679A9C1CF4FE8403B60B597 /* EditorView.swift in Sources */,
+				7AB8662DBA9100B0A9F36EEC /* ExportHistoryItem.swift in Sources */,
+				F6D1708682364B31BE3B0A41 /* ExportHistoryView.swift in Sources */,
+				2FD76804E33DB8BF66FD106E /* ExportPreset.swift in Sources */,
+				338F89E8442B697FB0D466CA /* ExportService.swift in Sources */,
+				0A9969BD5EC845900F7B3F89 /* ExportView.swift in Sources */,
+				E3900AA9BD2D04AE7B1E47F6 /* GradientPreset.swift in Sources */,
+				931D4ECABC8551AA5834B8F7 /* LockScreenStudioApp.swift in Sources */,
+				404D9B597FFF795A8DFDA75E /* MainTabView.swift in Sources */,
+				7E9D56DF82A01685154807CF /* OnboardingView.swift in Sources */,
+				5B3F6DF2980429F90D7B9748 /* PanelConfiguration.swift in Sources */,
+				E4A195B552DD5CFDB71739D9 /* PanelDataBuilder.swift in Sources */,
+				1FD456904AC0984F76D1F0D3 /* PaywallView.swift in Sources */,
+				7868F63D0D89359F1A64A9EE /* PreviewView.swift in Sources */,
+				BF978F71B4DE7324B99ED81E /* SettingsView.swift in Sources */,
+				F4EDF928532A52008A773035 /* ShortcutsGuideView.swift in Sources */,
+				B5358E4F9D759039FB2EBB44 /* SubscriptionManager.swift in Sources */,
+				31C59A50994AD375DF197DC4 /* TemplateGalleryView.swift in Sources */,
+				DF2784565CDF17E3BC984BEC /* TemplateSeeder.swift in Sources */,
+				32E7AE84CCF8946DC3E558A1 /* ThemeConfiguration.swift in Sources */,
+				FB25170565AA096CDCB48A39 /* ThemePickerSheet.swift in Sources */,
+				75EDF8BF95620B148C72B559 /* TodoItem.swift in Sources */,
+				F0E6588F39FB1D686BC49C26 /* WallpaperIntents.swift in Sources */,
+				8B406269998AE174C99D7BFC /* WallpaperRenderer.swift in Sources */,
+				F82BEFF835FD250F7C1734DC /* WallpaperTemplate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		532DC183519FE3109286ED3B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2E78491515925DBDCEEF3585 /* DevicePresetTests.swift in Sources */,
+				0AE899DD5A28E8C4338E2041 /* PanelConfigurationTests.swift in Sources */,
+				54BAB16E441AA13025779B0D /* SubscriptionManagerTests.swift in Sources */,
+				E890C37CF4A27D74064DD3F7 /* WallpaperRendererTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8A9CB0902D2E0BACEDE09DA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E587B7DCA4AE36EB69BA9503 /* LockScreenStudio */;
+			targetProxy = 9F721ABE6A0D7AA784E4CD68 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		24033A80D502559D2662ADBC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		43C5086DDF5B271C4DD99DCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LockScreenStudio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LockScreenStudio";
+			};
+			name = Release;
+		};
+		8D823C4BC4400F60E9CF6C9F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 9A2WJMF6Z7;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9E82A3E1B3C70B54B7BE4CE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 9A2WJMF6Z7;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AA55F5547E39A660E9762673 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		FF1776D94806453E09648B0C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LockScreenStudio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LockScreenStudio";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4094C104E1878C766803FE27 /* Build configuration list for PBXNativeTarget "LockScreenStudioTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FF1776D94806453E09648B0C /* Debug */,
+				43C5086DDF5B271C4DD99DCA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6BEB99E9965BBBF19142CBCB /* Build configuration list for PBXNativeTarget "LockScreenStudio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D823C4BC4400F60E9CF6C9F /* Debug */,
+				9E82A3E1B3C70B54B7BE4CE5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B4585CFFAA7F89330F31B8E1 /* Build configuration list for PBXProject "LockScreenStudio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				24033A80D502559D2662ADBC /* Debug */,
+				AA55F5547E39A660E9762673 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AD9A1B24C9D43D01A89D74F7 /* Project object */;
+}

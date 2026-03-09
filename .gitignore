@@ -1,0 +1,21 @@
+# Build
+build/
+DerivedData/
+*.xcworkspace
+!*.xcodeproj/project.pbxproj
+*.xcuserdata/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Node (website)
+website/node_modules/
+website/.next/
+website/out/
+
+# Misc
+*.log
+.env
+.env.local

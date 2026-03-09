@@ -1,0 +1,46 @@
+name: LockScreenStudio
+options:
+  bundleIdPrefix: com.lockscreenstudio
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "26.2"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    INFOPLIST_FILE: LockScreenStudio/Sources/App/Info.plist
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+targets:
+  LockScreenStudio:
+    type: application
+    platform: iOS
+    sources:
+      - path: LockScreenStudio/Sources
+      - path: LockScreenStudio/Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockscreenstudio.app
+        INFOPLIST_FILE: LockScreenStudio/Sources/App/Info.plist
+        GENERATE_INFOPLIST_FILE: false
+    entitlements:
+      path: LockScreenStudio/LockScreenStudio.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+
+  LockScreenStudioTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: LockScreenStudio/Tests
+    dependencies:
+      - target: LockScreenStudio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockscreenstudio.tests
+        GENERATE_INFOPLIST_FILE: true
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/LockScreenStudio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LockScreenStudio"
+        BUNDLE_LOADER: "$(TEST_HOST)"
