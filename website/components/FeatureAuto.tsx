@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import LockScreenMockup from "./LockScreenMockup";
+import Image from "next/image";
 
 const floatingIcons = [
   { icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", x: -140, y: -80, delay: 0 },
@@ -84,37 +84,21 @@ export default function FeatureAuto() {
             </motion.div>
           ))}
 
-          {/* Center phone */}
+          {/* Center phone — real screenshot */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <LockScreenMockup
-              size="lg"
-              gradient="from-slate-950 via-indigo-950 to-black"
-              dateText="Monday, February 23"
-              timeText="09:41"
-              panels={[
-                {
-                  title: "Agenda",
-                  lines: [
-                    { text: "09:00  Team Standup", accent: true },
-                    { text: "10:30  Design Review" },
-                    { text: "12:00  Lunch with Alex" },
-                    { text: "14:00  Sprint Planning" },
-                  ],
-                },
-                {
-                  title: "Top 3",
-                  lines: [
-                    { text: "1. Ship v1.0", accent: true },
-                    { text: "2. Review pull requests" },
-                    { text: "3. Gym at 6pm" },
-                  ],
-                },
-              ]}
-            />
+            <div className="relative w-[280px] h-[580px] rounded-[42px] border-[2px] border-white/10 overflow-hidden shadow-2xl bg-black">
+              <Image
+                src="/screenshots/shortcuts-automation.png"
+                alt="Daily auto-generate with Shortcuts"
+                fill
+                className="object-cover"
+                sizes="280px"
+              />
+            </div>
           </motion.div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import LockScreenMockup from "./LockScreenMockup";
+import Image from "next/image";
 
 const features = [
   "13+ Built-in Templates",
@@ -68,87 +68,61 @@ export default function FeatureCustomize() {
           </ul>
         </motion.div>
 
-        {/* Phones side */}
+        {/* Phones side — real screenshots */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.2 }}
           className="relative flex justify-center items-center min-h-[500px]"
         >
-          {/* Back phone (left) */}
-          <div className="absolute -left-4 top-8 -rotate-6 opacity-70 scale-90">
-            <LockScreenMockup
-              size="md"
-              gradient="from-emerald-950 via-slate-950 to-black"
-              dateText="Monday, February 23"
-              timeText="09:41"
-              panels={[
-                {
-                  title: "Countdown",
-                  lines: [
-                    { text: "15", accent: true },
-                    { text: "days until Birthday", dim: true },
-                  ],
-                },
-                {
-                  title: "Note",
-                  lines: [
-                    { text: "Pick up the cake" },
-                    { text: "Call mom by 5pm" },
-                  ],
-                },
-              ]}
-            />
-          </div>
+          {/* Back phone (left) — theme picker photo */}
+          <motion.div
+            initial={{ opacity: 0, rotate: -6 }}
+            animate={isInView ? { opacity: 0.7, rotate: -6 } : {}}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="absolute -left-4 top-8 scale-90"
+          >
+            <div className="relative w-[200px] h-[433px] rounded-[32px] border-[2px] border-white/10 overflow-hidden shadow-2xl bg-black">
+              <Image
+                src="/screenshots/theme-picker-photo.png"
+                alt="Theme picker with photo background"
+                fill
+                className="object-cover"
+                sizes="200px"
+              />
+            </div>
+          </motion.div>
 
-          {/* Center phone */}
+          {/* Center phone — theme colors */}
           <div className="relative z-10">
-            <LockScreenMockup
-              size="md"
-              gradient="from-indigo-950 via-indigo-900 to-slate-950"
-              dateText="Monday, February 23"
-              timeText="09:41"
-              panels={[
-                {
-                  title: "Agenda",
-                  lines: [
-                    { text: "09:00  Team Standup", accent: true },
-                    { text: "10:30  Design Review" },
-                    { text: "12:00  Lunch with Alex" },
-                    { text: "14:00  Sprint Planning" },
-                  ],
-                },
-                {
-                  title: "Top 3",
-                  lines: [
-                    { text: "1. Ship v1.0", accent: true },
-                    { text: "2. Review pull requests" },
-                    { text: "3. Gym at 6pm" },
-                  ],
-                },
-              ]}
-            />
+            <div className="relative w-[220px] h-[476px] rounded-[36px] border-[2px] border-white/10 overflow-hidden shadow-2xl bg-black">
+              <Image
+                src="/screenshots/theme-picker-colors.png"
+                alt="Theme customization with colors"
+                fill
+                className="object-cover"
+                sizes="220px"
+              />
+            </div>
           </div>
 
-          {/* Back phone (right) */}
-          <div className="absolute -right-4 top-8 rotate-6 opacity-70 scale-90">
-            <LockScreenMockup
-              size="md"
-              gradient="from-rose-950 via-slate-950 to-black"
-              dateText="Monday, February 23"
-              timeText="09:41"
-              panels={[
-                {
-                  title: "Meetings",
-                  lines: [
-                    { text: "09:00  Kickoff Call", accent: true },
-                    { text: "11:00  Client Review" },
-                    { text: "15:00  1:1 with Manager" },
-                  ],
-                },
-              ]}
-            />
-          </div>
+          {/* Back phone (right) — add panel */}
+          <motion.div
+            initial={{ opacity: 0, rotate: 6 }}
+            animate={isInView ? { opacity: 0.7, rotate: 6 } : {}}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="absolute -right-4 top-8 scale-90"
+          >
+            <div className="relative w-[200px] h-[433px] rounded-[32px] border-[2px] border-white/10 overflow-hidden shadow-2xl bg-black">
+              <Image
+                src="/screenshots/add-panel-sheet.png"
+                alt="Add panel options"
+                fill
+                className="object-cover"
+                sizes="200px"
+              />
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>
