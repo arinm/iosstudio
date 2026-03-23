@@ -24,7 +24,7 @@ export default function TermsPage() {
           Acceptance of Terms
         </h2>
         <p>
-          By downloading, installing, or using Lock Screen Studio (&quot;the App&quot;),
+          By downloading, installing, or using Lock Screen Studio (&quot;the App&quot;), developed by ARINITSOFT PC SRL, operating as Arinitsolutions (arinitsolutions.com),
           you agree to be bound by these Terms of Service. If you do not agree to
           these terms, do not use the App.
         </p>
@@ -113,7 +113,7 @@ export default function TermsPage() {
         </h2>
         <p>
           The App, including its design, code, templates, and visual assets, is the
-          intellectual property of Lock Screen Studio. Wallpaper images you generate
+          intellectual property of ARINITSOFT PC SRL (Arinitsolutions). Wallpaper images you generate
           using your own data are yours to use freely.
         </p>
 
@@ -130,7 +130,7 @@ export default function TermsPage() {
           Limitation of Liability
         </h2>
         <p>
-          To the maximum extent permitted by law, Lock Screen Studio shall not be
+          To the maximum extent permitted by law, ARINITSOFT PC SRL (Arinitsolutions) shall not be
           liable for any indirect, incidental, special, or consequential damages
           arising from your use of the App, including but not limited to issues with
           calendar data accuracy, wallpaper rendering, or device compatibility.
@@ -157,10 +157,10 @@ export default function TermsPage() {
         <p>
           For questions about these terms, contact us at{" "}
           <a
-            href="mailto:support@lockscreenstudio.app"
+            href="mailto:contact@arinitsolutions.com"
             className="text-indigo-400"
           >
-            support@lockscreenstudio.app
+            contact@arinitsolutions.com
           </a>
           .
         </p>

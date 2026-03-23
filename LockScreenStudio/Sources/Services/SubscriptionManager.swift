@@ -27,7 +27,9 @@ final class SubscriptionManager: ObservableObject {
     /// In DEBUG builds, set "debug_force_pro" in UserDefaults to override.
     var isPro: Bool {
         #if DEBUG
-        return true // Temporary: force Pro for screenshots
+        if UserDefaults.standard.bool(forKey: "debug_force_pro") {
+            return true
+        }
         #endif
         return !purchasedProductIDs.isEmpty
     }

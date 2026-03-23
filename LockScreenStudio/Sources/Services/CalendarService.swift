@@ -19,7 +19,8 @@ actor CalendarService {
     var authorizationStatus: AuthorizationStatus {
         switch EKEventStore.authorizationStatus(for: .event) {
         case .notDetermined: return .notDetermined
-        case .fullAccess, .writeOnly: return .authorized
+        case .fullAccess: return .authorized
+        case .writeOnly: return .denied // writeOnly cannot read events
         case .denied: return .denied
         case .restricted: return .restricted
         @unknown default: return .denied
@@ -61,7 +62,7 @@ actor CalendarService {
     func fetchTodayEvents() -> [EKEvent] {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: Date())
-        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+        guard let end = calendar.date(byAdding: .day, value: 1, to: start) else { return [] }
         return fetchEvents(from: start, to: end)
     }
 

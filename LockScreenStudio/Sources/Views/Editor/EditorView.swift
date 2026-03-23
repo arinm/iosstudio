@@ -29,9 +29,13 @@ struct EditorView: View {
         ScrollView {
             VStack(spacing: 24) {
                 panelListSection
-                if template.panels.contains(where: { $0.panelType == .topThree }) {
+                if template.panels.contains(where: { $0.panelType == .topThree && $0.isVisible }) {
                     quickEditSection
                 }
+                if template.panels.contains(where: { $0.panelType == .todo && $0.isVisible }) {
+                    todoEditSection
+                }
+                layoutSection
                 themeButton
                 automationButton
                 generateButton
@@ -156,35 +160,37 @@ struct EditorView: View {
     }
 
     private func panelRow(_ panel: PanelConfiguration) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: "line.3.horizontal")
-                .foregroundStyle(.tertiary)
-                .font(.subheadline)
+        Button {
+            showPanelConfig = panel
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "line.3.horizontal")
+                    .foregroundStyle(.tertiary)
+                    .font(.subheadline)
 
-            Image(systemName: panel.panelType.systemImage)
-                .foregroundStyle(.indigo)
-                .frame(width: 24)
+                Image(systemName: panel.panelType.systemImage)
+                    .foregroundStyle(.indigo)
+                    .frame(width: 24)
 
-            Text(panel.title)
-                .font(.body)
+                Text(panel.title)
+                    .font(.body)
+                    .foregroundStyle(.primary)
 
-            Spacer()
+                Spacer()
 
-            Toggle("", isOn: Binding(
-                get: { panel.isVisible },
-                set: { panel.isVisible = $0 }
-            ))
-            .labelsHidden()
-            .tint(.indigo)
+                Toggle("", isOn: Binding(
+                    get: { panel.isVisible },
+                    set: { panel.isVisible = $0 }
+                ))
+                .labelsHidden()
+                .tint(.indigo)
 
-            Button {
-                showPanelConfig = panel
-            } label: {
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
+        .buttonStyle(.plain)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .accessibilityLabel("\(panel.title) panel, \(panel.isVisible ? "visible" : "hidden")")
@@ -195,7 +201,7 @@ struct EditorView: View {
 
     private var quickEditSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Quick Edit")
+            Text("Top 3")
                 .font(.headline)
 
             VStack(spacing: 12) {
@@ -221,7 +227,188 @@ struct EditorView: View {
         }
     }
 
-    // MARK: - Theme & Generate
+    // MARK: - Todo Edit
+
+    @State private var newTodoText = ""
+
+    private var todoPanelTitle: String {
+        template.panels.first(where: { $0.panelType == .todo && $0.isVisible })?.title ?? "To-Do"
+    }
+
+    private var todoEditSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(todoPanelTitle)
+                .font(.headline)
+
+            VStack(spacing: 0) {
+                ForEach(todos) { todo in
+                    HStack(spacing: 12) {
+                        Button {
+                            todo.isCompleted.toggle()
+                        } label: {
+                            Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(todo.isCompleted ? .green : .secondary)
+                        }
+
+                        Text(todo.text)
+                            .strikethrough(todo.isCompleted)
+                            .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+
+                        Spacer()
+
+                        Button {
+                            modelContext.delete(todo)
+                            try? modelContext.save()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+
+                    if todo.id != todos.last?.id {
+                        Divider().padding(.leading, 52)
+                    }
+                }
+
+                // Add new todo
+                HStack(spacing: 12) {
+                    Button {
+                        addTodo()
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(.indigo)
+                            .font(.title3)
+                    }
+                    .disabled(newTodoText.trimmingCharacters(in: .whitespaces).isEmpty)
+
+                    TextField("Add a task...", text: $newTodoText)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            addTodo()
+                        }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+            }
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private func addTodo() {
+        let text = newTodoText.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return }
+        let todo = TodoItem(text: text, sortOrder: todos.count)
+        modelContext.insert(todo)
+        try? modelContext.save()
+        newTodoText = ""
+    }
+
+    // MARK: - Layout Section
+
+    @AppStorage("fontScale") private var fontScale: Double = 1.0
+    @AppStorage("contentPosition") private var contentPosition: String = "center"
+    @AppStorage("topPadding") private var topPadding: Double = 0
+
+    private var layoutSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Font Size
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Font Size")
+                    .font(.subheadline.bold())
+
+                HStack(spacing: 8) {
+                    ForEach(FontScaleOption.allCases) { option in
+                        let isSelected = abs(fontScale - option.scale) < 0.01
+                        Button {
+                            fontScale = option.scale
+                        } label: {
+                            VStack(spacing: 4) {
+                                Text("Aa")
+                                    .font(.system(size: option.previewSize, weight: .medium))
+                                Text(option.label)
+                                    .font(.caption2)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(isSelected ? Color.indigo.opacity(0.15) : Color(.tertiarySystemBackground))
+                            .foregroundStyle(isSelected ? .indigo : .primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(isSelected ? Color.indigo : .clear, lineWidth: 2)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
+            // Text Position
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Text Position")
+                    .font(.subheadline.bold())
+
+                HStack(spacing: 8) {
+                    layoutPositionButton("Top", value: "top", icon: "arrow.up.to.line")
+                    layoutPositionButton("Center", value: "center", icon: "arrow.up.and.down")
+                    layoutPositionButton("Bottom", value: "bottom", icon: "arrow.down.to.line")
+                }
+            }
+
+            // Top Padding
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Top Padding")
+                        .font(.subheadline.bold())
+                    Spacer()
+                    Text(topPadding == 0 ? "None" : "\(Int(topPadding))px")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Slider(value: $topPadding, in: 0...400, step: 20)
+                    .tint(.indigo)
+
+                Text("Adjust to avoid the Lock Screen clock.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(16)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func layoutPositionButton(_ label: String, value: String, icon: String) -> some View {
+        let isSelected = contentPosition == value
+
+        return Button {
+            contentPosition = value
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.body)
+                Text(label)
+                    .font(.caption2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(isSelected ? Color.indigo.opacity(0.15) : Color(.tertiarySystemBackground))
+            .foregroundStyle(isSelected ? .indigo : .primary)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isSelected ? Color.indigo : .clear, lineWidth: 2)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Theme
 
     private var themeButton: some View {
         Button {
@@ -273,6 +460,8 @@ struct EditorView: View {
             if template.isPro && !subscriptionManager.isPro {
                 showPaywall = true
             } else {
+                // Save panels for background auto-refresh
+                BackgroundTaskManager.savePanelsForRefresh(sortedPanels)
                 showPreview = true
             }
         } label: {
@@ -406,9 +595,8 @@ struct PanelConfigSheet: View {
                 case .agenda:
                     agendaConfigSection
                 case .topThree:
-                    // Configured via Quick Edit in editor
                     Section {
-                        Text("Edit priorities in the Quick Edit section above.")
+                        Text("Edit your priorities in the Top 3 section on the editor screen.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

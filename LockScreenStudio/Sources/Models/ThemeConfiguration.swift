@@ -101,6 +101,9 @@ enum FontColorOption: String, CaseIterable, Identifiable {
     case silver
     case warmGray
     case coolGray
+    case black
+    case darkGray
+    case charcoal
 
     var id: String { rawValue }
 
@@ -112,6 +115,9 @@ enum FontColorOption: String, CaseIterable, Identifiable {
         case .silver: return "Silver"
         case .warmGray: return "Warm"
         case .coolGray: return "Cool"
+        case .black: return "Black"
+        case .darkGray: return "Dark"
+        case .charcoal: return "Charcoal"
         }
     }
 
@@ -123,6 +129,9 @@ enum FontColorOption: String, CaseIterable, Identifiable {
         case .silver: return Color(red: 0.82, green: 0.84, blue: 0.86)
         case .warmGray: return Color(red: 0.85, green: 0.80, blue: 0.75)
         case .coolGray: return Color(red: 0.75, green: 0.78, blue: 0.85)
+        case .black: return Color(red: 0.08, green: 0.08, blue: 0.08)
+        case .darkGray: return Color(red: 0.25, green: 0.25, blue: 0.28)
+        case .charcoal: return Color(red: 0.18, green: 0.20, blue: 0.22)
         }
     }
 
@@ -134,6 +143,9 @@ enum FontColorOption: String, CaseIterable, Identifiable {
         case .silver: return UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
         case .warmGray: return UIColor(red: 0.85, green: 0.80, blue: 0.75, alpha: 1)
         case .coolGray: return UIColor(red: 0.75, green: 0.78, blue: 0.85, alpha: 1)
+        case .black: return UIColor(white: 0.08, alpha: 1)
+        case .darkGray: return UIColor(red: 0.25, green: 0.25, blue: 0.28, alpha: 1)
+        case .charcoal: return UIColor(red: 0.18, green: 0.20, blue: 0.22, alpha: 1)
         }
     }
 }

@@ -168,52 +168,7 @@ struct ThemePickerSheet: View {
                         }
                     }
 
-                    // Font Size
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Font Size")
-                            .font(.subheadline.bold())
-                            .padding(.horizontal, 4)
-
-                        HStack(spacing: 8) {
-                            ForEach(FontScaleOption.allCases) { option in
-                                fontScaleButton(option)
-                            }
-                        }
-                    }
-
-                    // Content Position
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Text Position")
-                            .font(.subheadline.bold())
-                            .padding(.horizontal, 4)
-
-                        HStack(spacing: 8) {
-                            positionButton("Top", value: "top", icon: "arrow.up.to.line")
-                            positionButton("Center", value: "center", icon: "arrow.up.and.down")
-                            positionButton("Bottom", value: "bottom", icon: "arrow.down.to.line")
-                        }
-                    }
-
-                    // Top padding slider
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("Top Padding")
-                                .font(.subheadline.bold())
-                            Spacer()
-                            Text(topPadding == 0 ? "None" : "\(Int(topPadding))px")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.horizontal, 4)
-
-                        Slider(value: $topPadding, in: 0...400, step: 20)
-                            .tint(.indigo)
-
-                        Text("Adjust to avoid the Lock Screen clock or widgets. Check the preview to see the result.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 4)
-                    }
+                    // Font Size & Text Position moved to Editor Layout section
                 }
                 .padding(20)
             }

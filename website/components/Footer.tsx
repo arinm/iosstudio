@@ -70,8 +70,8 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/20">
-            &copy; {new Date().getFullYear()} Lock Screen Studio. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} Lock Screen Studio by{" "}
+            <a href="https://arinitsolutions.com" className="text-white/40 hover:text-white/60 transition-colors" target="_blank" rel="noopener noreferrer">Arinitsolutions</a>. All rights reserved.
           </p>
           <a
             href="#download"

@@ -6,7 +6,11 @@ struct SettingsView: View {
     @AppStorage("appTheme") private var appTheme: String = "auto"
     @AppStorage("defaultAccent") private var defaultAccent: String = "indigo"
 
+    @AppStorage("autoRefreshEnabled") private var autoRefreshEnabled = false
+    @AppStorage("autoRefreshInterval") private var autoRefreshInterval: Double = 24
+
     @State private var calendarAuthorized = false
+    @State private var notificationsAuthorized = false
     @State private var showPaywall = false
     @State private var showShortcutsGuide = false
     @State private var currentIcon: AppIconOption = .default
@@ -16,6 +20,7 @@ struct SettingsView: View {
             List {
                 appearanceSection
                 appIconSection
+                autoRefreshSection
                 dataSection
                 shortcutsSection
                 subscriptionSection
@@ -132,6 +137,41 @@ struct SettingsView: View {
     private func detectCurrentIcon() {
         let iconName = UIApplication.shared.alternateIconName
         currentIcon = AppIconOption.allCases.first { $0.alternateIconName == iconName } ?? .default
+    }
+
+    // MARK: - Auto Refresh
+
+    private var autoRefreshSection: some View {
+        Section {
+            Toggle("Auto-Refresh Wallpaper", isOn: $autoRefreshEnabled)
+                .onChange(of: autoRefreshEnabled) { _, enabled in
+                    if enabled {
+                        Task {
+                            notificationsAuthorized = await BackgroundTaskManager.shared.requestNotificationPermission()
+                        }
+                        BackgroundTaskManager.shared.scheduleRefreshIfEnabled()
+                    } else {
+                        BackgroundTaskManager.shared.cancelScheduledRefresh()
+                    }
+                }
+
+            if autoRefreshEnabled {
+                Picker("Frequency", selection: $autoRefreshInterval) {
+                    Text("Every 6 hours").tag(6.0)
+                    Text("Every 12 hours").tag(12.0)
+                    Text("Daily").tag(24.0)
+                    Text("Every 2 days").tag(48.0)
+                }
+                .onChange(of: autoRefreshInterval) { _, _ in
+                    BackgroundTaskManager.shared.cancelScheduledRefresh()
+                    BackgroundTaskManager.shared.scheduleRefreshIfEnabled()
+                }
+            }
+        } header: {
+            Text("Auto-Refresh")
+        } footer: {
+            Text("Automatically regenerates your wallpaper with fresh data (calendar, todos) and saves it to Photos. You'll get a notification when it's ready.")
+        }
     }
 
     // MARK: - Data

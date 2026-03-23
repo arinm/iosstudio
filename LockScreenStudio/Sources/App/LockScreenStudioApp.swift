@@ -1,10 +1,12 @@
 import SwiftUI
 import SwiftData
+import BackgroundTasks
 
 @main
 struct LockScreenStudioApp: App {
     @StateObject private var subscriptionManager = SubscriptionManager()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    private let backgroundTaskManager = BackgroundTaskManager.shared
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -43,6 +45,10 @@ struct LockScreenStudioApp: App {
                 }
             }
             .environmentObject(subscriptionManager)
+            .onAppear {
+                backgroundTaskManager.registerTasks()
+                backgroundTaskManager.scheduleRefreshIfEnabled()
+            }
         }
         .modelContainer(sharedModelContainer)
     }

@@ -84,11 +84,11 @@ struct PaywallView: View {
 
     private var featuresSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            featureRow(icon: "rectangle.stack", text: "All templates")
+            featureRow(icon: "rectangle.stack", text: "All templates & panels")
             featureRow(icon: "infinity", text: "Unlimited exports")
-            featureRow(icon: "paintbrush", text: "Premium themes & fonts")
-            featureRow(icon: "bolt.fill", text: "Full Shortcuts automation")
-            featureRow(icon: "textformat", text: "Advanced typography")
+            featureRow(icon: "paintbrush", text: "Premium gradients & photo backgrounds")
+            featureRow(icon: "bolt.fill", text: "Advanced Shortcuts (custom template & date)")
+            featureRow(icon: "plus.circle", text: "Add custom panels")
         }
         .padding(.horizontal, 8)
     }
@@ -181,8 +181,11 @@ struct PaywallView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
-                    if product.id == SubscriptionManager.yearlyProductID {
-                        Text("3-day free trial")
+                    if product.id == SubscriptionManager.yearlyProductID,
+                       let sub = product.subscription,
+                       let introOffer = sub.introductoryOffer,
+                       introOffer.paymentMode == .freeTrial {
+                        Text("Free trial: \(introOffer.period.debugDescription)")
                             .font(.caption)
                             .foregroundStyle(.indigo)
                     }
@@ -205,7 +208,7 @@ struct PaywallView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(title) plan, \(subtitle)\(badge != nil ? ", \(badge!)" : "")")
+        .accessibilityLabel("\(title) plan, \(subtitle)\(badge.map { ", \($0)" } ?? "")")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
@@ -245,13 +248,13 @@ struct PaywallView: View {
             .foregroundStyle(.secondary)
 
             HStack(spacing: 16) {
-                Button("Terms of Service") { /* Open URL */ }
-                Button("Privacy Policy") { /* Open URL */ }
+                Link("Terms of Service", destination: URL(string: "https://lockscreenstudio.app/terms")!)
+                Link("Privacy Policy", destination: URL(string: "https://lockscreenstudio.app/privacy")!)
             }
             .font(.caption)
             .foregroundStyle(.tertiary)
 
-            Text("Payment is charged to your Apple ID account.")
+            Text("Payment is charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. Manage subscriptions in Settings > Apple ID > Subscriptions.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)

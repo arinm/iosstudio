@@ -145,6 +145,13 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
+        // Pro-only intent
+        let subManager = SubscriptionManager()
+        await subManager.updatePurchasedProducts()
+        guard subManager.isPro else {
+            throw IntentError.proRequired
+        }
+
         let service = ExportService()
         let context = try ModelContext(sharedModelContainer())
 

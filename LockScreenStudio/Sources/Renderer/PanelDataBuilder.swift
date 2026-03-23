@@ -113,15 +113,14 @@ final class PanelDataBuilder {
             }
         }
 
-        // Show sample data when calendar is empty (first launch / no permission)
+        // Show appropriate message when calendar is empty
         let emptyLines: [PanelLine]
         if lines.isEmpty {
             let calStatus = await calendarService.authorizationStatus
             if calStatus == .authorized {
                 emptyLines = [.text("No events today")]
             } else {
-                // Demo data so users see the value immediately
-                emptyLines = Self.sampleAgendaLines
+                emptyLines = []
             }
         } else {
             emptyLines = lines
@@ -208,25 +207,11 @@ final class PanelDataBuilder {
 
     // MARK: - Sample Data (shown before user adds their own)
 
-    private static let sampleAgendaLines: [PanelLine] = [
-        .event(time: "09:00", title: "Team Standup"),
-        .event(time: "10:30", title: "Design Review"),
-        .event(time: "12:00", title: "Lunch with Alex"),
-        .event(time: "14:00", title: "Sprint Planning"),
-    ]
+    private static let sampleAgendaLines: [PanelLine] = []
 
-    private static let samplePriorityLines: [PanelLine] = [
-        .priority(rank: 1, text: "Ship v1.0"),
-        .priority(rank: 2, text: "Review pull requests"),
-        .priority(rank: 3, text: "Gym at 6pm"),
-    ]
+    private static let samplePriorityLines: [PanelLine] = []
 
-    private static let sampleTodoLines: [PanelLine] = [
-        .todoItem(text: "Reply to emails", completed: true),
-        .todoItem(text: "Prepare presentation", completed: false),
-        .todoItem(text: "Book flight tickets", completed: false),
-        .todoItem(text: "Call dentist", completed: false),
-    ]
+    private static let sampleTodoLines: [PanelLine] = []
 
     private func buildCountdownPanel(_ panel: PanelConfiguration, date: Date) -> PanelRenderData {
         let config = panel.decodeConfig(CountdownConfig.self) ?? CountdownConfig()
@@ -265,7 +250,7 @@ final class PanelDataBuilder {
                 lines.append(.text(line))
             }
         } else {
-            lines.append(.text("Add a note in settings"))
+            // Empty — user configures via panel settings
         }
 
         return PanelRenderData(title: panel.title, lines: lines)
@@ -281,7 +266,7 @@ final class PanelDataBuilder {
                 lines.append(.text("— \(config.author)"))
             }
         } else {
-            lines.append(.text("Add a quote in settings"))
+            // Empty — user configures via panel settings
         }
 
         return PanelRenderData(title: panel.title, lines: lines)

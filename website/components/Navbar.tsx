@@ -33,20 +33,27 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 9h18" />
-              <path d="M9 3v18" />
+              {/* Phone body */}
+              <rect x="5" y="2" width="14" height="20" rx="3" stroke="white" strokeWidth="1.5" />
+              {/* Dynamic Island */}
+              <rect x="9.5" y="3.5" width="5" height="1.5" rx="0.75" fill="white" fillOpacity="0.4" />
+              {/* Dashboard lines */}
+              <rect x="8" y="7" width="8" height="1.2" rx="0.6" fill="white" fillOpacity="0.9" />
+              <rect x="8" y="9.5" width="5.5" height="1" rx="0.5" fill="white" fillOpacity="0.5" />
+              <rect x="8" y="11.5" width="7" height="1" rx="0.5" fill="white" fillOpacity="0.5" />
+              <rect x="8" y="13.5" width="4" height="1" rx="0.5" fill="white" fillOpacity="0.5" />
+              {/* Accent dot */}
+              <circle cx="16.5" y="9.5" cy="10" r="1" fill="#a5b4fc" />
+              {/* Home indicator */}
+              <rect x="9.5" y="19.5" width="5" height="1" rx="0.5" fill="white" fillOpacity="0.3" />
             </svg>
           </div>
           <span className="font-semibold text-sm text-white tracking-tight">

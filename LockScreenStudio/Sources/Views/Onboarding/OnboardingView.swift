@@ -15,7 +15,6 @@ struct OnboardingView: View {
             welcomePage.tag(0)
             previewDemoPage.tag(1)
             permissionsPage.tag(2)
-            templatePage.tag(3)
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
@@ -109,10 +108,16 @@ struct OnboardingView: View {
 
     @MainActor
     private func generateDemoPreview() async {
+        let now = Date()
+        let dayFormatter = DateFormatter()
+        dayFormatter.dateFormat = "EEEE"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMMM d, yyyy"
+
         let panels = [
             PanelRenderData(title: nil, lines: [
-                .text("FRIDAY"),
-                .text("February 21, 2026"),
+                .text(dayFormatter.string(from: now).uppercased()),
+                .text(dateFormatter.string(from: now)),
             ]),
             PanelRenderData(title: "AGENDA", lines: [
                 .event(time: "09:00", title: "Team Standup"),
@@ -176,9 +181,9 @@ struct OnboardingView: View {
             Spacer()
 
             Button {
-                withAnimation { currentPage = 3 }
+                onComplete()
             } label: {
-                Text("Continue")
+                Text("Get Started")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)

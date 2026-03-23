@@ -18,6 +18,7 @@
 		338F89E8442B697FB0D466CA /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9102F37413FDECD970B8E998 /* ExportService.swift */; };
 		404D9B597FFF795A8DFDA75E /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D750714A2F76AC3BBF14FC /* MainTabView.swift */; };
 		4D29A5FC4356930F85141FE7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3152A659220D46E2ED3FA83C /* Assets.xcassets */; };
+		521CFC952F71BFC300D055A4 /* LockScreenStudioStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 521CFC942F71BFC300D055A4 /* LockScreenStudioStore.storekit */; };
 		54BAB16E441AA13025779B0D /* SubscriptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B172F4FBD704E1A0004ACD8F /* SubscriptionManagerTests.swift */; };
 		5B3F6DF2980429F90D7B9748 /* PanelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1749CC5B776A2DDBD56C605B /* PanelConfiguration.swift */; };
 		75EDF8BF95620B148C72B559 /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1052EEE3FFD89FF4E561760D /* TodoItem.swift */; };
@@ -29,6 +30,7 @@
 		9B9A9E492267A9ACBD936D21 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69F64CCA973679D4799E824 /* CalendarService.swift */; };
 		B5358E4F9D759039FB2EBB44 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BB0DA1EA2E40D543FF1DE3 /* SubscriptionManager.swift */; };
 		B90B81912634C45F46B30689 /* AppIconOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AF28D0307605484ECFE0B8 /* AppIconOption.swift */; };
+		BE7AD6022D679967E060FB3C /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7947B12804A10A17869B94 /* BackgroundTaskManager.swift */; };
 		BF978F71B4DE7324B99ED81E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D93E2CEC642F6F2B39345B /* SettingsView.swift */; };
 		C35B73EAA9D28DB7CB50F5BC /* DashboardProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 993D5A534F20151FD8F0BE59 /* DashboardProject.swift */; };
 		DF2784565CDF17E3BC984BEC /* TemplateSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2881C7EF871861714D65DF64 /* TemplateSeeder.swift */; };
@@ -62,6 +64,8 @@
 		2881C7EF871861714D65DF64 /* TemplateSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateSeeder.swift; sourceTree = "<group>"; };
 		2F3CE0707C508C45FF8092EF /* TemplateGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateGalleryView.swift; sourceTree = "<group>"; };
 		3152A659220D46E2ED3FA83C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4D7947B12804A10A17869B94 /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
+		521CFC942F71BFC300D055A4 /* LockScreenStudioStore.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = LockScreenStudioStore.storekit; sourceTree = "<group>"; };
 		779EF975D5C8B355BAF5D2AC /* PanelDataBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelDataBuilder.swift; sourceTree = "<group>"; };
 		845B85642FC6CBF026B05F52 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		8F2F8883BD944E1F4A65B85E /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
@@ -235,6 +239,7 @@
 		93E0B70C6DFAB756CEEEFA38 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				4D7947B12804A10A17869B94 /* BackgroundTaskManager.swift */,
 				F69F64CCA973679D4799E824 /* CalendarService.swift */,
 				9102F37413FDECD970B8E998 /* ExportService.swift */,
 				25BB0DA1EA2E40D543FF1DE3 /* SubscriptionManager.swift */,
@@ -274,6 +279,7 @@
 			isa = PBXGroup;
 			children = (
 				3152A659220D46E2ED3FA83C /* Assets.xcassets */,
+				521CFC942F71BFC300D055A4 /* LockScreenStudioStore.storekit */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -359,6 +365,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D29A5FC4356930F85141FE7 /* Assets.xcassets in Resources */,
+				521CFC952F71BFC300D055A4 /* LockScreenStudioStore.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,6 +377,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B90B81912634C45F46B30689 /* AppIconOption.swift in Sources */,
+				BE7AD6022D679967E060FB3C /* BackgroundTaskManager.swift in Sources */,
 				9B9A9E492267A9ACBD936D21 /* CalendarService.swift in Sources */,
 				C35B73EAA9D28DB7CB50F5BC /* DashboardProject.swift in Sources */,
 				1679A9C1CF4FE8403B60B597 /* EditorView.swift in Sources */,
@@ -512,7 +520,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 9A2WJMF6Z7;
+				DEVELOPMENT_TEAM = KLRCQTV8AC;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -531,7 +539,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 9A2WJMF6Z7;
+				DEVELOPMENT_TEAM = KLRCQTV8AC;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

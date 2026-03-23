@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           Overview
         </h2>
         <p>
-          Lock Screen Studio (&quot;the App&quot;) is developed and maintained by Lock Screen Studio.
+          Lock Screen Studio (&quot;the App&quot;) is developed and maintained by ARINITSOFT PC SRL, operating as Arinitsolutions (arinitsolutions.com).
           Your privacy is important to us. This policy explains what data the App accesses,
           how it is used, and your rights regarding that data.
         </p>
@@ -118,10 +118,10 @@ export default function PrivacyPage() {
         <p>
           If you have questions about this privacy policy, please contact us at{" "}
           <a
-            href="mailto:privacy@lockscreenstudio.app"
+            href="mailto:contact@arinitsolutions.com"
             className="text-indigo-400"
           >
-            privacy@lockscreenstudio.app
+            contact@arinitsolutions.com
           </a>
           .
         </p>
