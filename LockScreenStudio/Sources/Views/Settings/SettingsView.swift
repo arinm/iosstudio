@@ -19,7 +19,6 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 appearanceSection
-                appIconSection
                 autoRefreshSection
                 dataSection
                 shortcutsSection

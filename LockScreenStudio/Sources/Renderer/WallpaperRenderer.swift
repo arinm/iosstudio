@@ -232,17 +232,17 @@ final class WallpaperRenderer {
 
     private func drawBackground(in rect: CGRect, theme: RenderTheme, backgroundImage: UIImage?, photoOffsetX: CGFloat = 0, photoOffsetY: CGFloat = 0, photoBlur: CGFloat = 0, photoDim: CGFloat = 0.45, context: CGContext) {
         // Custom photo background
-        if let bgImage = backgroundImage, let cgImage = bgImage.cgImage {
-            // Apply blur if needed
-            let finalCGImage: CGImage
-            if photoBlur > 0, let blurred = Self.applyBlur(to: bgImage, radius: photoBlur)?.cgImage {
-                finalCGImage = blurred
-            } else {
-                finalCGImage = cgImage
-            }
-
+        if let bgImage = backgroundImage {
             // Draw image scaled to fill (aspect fill + offset crop)
-            let imageSize = CGSize(width: finalCGImage.width, height: finalCGImage.height)
+            // Use the UIImage with blur applied, or original
+            let drawImage: UIImage
+            if photoBlur > 0, let blurredUI = Self.applyBlur(to: bgImage, radius: photoBlur) {
+                drawImage = blurredUI
+            } else {
+                drawImage = bgImage
+            }
+            // Use UIImage.size which respects EXIF orientation
+            let imageSize = drawImage.size
             let scaleX = rect.width / imageSize.width
             let scaleY = rect.height / imageSize.height
             let fillScale = max(scaleX, scaleY)
@@ -261,18 +261,8 @@ final class WallpaperRenderer {
                 height: drawHeight
             )
 
-            context.saveGState()
-            // Flip coordinates for CGImage drawing
-            context.translateBy(x: 0, y: rect.height)
-            context.scaleBy(x: 1, y: -1)
-            let flippedRect = CGRect(
-                x: drawRect.minX,
-                y: rect.height - drawRect.maxY,
-                width: drawRect.width,
-                height: drawRect.height
-            )
-            context.draw(finalCGImage, in: flippedRect)
-            context.restoreGState()
+            // UIImage.draw respects EXIF orientation automatically
+            drawImage.draw(in: drawRect)
 
             // Dark overlay for text readability (user-controlled dim)
             if photoDim > 0 {
@@ -495,7 +485,7 @@ final class WallpaperRenderer {
                     theme.bodyFontSize * 1.2
                 )
                 let totalGridWidth = CGFloat(cols) * cellSize + CGFloat(cols - 1) * gap
-                let gridOffsetX = rect.minX + (rect.width - totalGridWidth) / 2
+                let gridOffsetX = rect.minX
 
                 // Draw weekday headers (M T W T F S S)
                 let weekdayLabels = ["M", "T", "W", "T", "F", "S", "S"]

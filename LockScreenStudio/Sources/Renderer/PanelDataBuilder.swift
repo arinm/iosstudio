@@ -165,7 +165,7 @@ final class PanelDataBuilder {
             lines = Self.samplePriorityLines
         }
 
-        return PanelRenderData(title: panel.title, lines: lines)
+        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
     }
 
     private func buildTodoPanel(_ panel: PanelConfiguration, todos: [TodoItem]) -> PanelRenderData {
@@ -182,7 +182,7 @@ final class PanelDataBuilder {
 
         let emptyLines: [PanelLine] = lines.isEmpty ? Self.sampleTodoLines : lines
 
-        return PanelRenderData(title: panel.title, lines: emptyLines)
+        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: emptyLines)
     }
 
     private func buildHabitsPanel(_ panel: PanelConfiguration) -> PanelRenderData {
@@ -226,16 +226,16 @@ final class PanelDataBuilder {
 
         if daysRemaining > 0 {
             lines.append(.heroText("\(daysRemaining)"))
-            lines.append(.subtitle("days until \(config.eventName)"))
+            lines.append(.subtitle("\(config.beforeText) \(config.eventName)"))
         } else if daysRemaining == 0 {
-            lines.append(.heroText("TODAY"))
+            lines.append(.heroText(config.todayText))
             lines.append(.subtitle(config.eventName))
         } else {
             lines.append(.heroText("\(abs(daysRemaining))"))
-            lines.append(.subtitle("days since \(config.eventName)"))
+            lines.append(.subtitle("\(config.afterText) \(config.eventName)"))
         }
 
-        return PanelRenderData(title: panel.title, lines: lines)
+        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
     }
 
     private func buildNotesPanel(_ panel: PanelConfiguration) -> PanelRenderData {
@@ -253,7 +253,7 @@ final class PanelDataBuilder {
             // Empty — user configures via panel settings
         }
 
-        return PanelRenderData(title: panel.title, lines: lines)
+        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
     }
 
     private func buildQuotePanel(_ panel: PanelConfiguration) -> PanelRenderData {
@@ -269,7 +269,7 @@ final class PanelDataBuilder {
             // Empty — user configures via panel settings
         }
 
-        return PanelRenderData(title: panel.title, lines: lines)
+        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
     }
 
     private func buildMonthlyCalendarPanel(_ panel: PanelConfiguration, date: Date) async -> PanelRenderData {

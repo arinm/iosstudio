@@ -588,7 +588,10 @@ struct PanelConfigSheet: View {
         NavigationStack {
             Form {
                 Section("Panel") {
-                    TextField("Title", text: $panel.title)
+                    Toggle("Show Title", isOn: $panel.showTitle)
+                    if panel.showTitle {
+                        TextField("Title", text: $panel.title)
+                    }
                 }
 
                 switch panel.panelType {
@@ -736,6 +739,33 @@ struct PanelConfigSheet: View {
                     panel.encodeConfig(c)
                 }
             ))
+
+            TextField("Text before (e.g. days until)", text: Binding(
+                get: { config.beforeText },
+                set: { newValue in
+                    var c = config
+                    c.beforeText = newValue
+                    panel.encodeConfig(c)
+                }
+            ))
+
+            TextField("Text after (e.g. days since)", text: Binding(
+                get: { config.afterText },
+                set: { newValue in
+                    var c = config
+                    c.afterText = newValue
+                    panel.encodeConfig(c)
+                }
+            ))
+
+            TextField("Today text (e.g. TODAY)", text: Binding(
+                get: { config.todayText },
+                set: { newValue in
+                    var c = config
+                    c.todayText = newValue
+                    panel.encodeConfig(c)
+                }
+            ))
         }
     }
 
@@ -842,12 +872,13 @@ struct PanelConfigSheet: View {
 
 struct AddPanelSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var subscriptionManager: SubscriptionManager
     var onAdd: (PanelType) -> Void
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(PanelType.allCases) { type in
+                ForEach(PanelType.allCases.filter(\.isAvailable)) { type in
                     Button {
                         onAdd(type)
                         dismiss()
@@ -865,7 +896,7 @@ struct AddPanelSheet: View {
 
                             Spacer()
 
-                            if type.isPro {
+                            if type.isPro && !subscriptionManager.isPro {
                                 Text("PRO")
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundStyle(.white)

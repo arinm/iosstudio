@@ -110,6 +110,25 @@ struct ThemePickerSheet: View {
                                 .font(.subheadline.bold())
                                 .padding(.horizontal, 4)
 
+                            // Live preview of photo with effects
+                            if let thumb = bgThumbnail {
+                                ZStack {
+                                    Image(uiImage: thumb)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(height: 120)
+                                        .blur(radius: photoBlur * 0.3)
+                                        .clipped()
+
+                                    Color.black.opacity(photoDim)
+
+                                    Text("Aa")
+                                        .font(.title.bold())
+                                        .foregroundStyle(.white)
+                                }
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+
                             VStack(spacing: 8) {
                                 HStack {
                                     Image(systemName: "drop.halffull")
@@ -161,7 +180,7 @@ struct ThemePickerSheet: View {
                             .font(.subheadline.bold())
                             .padding(.horizontal, 4)
 
-                        HStack(spacing: 8) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5), spacing: 10) {
                             ForEach(FontColorOption.allCases) { option in
                                 fontColorButton(option)
                             }

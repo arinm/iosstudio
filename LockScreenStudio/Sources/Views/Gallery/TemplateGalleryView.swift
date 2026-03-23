@@ -157,15 +157,27 @@ struct TemplateGalleryView: View {
             .buttonStyle(.plain)
 
             ForEach(templates) { template in
-                NavigationLink {
-                    EditorView(template: template)
-                } label: {
-                    TemplateCardView(
-                        template: template,
-                        isPro: subscriptionManager.isPro
-                    )
+                if template.isPro && !subscriptionManager.isPro {
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        TemplateCardView(
+                            template: template,
+                            isPro: subscriptionManager.isPro
+                        )
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    NavigationLink {
+                        EditorView(template: template)
+                    } label: {
+                        TemplateCardView(
+                            template: template,
+                            isPro: subscriptionManager.isPro
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .navigationDestination(item: $newTemplate) { template in

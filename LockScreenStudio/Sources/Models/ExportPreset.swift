@@ -89,7 +89,7 @@ extension DevicePreset {
             name: "iPhone 17 Pro Max",
             screenWidth: 1320,
             screenHeight: 2868,
-            safeArea: .init(top: 330, bottom: 102, leading: 0, trailing: 0),
+            safeArea: .init(top: 450, bottom: 102, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -97,7 +97,7 @@ extension DevicePreset {
             name: "iPhone 17 Pro",
             screenWidth: 1206,
             screenHeight: 2622,
-            safeArea: .init(top: 310, bottom: 96, leading: 0, trailing: 0),
+            safeArea: .init(top: 430, bottom: 96, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -105,7 +105,7 @@ extension DevicePreset {
             name: "iPhone 17 Air",
             screenWidth: 1260,
             screenHeight: 2736,
-            safeArea: .init(top: 316, bottom: 99, leading: 0, trailing: 0),
+            safeArea: .init(top: 436, bottom: 99, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -113,7 +113,7 @@ extension DevicePreset {
             name: "iPhone 17",
             screenWidth: 1206,
             screenHeight: 2622,
-            safeArea: .init(top: 310, bottom: 96, leading: 0, trailing: 0),
+            safeArea: .init(top: 430, bottom: 96, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
 
@@ -124,7 +124,7 @@ extension DevicePreset {
             name: "iPhone 16 Pro Max",
             screenWidth: 1320,
             screenHeight: 2868,
-            safeArea: .init(top: 330, bottom: 102, leading: 0, trailing: 0),
+            safeArea: .init(top: 450, bottom: 102, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -132,7 +132,7 @@ extension DevicePreset {
             name: "iPhone 16 Pro",
             screenWidth: 1206,
             screenHeight: 2622,
-            safeArea: .init(top: 310, bottom: 96, leading: 0, trailing: 0),
+            safeArea: .init(top: 430, bottom: 96, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -140,7 +140,7 @@ extension DevicePreset {
             name: "iPhone 16 Plus",
             screenWidth: 1290,
             screenHeight: 2796,
-            safeArea: .init(top: 320, bottom: 99, leading: 0, trailing: 0),
+            safeArea: .init(top: 440, bottom: 99, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -148,7 +148,7 @@ extension DevicePreset {
             name: "iPhone 16",
             screenWidth: 1179,
             screenHeight: 2556,
-            safeArea: .init(top: 300, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 420, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -156,7 +156,7 @@ extension DevicePreset {
             name: "iPhone 16e",
             screenWidth: 1170,
             screenHeight: 2532,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
 
@@ -167,7 +167,7 @@ extension DevicePreset {
             name: "iPhone 15 Pro Max",
             screenWidth: 1290,
             screenHeight: 2796,
-            safeArea: .init(top: 320, bottom: 99, leading: 0, trailing: 0),
+            safeArea: .init(top: 440, bottom: 99, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -175,7 +175,7 @@ extension DevicePreset {
             name: "iPhone 15 Pro",
             screenWidth: 1179,
             screenHeight: 2556,
-            safeArea: .init(top: 300, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 420, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -183,7 +183,7 @@ extension DevicePreset {
             name: "iPhone 15 Plus",
             screenWidth: 1290,
             screenHeight: 2796,
-            safeArea: .init(top: 320, bottom: 99, leading: 0, trailing: 0),
+            safeArea: .init(top: 440, bottom: 99, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -191,7 +191,7 @@ extension DevicePreset {
             name: "iPhone 15",
             screenWidth: 1179,
             screenHeight: 2556,
-            safeArea: .init(top: 300, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 420, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
 
@@ -202,7 +202,7 @@ extension DevicePreset {
             name: "iPhone 14 Pro Max",
             screenWidth: 1290,
             screenHeight: 2796,
-            safeArea: .init(top: 320, bottom: 99, leading: 0, trailing: 0),
+            safeArea: .init(top: 440, bottom: 99, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -210,7 +210,7 @@ extension DevicePreset {
             name: "iPhone 14 Pro",
             screenWidth: 1179,
             screenHeight: 2556,
-            safeArea: .init(top: 300, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 420, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: true
         ),
         DevicePreset(
@@ -218,7 +218,7 @@ extension DevicePreset {
             name: "iPhone 14 Plus",
             screenWidth: 1284,
             screenHeight: 2778,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
         DevicePreset(
@@ -226,7 +226,7 @@ extension DevicePreset {
             name: "iPhone 14",
             screenWidth: 1170,
             screenHeight: 2532,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
 
@@ -237,7 +237,7 @@ extension DevicePreset {
             name: "iPhone 13 Pro Max",
             screenWidth: 1284,
             screenHeight: 2778,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
         DevicePreset(
@@ -245,7 +245,7 @@ extension DevicePreset {
             name: "iPhone 13 Pro",
             screenWidth: 1170,
             screenHeight: 2532,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
         DevicePreset(
@@ -253,7 +253,7 @@ extension DevicePreset {
             name: "iPhone 13",
             screenWidth: 1170,
             screenHeight: 2532,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
         DevicePreset(
@@ -272,7 +272,7 @@ extension DevicePreset {
             name: "iPhone 12 Pro Max",
             screenWidth: 1284,
             screenHeight: 2778,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
         DevicePreset(
@@ -280,7 +280,7 @@ extension DevicePreset {
             name: "iPhone 12 Pro",
             screenWidth: 1170,
             screenHeight: 2532,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
         DevicePreset(
@@ -288,7 +288,7 @@ extension DevicePreset {
             name: "iPhone 12",
             screenWidth: 1170,
             screenHeight: 2532,
-            safeArea: .init(top: 282, bottom: 93, leading: 0, trailing: 0),
+            safeArea: .init(top: 382, bottom: 93, leading: 0, trailing: 0),
             hasDynamicIsland: false
         ),
         DevicePreset(

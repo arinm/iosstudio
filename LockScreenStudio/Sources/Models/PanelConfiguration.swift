@@ -10,6 +10,7 @@ final class PanelConfiguration {
     var sortOrder: Int
     var isVisible: Bool
     var title: String
+    var showTitle: Bool
 
     /// Type-specific configuration stored as JSON data.
     /// Decoded by each panel's renderer using its own Codable struct.
@@ -28,6 +29,7 @@ final class PanelConfiguration {
         self.panelType = panelType
         self.sortOrder = sortOrder
         self.isVisible = isVisible
+        self.showTitle = true
         self.title = title ?? panelType.defaultTitle
         self.configData = configData
     }
@@ -84,6 +86,14 @@ enum PanelType: String, Codable, CaseIterable, Identifiable {
         case .countdown: return "hourglass"
         case .notes: return "note.text"
         case .monthlyCalendar: return "calendar.badge.clock"
+        }
+    }
+
+    /// Whether this panel type is available to users (shown in Add Panel sheet)
+    var isAvailable: Bool {
+        switch self {
+        case .habitsHeatmap: return false // Removed for v1.0 — uses fake data
+        default: return true
         }
     }
 
@@ -158,6 +168,9 @@ struct QuoteConfig: Codable {
 struct CountdownConfig: Codable {
     var targetDate: Date = Calendar.current.date(byAdding: .day, value: 30, to: .now) ?? .now
     var eventName: String = "Event"
+    var beforeText: String = "days until"
+    var afterText: String = "days since"
+    var todayText: String = "TODAY"
 }
 
 struct NotesConfig: Codable {
