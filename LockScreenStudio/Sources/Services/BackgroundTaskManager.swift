@@ -51,7 +51,7 @@ final class BackgroundTaskManager {
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            // Log error silently Failed to schedule: \(error)")
+            // Scheduling failure is non-critical, silently ignored
         }
     }
 
@@ -96,7 +96,7 @@ final class BackgroundTaskManager {
 
             task.setTaskCompleted(success: true)
         } catch {
-            // Log error silently Refresh failed: \(error)")
+            // Refresh failure is non-critical, silently ignored
             task.setTaskCompleted(success: false)
         }
     }
@@ -175,12 +175,16 @@ struct PanelConfigSnapshot: Codable {
     let sortOrder: Int
     let isEnabled: Bool
     let configJSON: Data?
+    let title: String?
+    let showTitle: Bool
 
     init(from panel: PanelConfiguration) {
         self.panelType = panel.panelType.rawValue
         self.sortOrder = panel.sortOrder
         self.isEnabled = panel.isVisible
         self.configJSON = panel.configData
+        self.title = panel.title
+        self.showTitle = panel.showTitle
     }
 
     func toPanelConfiguration() -> PanelConfiguration {
@@ -188,8 +192,10 @@ struct PanelConfigSnapshot: Codable {
             panelType: PanelType(rawValue: panelType) ?? .agenda,
             sortOrder: sortOrder,
             isVisible: isEnabled,
+            title: title,
             configData: configJSON
         )
+        config.showTitle = showTitle
         return config
     }
 }

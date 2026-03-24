@@ -223,9 +223,7 @@ struct PaywallView: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    Text(selectedPlan?.id == SubscriptionManager.yearlyProductID
-                         ? "Start Free Trial"
-                         : "Subscribe")
+                    Text(ctaButtonTitle)
                         .font(.headline)
                 }
             }
@@ -260,6 +258,17 @@ struct PaywallView: View {
                 .multilineTextAlignment(.center)
                 .padding(.top, 4)
         }
+    }
+
+    private var ctaButtonTitle: String {
+        guard let plan = selectedPlan,
+              plan.id == SubscriptionManager.yearlyProductID,
+              let sub = plan.subscription,
+              let intro = sub.introductoryOffer,
+              intro.paymentMode == .freeTrial else {
+            return "Subscribe"
+        }
+        return "Start Free Trial"
     }
 
     // MARK: - Purchase

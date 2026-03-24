@@ -6,8 +6,6 @@ struct OnboardingView: View {
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
     @State private var currentPage = 0
     @State private var calendarGranted = false
-    @State private var selectedTemplate: String? = "Today Dashboard"
-
     @State private var demoPreviewImage: UIImage?
 
     var body: some View {
@@ -233,85 +231,6 @@ struct OnboardingView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    // MARK: - Page 3: Pick Template
-
-    private var templatePage: some View {
-        VStack(spacing: 24) {
-            Spacer()
-
-            Text("Pick Your First Look")
-                .font(.title.bold())
-
-            LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: 16),
-                GridItem(.flexible(), spacing: 16),
-            ], spacing: 16) {
-                templateCard("Today Dashboard", icon: "calendar.badge.clock", isPro: false)
-                templateCard("Minimal Agenda", icon: "list.bullet", isPro: false)
-                templateCard("Priority Focus", icon: "star.fill", isPro: true)
-                templateCard("Dark Focus", icon: "moon.fill", isPro: true)
-            }
-            .padding(.horizontal, 24)
-
-            Spacer()
-
-            Button {
-                onComplete()
-            } label: {
-                Text("Start Creating")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.indigo)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
-        }
-    }
-
-    private func templateCard(_ name: String, icon: String, isPro: Bool) -> some View {
-        let locked = isPro && !subscriptionManager.isPro
-        return VStack(spacing: 8) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.tertiarySystemBackground))
-                    .frame(height: 120)
-
-                Image(systemName: icon)
-                    .font(.system(size: 32, weight: .light))
-                    .foregroundStyle(locked ? Color.secondary : Color.indigo)
-
-                if locked {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Image(systemName: "lock.fill")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .padding(8)
-                        }
-                        Spacer()
-                    }
-                }
-            }
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(selectedTemplate == name ? Color.indigo : .clear, lineWidth: 2)
-            )
-
-            Text(name)
-                .font(.caption)
-                .fontWeight(selectedTemplate == name ? .semibold : .regular)
-        }
-        .onTapGesture {
-            if !locked {
-                selectedTemplate = name
-            }
-        }
-        .accessibilityLabel("\(name) template\(locked ? ", Pro required" : "")")
-        .accessibilityAddTraits(selectedTemplate == name ? .isSelected : [])
-    }
 }
 
 #Preview {

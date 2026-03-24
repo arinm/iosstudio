@@ -84,6 +84,15 @@ struct GenerateWallpaperIntent: AppIntent {
             throw IntentError.noTemplateFound
         }
 
+        // Pro templates require subscription
+        if template.isPro {
+            let subManager = SubscriptionManager()
+            await subManager.updatePurchasedProducts()
+            guard subManager.isPro else {
+                throw IntentError.proRequired
+            }
+        }
+
         let priorities = try context.fetch(FetchDescriptor<PriorityItem>())
         let todos = try context.fetch(FetchDescriptor<TodoItem>())
 

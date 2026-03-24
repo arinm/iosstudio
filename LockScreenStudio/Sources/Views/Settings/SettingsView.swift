@@ -10,10 +10,8 @@ struct SettingsView: View {
     @AppStorage("autoRefreshInterval") private var autoRefreshInterval: Double = 24
 
     @State private var calendarAuthorized = false
-    @State private var notificationsAuthorized = false
     @State private var showPaywall = false
     @State private var showShortcutsGuide = false
-    @State private var currentIcon: AppIconOption = .default
 
     var body: some View {
         NavigationStack {
@@ -42,7 +40,6 @@ struct SettingsView: View {
                 ShortcutsGuideView()
             }
             .task { await checkCalendarAccess() }
-            .onAppear { detectCurrentIcon() }
         }
     }
 
@@ -82,69 +79,6 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - App Icon
-
-    private var appIconSection: some View {
-        Section("App Icon") {
-            ForEach(AppIconOption.allCases) { option in
-                let isLocked = option.isPro && !subscriptionManager.isPro
-                let isSelected = currentIcon == option
-
-                Button {
-                    guard !isLocked else {
-                        showPaywall = true
-                        return
-                    }
-                    setAppIcon(option)
-                } label: {
-                    HStack(spacing: 12) {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(option.previewColor))
-                            .frame(width: 44, height: 44)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(.systemGray4), lineWidth: 1)
-                            )
-                            .overlay {
-                                Image(systemName: "rectangle.on.rectangle.angled")
-                                    .font(.caption)
-                                    .foregroundStyle(option.useDarkIcon ? .black : .white)
-                            }
-
-                        Text(option.displayName)
-                            .foregroundStyle(.primary)
-
-                        Spacer()
-
-                        if isLocked {
-                            Text("PRO")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(.indigo)
-                        }
-                        if isSelected {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.indigo)
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private func setAppIcon(_ option: AppIconOption) {
-        UIApplication.shared.setAlternateIconName(option.alternateIconName) { error in
-            if error == nil {
-                currentIcon = option
-            }
-        }
-    }
-
-    private func detectCurrentIcon() {
-        let iconName = UIApplication.shared.alternateIconName
-        currentIcon = AppIconOption.allCases.first { $0.alternateIconName == iconName } ?? .default
-    }
-
     // MARK: - Auto Refresh
 
     private var autoRefreshSection: some View {
@@ -153,7 +87,7 @@ struct SettingsView: View {
                 .onChange(of: autoRefreshEnabled) { _, enabled in
                     if enabled {
                         Task {
-                            notificationsAuthorized = await BackgroundTaskManager.shared.requestNotificationPermission()
+                            _ = await BackgroundTaskManager.shared.requestNotificationPermission()
                         }
                         BackgroundTaskManager.shared.scheduleRefreshIfEnabled()
                     } else {
