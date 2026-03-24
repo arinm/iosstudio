@@ -262,31 +262,6 @@ struct ThemePickerSheet: View {
         .accessibilityLabel("\(option.rawValue.capitalized) accent color\(isLocked ? ", Pro required" : "")")
     }
 
-    private func positionButton(_ label: String, value: String, icon: String) -> some View {
-        let isSelected = contentPosition == value
-
-        return Button {
-            contentPosition = value
-        } label: {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.body)
-                Text(label)
-                    .font(.caption2)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(isSelected ? Color.indigo.opacity(0.15) : Color(.secondarySystemBackground))
-            .foregroundStyle(isSelected ? .indigo : .primary)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.indigo : .clear, lineWidth: 2)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
     // MARK: - Gradient Preset Button
 
     private func gradientPresetButton(_ preset: GradientPreset) -> some View {
@@ -410,32 +385,6 @@ struct ThemePickerSheet: View {
             )
         }
         .disabled(isLocked)
-    }
-
-    private func fontScaleButton(_ option: FontScaleOption) -> some View {
-        let isSelected = abs(fontScale - option.scale) < 0.01
-
-        return Button {
-            fontScale = option.scale
-        } label: {
-            VStack(spacing: 4) {
-                Text("Aa")
-                    .font(.system(size: option.previewSize, weight: .medium))
-                Text(option.label)
-                    .font(.caption2)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(isSelected ? Color.indigo.opacity(0.15) : Color(.secondarySystemBackground))
-            .foregroundStyle(isSelected ? .indigo : .primary)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.indigo : .clear, lineWidth: 2)
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Font size \(option.label)")
     }
 
     private func fontColorButton(_ option: FontColorOption) -> some View {

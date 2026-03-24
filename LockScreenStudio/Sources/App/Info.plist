@@ -32,8 +32,6 @@
 	<string>Lock Screen Studio reads your calendar events to display them on your wallpaper. Your data never leaves your device.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Lock Screen Studio saves generated wallpapers to your Photo Library so you can set them as your Lock Screen.</string>
-	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>Lock Screen Studio can display your reminders on your wallpaper. Your data stays on your device.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -72,6 +72,13 @@ struct SettingsView: View {
                     .tag(option.rawValue)
                 }
             }
+            .onChange(of: defaultAccent) { _, newValue in
+                if let option = AccentColorOption(rawValue: newValue),
+                   option.isPro && !subscriptionManager.isPro {
+                    defaultAccent = "indigo"
+                    showPaywall = true
+                }
+            }
         }
     }
 

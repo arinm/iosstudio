@@ -185,7 +185,7 @@ struct PaywallView: View {
                        let sub = product.subscription,
                        let introOffer = sub.introductoryOffer,
                        introOffer.paymentMode == .freeTrial {
-                        Text("Free trial: \(introOffer.period.debugDescription)")
+                        Text("\(introOffer.period.value)-\(introOffer.period.unit == .day ? "day" : "week") free trial")
                             .font(.caption)
                             .foregroundStyle(.indigo)
                     }
