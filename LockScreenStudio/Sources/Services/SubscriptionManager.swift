@@ -14,7 +14,8 @@ final class SubscriptionManager: ObservableObject {
 
     static let monthlyProductID = "com.lockscreenstudio.pro.monthly"
     static let yearlyProductID = "com.lockscreenstudio.pro.yearly"
-    static let allProductIDs: Set<String> = [monthlyProductID, yearlyProductID]
+    static let lifetimeProductID = "com.lockscreenstudio.pro.lifetime"
+    static let allProductIDs: Set<String> = [monthlyProductID, yearlyProductID, lifetimeProductID]
 
     // MARK: - Published State
 
@@ -45,6 +46,10 @@ final class SubscriptionManager: ObservableObject {
 
     var yearlyProduct: Product? {
         products.first { $0.id == Self.yearlyProductID }
+    }
+
+    var lifetimeProduct: Product? {
+        products.first { $0.id == Self.lifetimeProductID }
     }
 
     // MARK: - Transaction Listener

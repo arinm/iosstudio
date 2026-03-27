@@ -14,7 +14,21 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "lifetime_001",
+      "localizations" : [
+        {
+          "description" : "Unlock all Pro features forever. One-time purchase.",
+          "displayName" : "Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.lockscreenstudio.pro.lifetime",
+      "referenceName" : "Pro Lifetime",
+      "type" : "NonConsumable"
+    }
   ],
   "settings" : {
     "_askToBuyEnabled" : false,

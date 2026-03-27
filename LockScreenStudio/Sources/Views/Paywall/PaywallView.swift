@@ -131,6 +131,15 @@ struct PaywallView: View {
                 )
             }
 
+            if let lifetime = subscriptionManager.lifetimeProduct {
+                planCard(
+                    product: lifetime,
+                    title: "Lifetime",
+                    subtitle: lifetime.displayPrice + " once",
+                    badge: "BEST VALUE"
+                )
+            }
+
             if subscriptionManager.products.isEmpty && !subscriptionManager.isLoading {
                 Text("Unable to load subscription options.")
                     .font(.caption)
@@ -261,14 +270,20 @@ struct PaywallView: View {
     }
 
     private var ctaButtonTitle: String {
-        guard let plan = selectedPlan,
-              plan.id == SubscriptionManager.yearlyProductID,
-              let sub = plan.subscription,
-              let intro = sub.introductoryOffer,
-              intro.paymentMode == .freeTrial else {
-            return "Subscribe"
+        guard let plan = selectedPlan else { return "Subscribe" }
+
+        if plan.id == SubscriptionManager.lifetimeProductID {
+            return "Buy Once"
         }
-        return "Start Free Trial"
+
+        if plan.id == SubscriptionManager.yearlyProductID,
+           let sub = plan.subscription,
+           let intro = sub.introductoryOffer,
+           intro.paymentMode == .freeTrial {
+            return "Start Free Trial"
+        }
+
+        return "Subscribe"
     }
 
     // MARK: - Purchase

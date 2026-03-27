@@ -62,9 +62,6 @@
             ReferencedContainer = "container:LockScreenStudio.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <StoreKitConfigurationFileReference
-         identifier = "../../LockScreenStudio/Resources/LockScreenStudioStore.storekit">
-      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
