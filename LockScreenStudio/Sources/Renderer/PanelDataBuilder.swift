@@ -106,8 +106,16 @@ final class PanelDataBuilder {
         timeFormatter.dateFormat = "HH:mm"
 
         let lines: [PanelLine] = limitedEvents.map { event in
-            if config.showTime, let startDate = event.startDate {
-                return .event(time: timeFormatter.string(from: startDate), title: event.title ?? "No title")
+            if config.showTime {
+                let timeLabel: String
+                if event.isAllDay {
+                    timeLabel = "All Day"
+                } else if let startDate = event.startDate {
+                    timeLabel = timeFormatter.string(from: startDate)
+                } else {
+                    timeLabel = ""
+                }
+                return .event(time: timeLabel, title: event.title ?? "No title")
             } else {
                 return .text(event.title ?? "No title")
             }
