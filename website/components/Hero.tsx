@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { appStoreUrl } from "@/lib/links";
 
 export default function Hero() {
   return (
@@ -18,9 +19,9 @@ export default function Hero() {
           className="text-center lg:text-left flex-1"
         >
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-            Your Schedule.
+            Lock Screen
             <br />
-            <span className="gradient-text">Always Visible.</span>
+            <span className="gradient-text">Dashboard for iPhone.</span>
           </h1>
 
           <motion.p
@@ -29,8 +30,8 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mt-6 text-lg md:text-xl text-white/50 max-w-xl leading-relaxed"
           >
-            Transform your Lock Screen into a personal dashboard — agenda,
-            priorities, to-dos, and more. Updated daily, automatically.
+            Your schedule, always visible — agenda, priorities, to-dos, and
+            more, rendered as a wallpaper and refreshed daily.
           </motion.p>
 
           <motion.div
@@ -40,7 +41,9 @@ export default function Hero() {
             className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
           >
             <a
-              href="#download"
+              href={appStoreUrl("hero")}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-white/10 border border-white/15 text-white font-medium text-base hover:bg-white/15 transition-all duration-300 backdrop-blur-sm"
             >
               <svg

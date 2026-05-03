@@ -9,11 +9,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Lock Screen Studio — Your Schedule, Always Visible",
+  title: {
+    default: "Lock Screen Studio — Lock Screen Dashboard for iPhone",
+    template: "%s — Lock Screen Studio",
+  },
   description:
     "Transform your iPhone Lock Screen into a personal dashboard with agenda, priorities, to-dos, countdown, and more. Updated daily, automatically via Shortcuts.",
   keywords: [
     "lock screen",
+    "lock screen dashboard",
     "wallpaper",
     "iphone",
     "calendar",
@@ -24,8 +28,11 @@ export const metadata: Metadata = {
     "automation",
   ],
   metadataBase: new URL("https://lockscreenstudio.app"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Lock Screen Studio — Your Schedule, Always Visible",
+    title: "Lock Screen Studio — Lock Screen Dashboard for iPhone",
     description:
       "Transform your iPhone Lock Screen into a personal dashboard with agenda, priorities, to-dos, and more.",
     url: "https://lockscreenstudio.app",

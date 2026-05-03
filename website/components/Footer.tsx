@@ -1,3 +1,5 @@
+import { appStoreUrl } from "@/lib/links";
+
 const footerLinks = {
   Product: [
     { label: "Features", href: "#features" },
@@ -74,7 +76,9 @@ export default function Footer() {
             <a href="https://arinitsolutions.com" className="text-white/40 hover:text-white/60 transition-colors" target="_blank" rel="noopener noreferrer">Arinitsolutions</a>. All rights reserved.
           </p>
           <a
-            href="#download"
+            href={appStoreUrl("footer")}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-xs text-indigo-400/60 hover:text-indigo-400 transition-colors"
           >
             Download on the App Store

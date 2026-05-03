@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { appStoreUrl } from "@/lib/links";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -76,7 +77,9 @@ export default function Navbar() {
 
         {/* CTA */}
         <a
-          href="#download"
+          href={appStoreUrl("navbar")}
+          target="_blank"
+          rel="noopener noreferrer"
           className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-sm font-medium text-white hover:bg-white/5 transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -126,7 +129,9 @@ export default function Navbar() {
             </a>
           ))}
           <a
-            href="#download"
+            href={appStoreUrl("navbar_mobile")}
+            target="_blank"
+            rel="noopener noreferrer"
             className="block text-sm text-center font-medium text-white py-2.5 mt-2 rounded-full border border-white/20"
           >
             Get the App
