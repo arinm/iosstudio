@@ -172,9 +172,14 @@ struct EditorView: View {
                     .foregroundStyle(.indigo)
                     .frame(width: 24)
 
-                Text(panel.title)
-                    .font(.body)
-                    .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(panel.title)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                    Text(panel.showTitle ? "Title shown" : "Title hidden")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
 
                 Spacer()
 
@@ -185,15 +190,15 @@ struct EditorView: View {
                 .labelsHidden()
                 .tint(.indigo)
 
-                Image(systemName: "chevron.right")
-                    .font(.caption)
+                Image(systemName: "gearshape")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .accessibilityLabel("\(panel.title) panel, \(panel.isVisible ? "visible" : "hidden")")
+        .accessibilityLabel("\(panel.title) panel, \(panel.isVisible ? "visible" : "hidden"), title \(panel.showTitle ? "shown" : "hidden")")
         .accessibilityHint("Double tap to configure")
     }
 
@@ -313,6 +318,12 @@ struct EditorView: View {
     @AppStorage("contentPosition") private var contentPosition: String = "center"
     @AppStorage("topPadding") private var topPadding: Double = 0
 
+    private var offsetLabel: String {
+        let value = Int(topPadding)
+        if value == 0 { return "Centered" }
+        return value > 0 ? "+\(value)px" : "\(value)px"
+    }
+
     private var layoutSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Font Size
@@ -359,21 +370,60 @@ struct EditorView: View {
                 }
             }
 
-            // Top Padding
+            // Vertical Offset (bipolar — push text up or down)
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("Top Padding")
+                    Text("Vertical Offset")
                         .font(.subheadline.bold())
                     Spacer()
-                    Text(topPadding == 0 ? "None" : "\(Int(topPadding))px")
+                    Text(offsetLabel)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
-                Slider(value: $topPadding, in: 0...400, step: 20)
-                    .tint(.indigo)
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.up")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 14)
+                        .accessibilityHidden(true)
+                    Slider(value: $topPadding, in: -300...300, step: 10)
+                        .tint(.indigo)
+                        .accessibilityLabel("Vertical offset")
+                        .accessibilityValue(offsetLabel)
+                    Image(systemName: "arrow.down")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 14)
+                        .accessibilityHidden(true)
+                }
 
-                Text("Adjust to avoid the Lock Screen clock.")
+                HStack {
+                    Button {
+                        topPadding = 0
+                    } label: {
+                        Label("Reset", systemImage: "arrow.counterclockwise")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .tint(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        showPreview = true
+                    } label: {
+                        Label("Preview", systemImage: "eye")
+                            .font(.caption.bold())
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .tint(.indigo)
+                }
+                .padding(.top, 2)
+
+                Text("Move text up (negative) or down (positive) to clear the clock or home indicator.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -590,7 +640,10 @@ struct PanelConfigSheet: View {
                 Section("Panel") {
                     Toggle("Show Title", isOn: $panel.showTitle)
                     if panel.showTitle {
-                        TextField("Title", text: $panel.title)
+                        LabeledContent("Title") {
+                            TextField("Enter title", text: $panel.title)
+                                .multilineTextAlignment(.trailing)
+                        }
                     }
                 }
 
@@ -731,41 +784,53 @@ struct PanelConfigSheet: View {
                 }
             ), displayedComponents: .date)
 
-            TextField("Event Name", text: Binding(
-                get: { config.eventName },
-                set: { newValue in
-                    var c = config
-                    c.eventName = newValue
-                    panel.encodeConfig(c)
-                }
-            ))
+            LabeledContent("Event") {
+                TextField("e.g. Birthday", text: Binding(
+                    get: { config.eventName },
+                    set: { newValue in
+                        var c = config
+                        c.eventName = newValue
+                        panel.encodeConfig(c)
+                    }
+                ))
+                .multilineTextAlignment(.trailing)
+            }
 
-            TextField("Text before (e.g. days until)", text: Binding(
-                get: { config.beforeText },
-                set: { newValue in
-                    var c = config
-                    c.beforeText = newValue
-                    panel.encodeConfig(c)
-                }
-            ))
+            LabeledContent("Before") {
+                TextField("days until", text: Binding(
+                    get: { config.beforeText },
+                    set: { newValue in
+                        var c = config
+                        c.beforeText = newValue
+                        panel.encodeConfig(c)
+                    }
+                ))
+                .multilineTextAlignment(.trailing)
+            }
 
-            TextField("Text after (e.g. days since)", text: Binding(
-                get: { config.afterText },
-                set: { newValue in
-                    var c = config
-                    c.afterText = newValue
-                    panel.encodeConfig(c)
-                }
-            ))
+            LabeledContent("After") {
+                TextField("days since", text: Binding(
+                    get: { config.afterText },
+                    set: { newValue in
+                        var c = config
+                        c.afterText = newValue
+                        panel.encodeConfig(c)
+                    }
+                ))
+                .multilineTextAlignment(.trailing)
+            }
 
-            TextField("Today text (e.g. TODAY)", text: Binding(
-                get: { config.todayText },
-                set: { newValue in
-                    var c = config
-                    c.todayText = newValue
-                    panel.encodeConfig(c)
-                }
-            ))
+            LabeledContent("Today") {
+                TextField("TODAY", text: Binding(
+                    get: { config.todayText },
+                    set: { newValue in
+                        var c = config
+                        c.todayText = newValue
+                        panel.encodeConfig(c)
+                    }
+                ))
+                .multilineTextAlignment(.trailing)
+            }
         }
     }
 
@@ -808,14 +873,17 @@ struct PanelConfigSheet: View {
             ), axis: .vertical)
             .lineLimit(2...6)
 
-            TextField("Author", text: Binding(
-                get: { config.author },
-                set: { newValue in
-                    var c = config
-                    c.author = newValue
-                    panel.encodeConfig(c)
-                }
-            ))
+            LabeledContent("Author") {
+                TextField("Optional", text: Binding(
+                    get: { config.author },
+                    set: { newValue in
+                        var c = config
+                        c.author = newValue
+                        panel.encodeConfig(c)
+                    }
+                ))
+                .multilineTextAlignment(.trailing)
+            }
         }
     }
 
@@ -823,14 +891,17 @@ struct PanelConfigSheet: View {
         let config = panel.decodeConfig(HabitsHeatmapConfig.self) ?? HabitsHeatmapConfig()
 
         return Section("Habits Heatmap") {
-            TextField("Habit Name", text: Binding(
-                get: { config.habitName },
-                set: { newValue in
-                    var c = config
-                    c.habitName = newValue
-                    panel.encodeConfig(c)
-                }
-            ))
+            LabeledContent("Habit") {
+                TextField("Habit name", text: Binding(
+                    get: { config.habitName },
+                    set: { newValue in
+                        var c = config
+                        c.habitName = newValue
+                        panel.encodeConfig(c)
+                    }
+                ))
+                .multilineTextAlignment(.trailing)
+            }
 
             Stepper("Weeks: \(config.weeksToShow)", value: Binding(
                 get: { config.weeksToShow },

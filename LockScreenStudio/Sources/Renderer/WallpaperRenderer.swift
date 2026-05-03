@@ -87,13 +87,16 @@ final class WallpaperRenderer {
             // 1. Draw background (solid/gradient or custom photo)
             drawBackground(in: rect, theme: theme, backgroundImage: request.backgroundImage, photoOffsetX: request.photoOffsetX, photoOffsetY: request.photoOffsetY, photoBlur: request.photoBlur, photoDim: request.photoDim, context: cgContext)
 
-            // 2. Calculate content area (respecting safe areas + top padding)
-            let topPad = request.clockTopPadding
+            // 2. Calculate content area (respecting safe areas)
+            // clockTopPadding is a bipolar vertical offset applied AFTER position
+            // calculation, so it shifts text up (negative) or down (positive)
+            // regardless of whether content is top/center/bottom aligned.
+            let verticalOffset = request.clockTopPadding
             let contentRect = CGRect(
                 x: safeArea.leading + theme.margins.left,
-                y: safeArea.top + theme.margins.top + topPad,
+                y: safeArea.top + theme.margins.top,
                 width: size.width - safeArea.leading - safeArea.trailing - theme.margins.left - theme.margins.right,
-                height: size.height - safeArea.top - safeArea.bottom - theme.margins.top - theme.margins.bottom - topPad
+                height: size.height - safeArea.top - safeArea.bottom - theme.margins.top - theme.margins.bottom
             )
 
             // 3. Calculate total content height to vertically distribute
@@ -122,8 +125,8 @@ final class WallpaperRenderer {
                 }
             }
 
-            // 4. Render panels sequentially
-            var currentY = startY
+            // 4. Render panels sequentially (apply bipolar vertical offset)
+            var currentY = startY + verticalOffset
 
             for (index, panelData) in request.panels.enumerated() {
                 let panelHeight = panelData.estimatedHeight(forWidth: contentRect.width, theme: theme)
