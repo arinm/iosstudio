@@ -4,7 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
     @Environment(\.dismiss) private var dismiss
     @AppStorage("appTheme") private var appTheme: String = "auto"
-    @AppStorage("defaultAccent") private var defaultAccent: String = "indigo"
+    @AppStorage("selectedAccent") private var selectedAccent: String = "indigo"
 
     @AppStorage("autoRefreshEnabled") private var autoRefreshEnabled = false
     @AppStorage("autoRefreshInterval") private var autoRefreshInterval: Double = 24
@@ -53,7 +53,7 @@ struct SettingsView: View {
                 Text("Dark").tag("dark")
             }
 
-            Picker("Accent Color", selection: $defaultAccent) {
+            Picker("Accent Color", selection: $selectedAccent) {
                 ForEach(AccentColorOption.allCases) { option in
                     HStack {
                         Circle()
@@ -69,10 +69,10 @@ struct SettingsView: View {
                     .tag(option.rawValue)
                 }
             }
-            .onChange(of: defaultAccent) { _, newValue in
+            .onChange(of: selectedAccent) { _, newValue in
                 if let option = AccentColorOption(rawValue: newValue),
                    option.isPro && !subscriptionManager.isPro {
-                    defaultAccent = "indigo"
+                    selectedAccent = "indigo"
                     showPaywall = true
                 }
             }

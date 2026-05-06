@@ -10,7 +10,6 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     TARGETED_DEVICE_FAMILY: "1"
-    INFOPLIST_FILE: LockScreenStudio/Sources/App/Info.plist
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
 
@@ -18,18 +17,47 @@ targets:
   LockScreenStudio:
     type: application
     platform: iOS
+    scheme: {}
     sources:
       - path: LockScreenStudio/Sources
       - path: LockScreenStudio/Resources
+    dependencies:
+      - target: LockScreenStudioWidget
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.lockscreenstudio.app
         INFOPLIST_FILE: LockScreenStudio/Sources/App/Info.plist
         GENERATE_INFOPLIST_FILE: false
+        MARKETING_VERSION: "1.1.0"
+        CURRENT_PROJECT_VERSION: "10"
     entitlements:
       path: LockScreenStudio/LockScreenStudio.entitlements
       properties:
-        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - group.com.lockscreenstudio.shared
+
+  LockScreenStudioWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LockScreenStudioWidget
+      - path: LockScreenStudio/Sources/Models
+      - path: LockScreenStudio/Sources/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockscreenstudio.app.widget
+        INFOPLIST_FILE: LockScreenStudioWidget/Info.plist
+        GENERATE_INFOPLIST_FILE: false
+        SKIP_INSTALL: YES
+        CODE_SIGN_STYLE: Automatic
+        MARKETING_VERSION: "1.1.0"
+        CURRENT_PROJECT_VERSION: "10"
+        TARGETED_DEVICE_FAMILY: "1"
+    entitlements:
+      path: LockScreenStudioWidget/LockScreenStudioWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.lockscreenstudio.shared
 
   LockScreenStudioTests:
     type: bundle.unit-test

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct EditorView: View {
     @Bindable var template: WallpaperTemplate
@@ -15,11 +16,19 @@ struct EditorView: View {
     @State private var showPaywall = false
     @State private var showShortcutsWizard = false
     @State private var showAddPanel = false
+    @State private var showRenameAlert = false
+    @State private var renameDraft = ""
 
     // Quick-edit state for Top 3 priorities
     @State private var priority1 = ""
     @State private var priority2 = ""
     @State private var priority3 = ""
+
+    // Auto-refresh feedback
+    @State private var refreshTask: Task<Void, Never>?
+    @State private var showRefreshToast = false
+    @State private var refreshToastMessage = ""
+    @AppStorage("autoRefreshEnabled") private var autoRefreshEnabled: Bool = false
 
     private var sortedPanels: [PanelConfiguration] {
         template.panels.sorted { $0.sortOrder < $1.sortOrder }
@@ -43,9 +52,25 @@ struct EditorView: View {
             .padding(20)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle(template.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Button {
+                    renameDraft = template.name
+                    showRenameAlert = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(template.name)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        Image(systemName: "pencil")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityLabel("Rename template")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showPreview = true
@@ -54,6 +79,18 @@ struct EditorView: View {
                 }
                 .accessibilityLabel("Preview wallpaper")
             }
+        }
+        .alert("Rename template", isPresented: $showRenameAlert) {
+            TextField("Template name", text: $renameDraft)
+                .textInputAutocapitalization(.words)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                let trimmed = renameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmed.isEmpty else { return }
+                template.name = trimmed
+                try? modelContext.save()
+            }
+            .disabled(renameDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .sheet(isPresented: $showThemePicker) {
             ThemePickerSheet()
@@ -84,6 +121,38 @@ struct EditorView: View {
             .presentationDetents([.medium])
         }
         .onAppear { loadPriorities() }
+        .overlay(alignment: .bottom) {
+            if showRefreshToast {
+                refreshToast
+                    .padding(.bottom, 24)
+                    .padding(.horizontal, 16)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showRefreshToast)
+    }
+
+    private var refreshToast: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sparkles")
+                .foregroundStyle(.indigo)
+            Text(refreshToastMessage)
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+            Spacer(minLength: 0)
+            Button("Photos") {
+                if let url = URL(string: "photos-redirect://") {
+                    UIApplication.shared.open(url)
+                }
+            }
+            .font(.subheadline.bold())
+            .foregroundStyle(.indigo)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
     }
 
     // MARK: - Panels List
@@ -249,7 +318,7 @@ struct EditorView: View {
                 ForEach(todos) { todo in
                     HStack(spacing: 12) {
                         Button {
-                            todo.isCompleted.toggle()
+                            toggleTodo(todo)
                         } label: {
                             Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
                                 .foregroundStyle(todo.isCompleted ? .green : .secondary)
@@ -264,6 +333,7 @@ struct EditorView: View {
                         Button {
                             modelContext.delete(todo)
                             try? modelContext.save()
+                            WidgetCenter.shared.reloadAllTimelines()
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.caption)
@@ -309,7 +379,49 @@ struct EditorView: View {
         let todo = TodoItem(text: text, sortOrder: todos.count)
         modelContext.insert(todo)
         try? modelContext.save()
+        WidgetCenter.shared.reloadAllTimelines()
         newTodoText = ""
+    }
+
+    private func toggleTodo(_ todo: TodoItem) {
+        todo.isCompleted.toggle()
+        todo.completedAt = todo.isCompleted ? Date() : nil
+        try? modelContext.save()
+
+        // Tell the widget extension to reload so its checkbox state matches.
+        WidgetCenter.shared.reloadAllTimelines()
+
+        // Always refresh the panel snapshot so the next BGTask uses fresh data.
+        BackgroundTaskManager.savePanelsForRefresh(template.panels)
+
+        // If auto-refresh is on, regenerate now (debounced — avoids saving N
+        // wallpapers when the user toggles several todos in quick succession).
+        guard autoRefreshEnabled else { return }
+        scheduleDebouncedRefresh()
+    }
+
+    private func scheduleDebouncedRefresh() {
+        refreshTask?.cancel()
+        let panels = template.panels
+        let snapshotTodos = todos.map { $0 }
+        let snapshotPriorities = currentPriorities()
+        refreshTask = Task {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            let success = await BackgroundTaskManager.shared.refreshNow(
+                panels: panels,
+                todos: snapshotTodos,
+                priorities: snapshotPriorities
+            )
+            await MainActor.run {
+                refreshToastMessage = success
+                    ? "Wallpaper updated. Open Photos to apply."
+                    : "Couldn't update wallpaper."
+                showRefreshToast = true
+            }
+            try? await Task.sleep(for: .seconds(3))
+            await MainActor.run { showRefreshToast = false }
+        }
     }
 
     // MARK: - Layout Section
@@ -722,17 +834,29 @@ struct PanelConfigSheet: View {
     private var todoConfigSection: some View {
         let config = panel.decodeConfig(TodoConfig.self) ?? TodoConfig()
 
-        return Section("To-Do Settings") {
-            Toggle("Show Completed", isOn: Binding(
+        return Section {
+            Toggle(isOn: Binding(
                 get: { config.showCompleted },
                 set: { newValue in
                     var c = config
                     c.showCompleted = newValue
                     panel.encodeConfig(c)
                 }
-            ))
+            )) {
+                Label {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Show completed todos")
+                        Text("Display done items with a strikethrough on the wallpaper.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.indigo)
+                }
+            }
 
-            Stepper("Max Items: \(config.maxItems)", value: Binding(
+            Stepper("Max items: \(config.maxItems)", value: Binding(
                 get: { config.maxItems },
                 set: { newValue in
                     var c = config
@@ -740,6 +864,8 @@ struct PanelConfigSheet: View {
                     panel.encodeConfig(c)
                 }
             ), in: 1...10)
+        } header: {
+            Text("To-Do Settings")
         }
     }
 

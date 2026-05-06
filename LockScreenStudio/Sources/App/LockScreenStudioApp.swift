@@ -8,28 +8,7 @@ struct LockScreenStudioApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     private let backgroundTaskManager = BackgroundTaskManager.shared
 
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            DashboardProject.self,
-            WallpaperTemplate.self,
-            PanelConfiguration.self,
-            ThemeConfiguration.self,
-            ExportPreset.self,
-            TodoItem.self,
-            PriorityItem.self,
-            ExportHistoryItem.self,
-        ])
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
-        )
-        do {
-            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            return container
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    let sharedModelContainer: ModelContainer = SharedContainer.makeModelContainer()
 
     var body: some Scene {
         WindowGroup {

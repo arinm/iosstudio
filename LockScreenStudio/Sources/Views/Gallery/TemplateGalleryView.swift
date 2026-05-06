@@ -7,6 +7,7 @@ struct TemplateGalleryView: View {
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
     @State private var showSettings = false
     @State private var showPaywall = false
+    @State private var showHistory = false
 
     var body: some View {
         ScrollView {
@@ -22,17 +23,30 @@ struct TemplateGalleryView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "gearshape")
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 12) {
+                    Button {
+                        showHistory = true
+                    } label: {
+                        Image(systemName: "chart.bar.xaxis")
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("History")
+
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("Settings")
                 }
-                .accessibilityLabel("Settings")
             }
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
+        }
+        .sheet(isPresented: $showHistory) {
+            NavigationStack { HistoryView() }
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView()

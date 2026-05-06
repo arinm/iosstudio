@@ -4,7 +4,7 @@ import SwiftData
 /// Seeds the database with built-in templates on first launch.
 struct TemplateSeeder {
 
-    private static let currentSeedVersion = 3
+    private static let currentSeedVersion = 4
 
     static func seedIfNeeded(context: ModelContext) {
         let storedVersion = UserDefaults.standard.integer(forKey: "templateSeedVersion")
@@ -56,7 +56,30 @@ struct TemplateSeeder {
             makeMeetingDay(),
             makeMinimalNotes(),
             makeFullDashboard(),
+            makeJustTodo(),
         ]
+    }
+
+    private static func makeJustTodo() -> WallpaperTemplate {
+        let template = WallpaperTemplate(
+            name: "Just To-Do",
+            description: "A focused list — just date and your tasks.",
+            layoutType: .minimal,
+            isPro: false,
+            sortOrder: 13
+        )
+
+        let panels = [
+            PanelConfiguration(panelType: .dateTime, sortOrder: 0, title: nil),
+            PanelConfiguration(panelType: .todo, sortOrder: 1, title: "To-Do"),
+        ]
+
+        panels[0].encodeConfig(DateTimeConfig(showDayOfWeek: true, dateFormat: .long))
+        // Show completed so toggling from the widget gives visible strikethrough feedback.
+        panels[1].encodeConfig(TodoConfig(showCompleted: true, maxItems: 8))
+
+        template.panels = panels
+        return template
     }
 
     // MARK: - Template Definitions

@@ -9,6 +9,9 @@ final class TodoItem {
     var isCompleted: Bool
     var sortOrder: Int
     var createdAt: Date
+    /// Set when isCompleted transitions to true; cleared when toggled back.
+    /// Drives daily history aggregation and streak features.
+    var completedAt: Date?
 
     init(text: String, isCompleted: Bool = false, sortOrder: Int = 0) {
         self.id = UUID()
@@ -16,6 +19,7 @@ final class TodoItem {
         self.isCompleted = isCompleted
         self.sortOrder = sortOrder
         self.createdAt = Date()
+        self.completedAt = isCompleted ? Date() : nil
     }
 }
 

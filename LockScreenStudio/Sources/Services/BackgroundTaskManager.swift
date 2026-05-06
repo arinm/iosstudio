@@ -70,34 +70,50 @@ final class BackgroundTaskManager {
             task.setTaskCompleted(success: false)
         }
 
-        do {
-            // Load current panel configuration from UserDefaults
-            let panels = loadSavedPanels()
-            let devicePresetName = UserDefaults.standard.string(forKey: "selectedDevice") ?? ""
-            let devicePreset = DevicePreset.allPresets.first { $0.name == devicePresetName } ?? .current
+        // Background path uses the saved panel snapshot; todos/priorities
+        // are unavailable here and rendered as empty (BG-side limitation).
+        let success = await renderAndSave(
+            panels: loadSavedPanels(),
+            todos: [],
+            priorities: []
+        )
+        if success {
+            await sendRefreshNotification()
+        }
+        task.setTaskCompleted(success: success)
+    }
 
+    /// Triggers an immediate wallpaper regeneration using the supplied data
+    /// (typically called from the editor when the user toggles a todo so they
+    /// see the result reflected in Photos within seconds).
+    @discardableResult
+    func refreshNow(
+        panels: [PanelConfiguration],
+        todos: [TodoItem],
+        priorities: [PriorityItem]
+    ) async -> Bool {
+        await renderAndSave(panels: panels, todos: todos, priorities: priorities)
+    }
+
+    private func renderAndSave(
+        panels: [PanelConfiguration],
+        todos: [TodoItem],
+        priorities: [PriorityItem]
+    ) async -> Bool {
+        do {
             let result = try await exportService.generateWallpaper(
                 panels: panels,
                 theme: nil,
-                devicePreset: devicePreset,
+                devicePreset: .current,
+                priorities: priorities,
+                todos: todos,
                 date: .now
             )
-
-            guard let image = UIImage(data: result.imageData) else {
-                task.setTaskCompleted(success: false)
-                return
-            }
-
-            // Save to Photos
+            guard let image = UIImage(data: result.imageData) else { return false }
             try await exportService.saveToPhotos(image)
-
-            // Send notification
-            await sendRefreshNotification()
-
-            task.setTaskCompleted(success: true)
+            return true
         } catch {
-            // Refresh failure is non-critical, silently ignored
-            task.setTaskCompleted(success: false)
+            return false
         }
     }
 
