@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import PhoneShowcase from "@/components/PhoneShowcase";
+import FeatureWidget from "@/components/FeatureWidget";
 import FeatureAuto from "@/components/FeatureAuto";
 import FeatureCustomize from "@/components/FeatureCustomize";
 import FeatureTemplates from "@/components/FeatureTemplates";
@@ -15,6 +16,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <PhoneShowcase />
+      <FeatureWidget />
       <FeatureAuto />
       <FeatureCustomize />
       <FeatureTemplates />

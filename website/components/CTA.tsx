@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { appStoreUrl } from "@/lib/links";
 
 export default function CTA() {
   const ref = useRef(null);
@@ -32,7 +33,9 @@ export default function CTA() {
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href="#"
+            href={appStoreUrl("cta_main")}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-base transition-all duration-300 glow-indigo"
           >
             <svg

@@ -19,9 +19,9 @@ export default function Hero() {
           className="text-center lg:text-left flex-1"
         >
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-            Lock Screen
+            Your iPhone Lock Screen,
             <br />
-            <span className="gradient-text">Dashboard for iPhone.</span>
+            <span className="gradient-text">on autopilot.</span>
           </h1>
 
           <motion.p
@@ -30,8 +30,9 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mt-6 text-lg md:text-xl text-white/50 max-w-xl leading-relaxed"
           >
-            Your schedule, always visible — agenda, priorities, to-dos, and
-            more, rendered as a wallpaper and refreshed daily.
+            Calendar, top 3, todos, countdowns — exported as a wallpaper that
+            refreshes itself every morning. Now with an interactive widget to
+            check todos right from your Home Screen.
           </motion.p>
 
           <motion.div
