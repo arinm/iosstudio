@@ -8,6 +8,7 @@ struct SettingsView: View {
 
     @AppStorage("autoRefreshEnabled") private var autoRefreshEnabled = false
     @AppStorage("autoRefreshInterval") private var autoRefreshInterval: Double = 24
+    @AppStorage("automationMode") private var automationMode: String = "off" // off | builtin | shortcuts
 
     @State private var calendarAuthorized = false
     @State private var showPaywall = false
@@ -17,9 +18,8 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 appearanceSection
-                autoRefreshSection
+                automationSection
                 dataSection
-                shortcutsSection
                 subscriptionSection
                 aboutSection
                 #if DEBUG
@@ -79,23 +79,20 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Auto Refresh
+    // MARK: - Automation (unified BGTask + Shortcuts surface)
 
-    private var autoRefreshSection: some View {
+    private var automationSection: some View {
         Section {
-            Toggle("Auto-Refresh Wallpaper", isOn: $autoRefreshEnabled)
-                .onChange(of: autoRefreshEnabled) { _, enabled in
-                    if enabled {
-                        Task {
-                            _ = await BackgroundTaskManager.shared.requestNotificationPermission()
-                        }
-                        BackgroundTaskManager.shared.scheduleRefreshIfEnabled()
-                    } else {
-                        BackgroundTaskManager.shared.cancelScheduledRefresh()
-                    }
-                }
+            Picker("Mode", selection: $automationMode) {
+                Text("Off").tag("off")
+                Text("Built-in").tag("builtin")
+                Text("Shortcuts (recommended)").tag("shortcuts")
+            }
+            .onChange(of: automationMode) { _, newValue in
+                applyAutomationMode(newValue)
+            }
 
-            if autoRefreshEnabled {
+            if automationMode == "builtin" {
                 Picker("Frequency", selection: $autoRefreshInterval) {
                     Text("Every 6 hours").tag(6.0)
                     Text("Every 12 hours").tag(12.0)
@@ -107,10 +104,53 @@ struct SettingsView: View {
                     BackgroundTaskManager.shared.scheduleRefreshIfEnabled()
                 }
             }
+
+            if automationMode == "shortcuts" {
+                Button {
+                    showShortcutsGuide = true
+                } label: {
+                    Label("Open Automation Gallery", systemImage: "bolt.fill")
+                }
+            }
         } header: {
-            Text("Auto-Refresh")
+            Text("Automation")
         } footer: {
-            Text("Automatically regenerates your wallpaper with fresh data (calendar, todos) and saves it to Photos. You'll get a notification when it's ready.")
+            Text(automationFooter)
+        }
+    }
+
+    private var automationFooter: String {
+        switch automationMode {
+        case "builtin":
+            return "iOS picks an opportune moment within your chosen window - exact timing isn't guaranteed. A fresh wallpaper is saved to Photos with a notification - tap once to apply. For precise scheduling (e.g. 7:00 AM sharp), use Shortcuts instead."
+        case "shortcuts":
+            return "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. The fresh wallpaper lands in Photos with a notification; one tap to apply. (Apple removed direct wallpaper-setting from Shortcuts in iOS 26.)"
+        default:
+            return "Off: your wallpaper won't update on its own. Pick Built-in for fire-and-forget, or Shortcuts for precise scheduling."
+        }
+    }
+
+    private func applyAutomationMode(_ mode: String) {
+        switch mode {
+        case "builtin":
+            autoRefreshEnabled = true
+            Task {
+                _ = await BackgroundTaskManager.shared.requestNotificationPermission()
+            }
+            BackgroundTaskManager.shared.scheduleRefreshIfEnabled()
+        case "shortcuts":
+            // BGTask path off, but we still need notifications because the
+            // entire post-iOS-26 flow is: automation runs → notification
+            // arrives → user taps to apply. Without notification permission
+            // the user has no idea their wallpaper is ready.
+            autoRefreshEnabled = false
+            BackgroundTaskManager.shared.cancelScheduledRefresh()
+            Task {
+                _ = await BackgroundTaskManager.shared.requestNotificationPermission()
+            }
+        default:
+            autoRefreshEnabled = false
+            BackgroundTaskManager.shared.cancelScheduledRefresh()
         }
     }
 
@@ -139,27 +179,6 @@ struct SettingsView: View {
                 ExportHistoryView()
             } label: {
                 Label("Export History", systemImage: "clock.arrow.circlepath")
-            }
-        }
-    }
-
-    // MARK: - Shortcuts
-
-    private var shortcutsSection: some View {
-        Section("Shortcuts") {
-            Button {
-                showShortcutsGuide = true
-            } label: {
-                Label("Shortcuts Guide", systemImage: "bolt.fill")
-            }
-
-            Button {
-                // Open Shortcuts app
-                if let url = URL(string: "shortcuts://") {
-                    UIApplication.shared.open(url)
-                }
-            } label: {
-                Label("Open Shortcuts App", systemImage: "arrow.up.right.square")
             }
         }
     }

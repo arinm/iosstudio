@@ -99,11 +99,14 @@ struct TodoWidgetEntryView: View {
     }
 
     private var rowLimit: Int {
-        family == .systemSmall ? 3 : 6
+        // Tighter row counts so each row gets a larger tap target — Apple HIG
+        // recommends 44x44pt, and a 3-row small widget puts each row right
+        // around that. Medium gets 5 to leave breathing room.
+        family == .systemSmall ? 3 : 5
     }
 
     private var smallView: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
             header
             if entry.todos.isEmpty {
                 emptyState
@@ -117,7 +120,7 @@ struct TodoWidgetEntryView: View {
     }
 
     private var mediumView: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             header
             if entry.todos.isEmpty {
                 emptyState
@@ -148,21 +151,25 @@ struct TodoWidgetEntryView: View {
     }
 
     private func todoRow(_ todo: TodoSnapshot, compact: Bool) -> some View {
-        HStack(spacing: 8) {
-            Button(intent: MarkTodoDoneIntent(todoID: todo.id.uuidString)) {
+        // Bigger tap targets: the Button extends across the whole row using
+        // contentShape(.rect) so the user can hit the row anywhere, not just
+        // the tiny checkbox glyph. Icon font sizes bumped one step up.
+        Button(intent: MarkTodoDoneIntent(todoID: todo.id.uuidString)) {
+            HStack(spacing: 10) {
                 Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(compact ? .caption : .subheadline)
+                    .font(compact ? .body : .title3)
                     .foregroundStyle(todo.isCompleted ? .indigo : .secondary)
-            }
-            .buttonStyle(.plain)
 
-            Text(todo.text)
-                .font(compact ? .caption2 : .caption)
-                .lineLimit(1)
-                .strikethrough(todo.isCompleted)
-                .foregroundStyle(todo.isCompleted ? .secondary : .primary)
-            Spacer(minLength: 0)
+                Text(todo.text)
+                    .font(compact ? .footnote : .subheadline)
+                    .lineLimit(1)
+                    .strikethrough(todo.isCompleted)
+                    .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+                Spacer(minLength: 0)
+            }
+            .contentShape(.rect)
         }
+        .buttonStyle(.plain)
     }
 
     private var emptyState: some View {

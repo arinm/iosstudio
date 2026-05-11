@@ -30,9 +30,9 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mt-6 text-lg md:text-xl text-white/50 max-w-xl leading-relaxed"
           >
-            Calendar, top 3, todos, countdowns — exported as a wallpaper that
-            refreshes itself every morning. Now with an interactive widget to
-            check todos right from your Home Screen.
+            Calendar, top 3, todos, countdowns - a fresh wallpaper saved to
+            Photos every morning via Apple Shortcuts. Plus an interactive
+            widget to check todos right from your Home Screen.
           </motion.p>
 
           <motion.div
@@ -174,7 +174,7 @@ export default function Hero() {
             transition={{ delay: 1, duration: 0.5 }}
             className="absolute -bottom-4 -right-4 bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg shadow-indigo-500/30"
           >
-            Auto-refresh daily
+            Fresh daily, one tap
           </motion.div>
         </motion.div>
       </div>

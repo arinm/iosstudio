@@ -9,17 +9,21 @@ import UIKit
 /// available template and renders with current date's data.
 /// This is the free-tier intent, designed for simple daily automation.
 struct GenerateTodayWallpaperIntent: AppIntent {
-    static let title: LocalizedStringResource = "Generate Today Wallpaper"
+    static let title: LocalizedStringResource = "Generate Today's Wallpaper"
     static let description = IntentDescription(
         "Creates a wallpaper image with today's agenda, priorities, and tasks.",
         categoryName: "Wallpaper"
     )
     static let openAppWhenRun = false
 
+    static var parameterSummary: some ParameterSummary {
+        Summary("Generate today's lock screen wallpaper")
+    }
+
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
         let service = ExportService()
-        let context = try ModelContext(sharedModelContainer())
+        let context = ModelContext(SharedContainer.makeModelContainer())
 
         let descriptor = FetchDescriptor<WallpaperTemplate>(
             predicate: #Predicate { !$0.isPro },
@@ -42,6 +46,24 @@ struct GenerateTodayWallpaperIntent: AppIntent {
             date: .now
         )
 
+        // Save to Photos automatically so the user gets the new wallpaper in
+        // their library without needing a separate "Save to Photo Album" step.
+        // Apple removed the system "Set Wallpaper" Shortcuts action in iOS 26
+        // so the user applies it manually with one tap from the notification.
+        var photosOutcome: WallpaperNotification.Outcome = .savedToPhotos
+        if let image = UIImage(data: result.imageData) {
+            do {
+                try await service.saveToPhotos(image)
+            } catch ExportService.PhotosError.permissionDenied {
+                photosOutcome = .photosPermissionDenied
+            } catch {
+                // Other failures (write error, etc.) fall through silently —
+                // the IntentFile is still returned so power-user shortcuts
+                // chained after this can still consume the image.
+            }
+        }
+        await WallpaperNotification.sendRefreshed(outcome: photosOutcome)
+
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
             fileURL: fileURL,
@@ -49,6 +71,7 @@ struct GenerateTodayWallpaperIntent: AppIntent {
             type: .png
         )
 
+        AutomationStatus.recordRun()
         return .result(value: intentFile)
     }
 }
@@ -71,10 +94,24 @@ struct GenerateWallpaperIntent: AppIntent {
     @Parameter(title: "Theme", default: .dark)
     var theme: ThemeEnum
 
+    static var parameterSummary: some ParameterSummary {
+        Summary("Generate \(\.$templateName) wallpaper in \(\.$theme) mode")
+    }
+
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
+        // Fail fast on pro templates if the user isn't subscribed, before any
+        // SwiftData fetch or render work.
+        if templateName.requiresPro {
+            let subManager = SubscriptionManager()
+            await subManager.updatePurchasedProducts()
+            guard subManager.isPro else {
+                throw IntentError.proRequired
+            }
+        }
+
         let service = ExportService()
-        let context = try ModelContext(sharedModelContainer())
+        let context = ModelContext(SharedContainer.makeModelContainer())
 
         let searchName = templateName.templateName
         let descriptor = FetchDescriptor<WallpaperTemplate>(
@@ -82,15 +119,6 @@ struct GenerateWallpaperIntent: AppIntent {
         )
         guard let template = try context.fetch(descriptor).first else {
             throw IntentError.noTemplateFound
-        }
-
-        // Pro templates require subscription
-        if template.isPro {
-            let subManager = SubscriptionManager()
-            await subManager.updatePurchasedProducts()
-            guard subManager.isPro else {
-                throw IntentError.proRequired
-            }
         }
 
         let priorities = try context.fetch(FetchDescriptor<PriorityItem>())
@@ -111,6 +139,20 @@ struct GenerateWallpaperIntent: AppIntent {
             date: .now
         )
 
+        var photosOutcome: WallpaperNotification.Outcome = .savedToPhotos
+        if let image = UIImage(data: result.imageData) {
+            do {
+                try await service.saveToPhotos(image)
+            } catch ExportService.PhotosError.permissionDenied {
+                photosOutcome = .photosPermissionDenied
+            } catch {
+                // Other failures (write error, etc.) fall through silently —
+                // the IntentFile is still returned so power-user shortcuts
+                // chained after this can still consume the image.
+            }
+        }
+        await WallpaperNotification.sendRefreshed(outcome: photosOutcome)
+
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
             fileURL: fileURL,
@@ -118,6 +160,7 @@ struct GenerateWallpaperIntent: AppIntent {
             type: .png
         )
 
+        AutomationStatus.recordRun()
         return .result(value: intentFile)
     }
 }
@@ -152,6 +195,16 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
     @Parameter(title: "Format", default: .png)
     var format: FormatEnum
 
+    static var parameterSummary: some ParameterSummary {
+        Summary("Generate \(\.$templateName) wallpaper") {
+            \.$date
+            \.$theme
+            \.$accent
+            \.$device
+            \.$format
+        }
+    }
+
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
         // Pro-only intent
@@ -162,7 +215,7 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
         }
 
         let service = ExportService()
-        let context = try ModelContext(sharedModelContainer())
+        let context = ModelContext(SharedContainer.makeModelContainer())
 
         let searchName = templateName.templateName
         let descriptor = FetchDescriptor<WallpaperTemplate>(
@@ -194,6 +247,20 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
             date: targetDate
         )
 
+        var photosOutcome: WallpaperNotification.Outcome = .savedToPhotos
+        if let image = UIImage(data: result.imageData) {
+            do {
+                try await service.saveToPhotos(image)
+            } catch ExportService.PhotosError.permissionDenied {
+                photosOutcome = .photosPermissionDenied
+            } catch {
+                // Other failures (write error, etc.) fall through silently —
+                // the IntentFile is still returned so power-user shortcuts
+                // chained after this can still consume the image.
+            }
+        }
+        await WallpaperNotification.sendRefreshed(outcome: photosOutcome)
+
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
             fileURL: fileURL,
@@ -201,6 +268,7 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
             type: imageFormat == .png ? .png : .jpeg
         )
 
+        AutomationStatus.recordRun()
         return .result(value: intentFile)
     }
 }
@@ -224,21 +292,36 @@ enum TemplateNameEnum: String, AppEnum {
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Template")
 
+    // Pro templates get a "(Pro)" suffix so free users see the gate before
+    // building a whole automation that fails at runtime. Full dynamic-options
+    // filtering would require migrating to AppEntity, which would break
+    // existing user Shortcuts — deferred to a future major version.
     static let caseDisplayRepresentations: [TemplateNameEnum: DisplayRepresentation] = [
         .todayDashboard: "Today Dashboard",
         .minimalAgenda: "Minimal Agenda",
-        .priorityFocus: "Priority Focus",
-        .weeklyOverview: "Weekly Overview",
-        .darkFocus: "Dark Focus",
-        .splitLayout: "Split Layout",
+        .priorityFocus: "Priority Focus (Pro)",
+        .weeklyOverview: "Weekly Overview (Pro)",
+        .darkFocus: "Dark Focus (Pro)",
+        .splitLayout: "Split Layout (Pro)",
         .countdown: "Countdown",
         .morningBriefing: "Morning Briefing",
         .studentPlanner: "Student Planner",
-        .fitness: "Fitness",
-        .meetingDay: "Meeting Day",
+        .fitness: "Fitness (Pro)",
+        .meetingDay: "Meeting Day (Pro)",
         .minimalNotes: "Minimal Notes",
-        .fullDashboard: "Full Dashboard",
+        .fullDashboard: "Full Dashboard (Pro)",
     ]
+
+    /// True when the template requires Lock Screen Studio Pro.
+    var requiresPro: Bool {
+        switch self {
+        case .priorityFocus, .weeklyOverview, .darkFocus, .splitLayout,
+             .fitness, .meetingDay, .fullDashboard:
+            return true
+        default:
+            return false
+        }
+    }
 
     var templateName: String {
         switch self {
@@ -383,8 +466,12 @@ struct LockScreenStudioShortcuts: AppShortcutsProvider {
                 "Generate today's wallpaper with \(.applicationName)",
                 "Create today's lock screen with \(.applicationName)",
                 "Make my daily wallpaper with \(.applicationName)",
+                "Refresh my lock screen with \(.applicationName)",
+                "Update my wallpaper with \(.applicationName)",
+                "New wallpaper with \(.applicationName)",
+                "Build today's dashboard with \(.applicationName)",
             ],
-            shortTitle: "Today Wallpaper",
+            shortTitle: "Today's Wallpaper",
             systemImageName: "photo.artframe"
         )
         AppShortcut(
@@ -392,6 +479,8 @@ struct LockScreenStudioShortcuts: AppShortcutsProvider {
             phrases: [
                 "Generate a wallpaper with \(.applicationName)",
                 "Create a lock screen with \(.applicationName)",
+                "Pick a wallpaper template in \(.applicationName)",
+                "Set my lock screen template in \(.applicationName)",
             ],
             shortTitle: "Generate Wallpaper",
             systemImageName: "rectangle.on.rectangle"
@@ -411,28 +500,12 @@ enum IntentError: Error, CustomLocalizedStringResourceConvertible {
         case .noTemplateFound:
             return "No matching template found. Open Lock Screen Studio to set up a template."
         case .proRequired:
-            return "This template requires Lock Screen Studio Pro."
+            return "This template requires Lock Screen Studio Pro. Open the app, tap Upgrade, then re-run the shortcut."
         case .generationFailed:
             return "Failed to generate wallpaper. Please try again."
         }
     }
 }
 
-// MARK: - Shared Model Container (for Intents)
-
-/// Provides access to the shared SwiftData container from intents.
-/// Must match the container configuration in the app.
-private func sharedModelContainer() throws -> ModelContainer {
-    let schema = Schema([
-        DashboardProject.self,
-        WallpaperTemplate.self,
-        PanelConfiguration.self,
-        ThemeConfiguration.self,
-        ExportPreset.self,
-        TodoItem.self,
-        PriorityItem.self,
-        ExportHistoryItem.self,
-    ])
-    let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-    return try ModelContainer(for: schema, configurations: [config])
-}
+// Intents share the SwiftData container with the app and widget via
+// SharedContainer.makeModelContainer() — see Sources/Shared/SharedContainer.swift.

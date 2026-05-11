@@ -70,17 +70,35 @@ final class BackgroundTaskManager {
             task.setTaskCompleted(success: false)
         }
 
-        // Background path uses the saved panel snapshot; todos/priorities
-        // are unavailable here and rendered as empty (BG-side limitation).
+        // Read todos and priorities live from the shared App Group SwiftData
+        // store so the BG-rendered wallpaper reflects the user's current state
+        // (calendar, todos, priorities) instead of rendering them empty.
+        let (todos, priorities) = loadLiveTodosAndPriorities()
         let success = await renderAndSave(
             panels: loadSavedPanels(),
-            todos: [],
-            priorities: []
+            todos: todos,
+            priorities: priorities
         )
         if success {
-            await sendRefreshNotification()
+            await WallpaperNotification.sendRefreshed()
         }
         task.setTaskCompleted(success: success)
+    }
+
+    /// Fetches the current TodoItems and PriorityItems from the App Group
+    /// SwiftData store. Returns empty arrays if the store can't be read.
+    private func loadLiveTodosAndPriorities() -> ([TodoItem], [PriorityItem]) {
+        let container = SharedContainer.makeModelContainer()
+        let context = ModelContext(container)
+
+        let todoDescriptor = FetchDescriptor<TodoItem>(
+            sortBy: [SortDescriptor(\.sortOrder)]
+        )
+        let priorityDescriptor = FetchDescriptor<PriorityItem>()
+
+        let todos = (try? context.fetch(todoDescriptor)) ?? []
+        let priorities = (try? context.fetch(priorityDescriptor)) ?? []
+        return (todos, priorities)
     }
 
     /// Triggers an immediate wallpaper regeneration using the supplied data
@@ -135,34 +153,6 @@ final class BackgroundTaskManager {
             PanelConfiguration(panelType: .agenda, sortOrder: 0),
             PanelConfiguration(panelType: .dateTime, sortOrder: 1),
         ]
-    }
-
-    // MARK: - Notification
-
-    private func sendRefreshNotification() async {
-        let center = UNUserNotificationCenter.current()
-
-        // Request permission if needed
-        let settings = await center.notificationSettings()
-        if settings.authorizationStatus == .notDetermined {
-            _ = try? await center.requestAuthorization(options: [.alert, .sound])
-        }
-
-        guard settings.authorizationStatus == .authorized ||
-              settings.authorizationStatus == .notDetermined else { return }
-
-        let content = UNMutableNotificationContent()
-        content.title = "Wallpaper Updated"
-        content.body = "Your lock screen wallpaper has been refreshed. Open Photos to apply it."
-        content.sound = .default
-
-        let request = UNNotificationRequest(
-            identifier: "wallpaper-refresh-\(Date().timeIntervalSince1970)",
-            content: content,
-            trigger: nil // deliver immediately
-        )
-
-        try? await center.add(request)
     }
 
     // MARK: - Save Panels (called from Editor)

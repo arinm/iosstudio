@@ -10,8 +10,12 @@ const faqs = [
     a: "Yes! The core features are completely free — choose from several templates, customize panels, and generate wallpapers. Pro unlocks additional templates, gradient backgrounds, alternative app icons, and the ability to add unlimited panels.",
   },
   {
-    q: "How does the wallpaper update automatically?",
-    a: "Lock Screen Studio integrates with Apple Shortcuts. You set up a simple automation that runs at a time you choose (e.g., 6:00 AM). It generates a fresh wallpaper with your latest data and sets it as your Lock Screen — all in the background.",
+    q: "How does the wallpaper update each day?",
+    a: "Lock Screen Studio integrates with Apple Shortcuts. You set up an automation that runs on a schedule you pick (e.g., 7:00 AM) — it generates a fresh wallpaper with your latest agenda and todos, saves it to Photos, and sends a notification. Tap the notification → Photos → Use as Wallpaper → Lock Screen. One tap to apply.",
+  },
+  {
+    q: "Why isn't applying the wallpaper fully automatic?",
+    a: "In iOS 26 Apple removed the Shortcuts action that lets third-party apps change your wallpaper directly. The fresh wallpaper still arrives in your Photos automatically every morning — you just tap once to set it. We're tracking iOS updates and will switch back to fully hands-free the moment Apple restores the capability.",
   },
   {
     q: "What iPhone models are supported?",

@@ -28,8 +28,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.lockscreenstudio.app
         INFOPLIST_FILE: LockScreenStudio/Sources/App/Info.plist
         GENERATE_INFOPLIST_FILE: false
-        MARKETING_VERSION: "1.10.0"
-        CURRENT_PROJECT_VERSION: "10"
+        MARKETING_VERSION: "1.11.0"
+        CURRENT_PROJECT_VERSION: "11"
     entitlements:
       path: LockScreenStudio/LockScreenStudio.entitlements
       properties:
@@ -50,8 +50,8 @@ targets:
         GENERATE_INFOPLIST_FILE: false
         SKIP_INSTALL: YES
         CODE_SIGN_STYLE: Automatic
-        MARKETING_VERSION: "1.10.0"
-        CURRENT_PROJECT_VERSION: "10"
+        MARKETING_VERSION: "1.11.0"
+        CURRENT_PROJECT_VERSION: "11"
         TARGETED_DEVICE_FAMILY: "1"
     entitlements:
       path: LockScreenStudioWidget/LockScreenStudioWidget.entitlements

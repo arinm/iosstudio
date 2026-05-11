@@ -10,6 +10,10 @@ struct LockScreenStudioApp: App {
 
     let sharedModelContainer: ModelContainer = SharedContainer.makeModelContainer()
 
+    init() {
+        migrateAutomationModeIfNeeded()
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -30,5 +34,18 @@ struct LockScreenStudioApp: App {
             }
         }
         .modelContainer(sharedModelContainer)
+    }
+
+    /// One-time bridge for users upgrading from v1.10 or earlier: their
+    /// `autoRefreshEnabled` may be true (BGTask scheduled) while the new
+    /// `automationMode` key would default to "off", producing a confusing UI
+    /// state where Settings says Off but the background task keeps firing.
+    private func migrateAutomationModeIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: "automationModeMigrated") else { return }
+        if defaults.bool(forKey: "autoRefreshEnabled") {
+            defaults.set("builtin", forKey: "automationMode")
+        }
+        defaults.set(true, forKey: "automationModeMigrated")
     }
 }

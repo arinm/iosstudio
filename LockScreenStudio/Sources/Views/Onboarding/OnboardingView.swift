@@ -1,4 +1,5 @@
 import SwiftUI
+import Photos
 
 struct OnboardingView: View {
     let onComplete: () -> Void
@@ -6,13 +7,16 @@ struct OnboardingView: View {
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
     @State private var currentPage = 0
     @State private var calendarGranted = false
+    @State private var notificationsGranted = false
+    @State private var photosGranted = false
     @State private var demoPreviewImage: UIImage?
 
     var body: some View {
         TabView(selection: $currentPage) {
             welcomePage.tag(0)
             previewDemoPage.tag(1)
-            permissionsPage.tag(2)
+            automationPage.tag(2)
+            permissionsPage.tag(3)
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
@@ -104,6 +108,64 @@ struct OnboardingView: View {
         .task { await generateDemoPreview() }
     }
 
+    // MARK: - Page 3: Automation pitch
+
+    private var automationPage: some View {
+        VStack(spacing: 28) {
+            Spacer()
+
+            Image(systemName: "bolt.circle.fill")
+                .font(.system(size: 72, weight: .thin))
+                .foregroundStyle(.indigo)
+
+            VStack(spacing: 12) {
+                Text("Set It Once.\nFresh Wallpaper Daily.")
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+
+                Text("Pair with Apple Shortcuts so your iPhone generates and saves a fresh wallpaper to Photos every morning. One tap from the notification to apply.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+
+            VStack(spacing: 10) {
+                automationBullet(icon: "sunrise.fill", text: "Generates at 7 AM, saved to Photos")
+                automationBullet(icon: "moon.zzz.fill", text: "Dark theme when Focus turns on")
+                automationBullet(icon: "location.fill", text: "Fresh wallpaper when you arrive at work")
+            }
+            .padding(.horizontal, 32)
+
+            Spacer()
+
+            Button {
+                withAnimation { currentPage = 3 }
+            } label: {
+                Text("Sounds good")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.indigo)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 48)
+        }
+    }
+
+    private func automationBullet(icon: String, text: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.callout)
+                .foregroundStyle(.indigo)
+                .frame(width: 24)
+            Text(text)
+                .font(.subheadline)
+            Spacer()
+        }
+    }
+
     @MainActor
     private func generateDemoPreview() async {
         let now = Date()
@@ -138,7 +200,7 @@ struct OnboardingView: View {
         )
     }
 
-    // MARK: - Page 3: Permissions
+    // MARK: - Page 4: Permissions
 
     private var permissionsPage: some View {
         VStack(spacing: 32) {
@@ -151,7 +213,7 @@ struct OnboardingView: View {
             Text("Quick Setup")
                 .font(.title.bold())
 
-            VStack(spacing: 16) {
+            VStack(spacing: 12) {
                 permissionRow(
                     icon: "calendar",
                     title: "Calendar Access",
@@ -161,6 +223,29 @@ struct OnboardingView: View {
                     Task {
                         let service = CalendarService()
                         calendarGranted = await service.requestAccess()
+                    }
+                }
+
+                permissionRow(
+                    icon: "bell.badge",
+                    title: "Notifications",
+                    subtitle: "Tap-to-apply when a fresh wallpaper is ready",
+                    granted: notificationsGranted
+                ) {
+                    Task {
+                        notificationsGranted = await BackgroundTaskManager.shared.requestNotificationPermission()
+                    }
+                }
+
+                permissionRow(
+                    icon: "photo.on.rectangle",
+                    title: "Photos (Add Only)",
+                    subtitle: "Save daily wallpapers to your library",
+                    granted: photosGranted
+                ) {
+                    Task {
+                        let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+                        photosGranted = (status == .authorized || status == .limited)
                     }
                 }
 

@@ -19,6 +19,10 @@ struct EditorView: View {
     @State private var showRenameAlert = false
     @State private var renameDraft = ""
 
+    // Surfaces an automation nudge after the user generates their first wallpaper.
+    @AppStorage("hasGeneratedOnce") private var hasGeneratedOnce: Bool = false
+    @AppStorage("dismissedAutomationBanner") private var dismissedAutomationBanner: Bool = false
+
     // Quick-edit state for Top 3 priorities
     @State private var priority1 = ""
     @State private var priority2 = ""
@@ -47,6 +51,7 @@ struct EditorView: View {
                 layoutSection
                 themeButton
                 automationButton
+                automationNudgeBanner
                 generateButton
             }
             .padding(20)
@@ -601,9 +606,10 @@ struct EditorView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Daily Automation")
                         .font(.subheadline)
-                    Text("Auto-generate via Shortcuts")
+                    Text(automationSubtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .lineLimit(2)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -617,6 +623,59 @@ struct EditorView: View {
         .buttonStyle(.plain)
     }
 
+    private var automationSubtitle: String {
+        if let description = AutomationStatus.lastRunDescription() {
+            return "Last auto-run: \(description)"
+        }
+        return "Auto-generate via Shortcuts"
+    }
+
+    @ViewBuilder
+    private var automationNudgeBanner: some View {
+        if hasGeneratedOnce
+            && AutomationStatus.lastRunDate == nil
+            && !dismissedAutomationBanner {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "sparkles")
+                    .foregroundStyle(.indigo)
+                    .font(.title3)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Want a fresh wallpaper every morning?")
+                        .font(.subheadline.bold())
+                    Text("Pair with Apple Shortcuts - generated and saved to Photos automatically. One tap to apply.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Button {
+                        showShortcutsWizard = true
+                    } label: {
+                        Text("Set it up →")
+                            .font(.caption.bold())
+                            .foregroundStyle(.indigo)
+                            .padding(.top, 2)
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer(minLength: 0)
+                Button {
+                    withAnimation { dismissedAutomationBanner = true }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss")
+            }
+            .padding(14)
+            .background(Color.indigo.opacity(0.08))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.indigo.opacity(0.2), lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
     private var generateButton: some View {
         Button {
             if template.isPro && !subscriptionManager.isPro {
@@ -624,6 +683,7 @@ struct EditorView: View {
             } else {
                 // Save panels for background auto-refresh
                 BackgroundTaskManager.savePanelsForRefresh(sortedPanels)
+                hasGeneratedOnce = true
                 showPreview = true
             }
         } label: {

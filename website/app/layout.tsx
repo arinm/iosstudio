@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s — Lock Screen Studio",
   },
   description:
-    "Transform your iPhone Lock Screen into a personal dashboard with agenda, priorities, to-dos, countdown, and more. Updated daily, automatically via Shortcuts.",
+    "Transform your iPhone Lock Screen into a personal dashboard with agenda, priorities, to-dos, countdown, and more. A fresh wallpaper saved to Photos every morning via Apple Shortcuts - one tap to apply.",
   keywords: [
     "lock screen",
     "lock screen dashboard",

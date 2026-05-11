@@ -13,6 +13,7 @@
 		1679A9C1CF4FE8403B60B597 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1860A656819D52DA215175F /* EditorView.swift */; };
 		189D323ED81EA1FE7CC4AC26 /* MarkTodoDoneIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3935D90C5B8F62A4E06C91EE /* MarkTodoDoneIntent.swift */; };
 		1FD456904AC0984F76D1F0D3 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2F8883BD944E1F4A65B85E /* PaywallView.swift */; };
+		26136521042F0D388C4F4CF8 /* WallpaperNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6987B5F3F914262C39271A /* WallpaperNotification.swift */; };
 		28BDC6975D2626D62A119332 /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 10037F449D36F90F671A4CED /* AppIcon.png */; };
 		2E78491515925DBDCEEF3585 /* DevicePresetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C381EAC438AE7ADE2594EDCB /* DevicePresetTests.swift */; };
 		2FD76804E33DB8BF66FD106E /* ExportPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 242188A911A2D1C4DB782FF9 /* ExportPreset.swift */; };
@@ -32,11 +33,13 @@
 		7868F63D0D89359F1A64A9EE /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B85642FC6CBF026B05F52 /* PreviewView.swift */; };
 		7AB8662DBA9100B0A9F36EEC /* ExportHistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EE77BC484C7D03F21A907B /* ExportHistoryItem.swift */; };
 		7E9D56DF82A01685154807CF /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA06C15D65A0B6BD481222E9 /* OnboardingView.swift */; };
+		851F9C3C3D3251313964C9A0 /* WallpaperNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6987B5F3F914262C39271A /* WallpaperNotification.swift */; };
 		8B406269998AE174C99D7BFC /* WallpaperRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A4206D42660E5F348F437C /* WallpaperRenderer.swift */; };
 		931D4ECABC8551AA5834B8F7 /* LockScreenStudioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C9946BFF913B0051ECE8D7 /* LockScreenStudioApp.swift */; };
 		9668EAAEA7027D592C81B6AE /* ThemeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA47866F7E090BFC05C68AB /* ThemeConfiguration.swift */; };
 		973D323DA9D9BA2F7A7EBEE0 /* MarkTodoDoneIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3935D90C5B8F62A4E06C91EE /* MarkTodoDoneIntent.swift */; };
 		9B9A9E492267A9ACBD936D21 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69F64CCA973679D4799E824 /* CalendarService.swift */; };
+		AEA41773B49CFD094E31F873 /* AutomationStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F5D439768CA2CD0E32D760 /* AutomationStatus.swift */; };
 		B293CEB40A8B5D0A20BE2B1F /* DashboardProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 993D5A534F20151FD8F0BE59 /* DashboardProject.swift */; };
 		B5358E4F9D759039FB2EBB44 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BB0DA1EA2E40D543FF1DE3 /* SubscriptionManager.swift */; };
 		B90B81912634C45F46B30689 /* AppIconOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AF28D0307605484ECFE0B8 /* AppIconOption.swift */; };
@@ -52,6 +55,7 @@
 		E890C37CF4A27D74064DD3F7 /* WallpaperRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9230E5259A0D07930E84D465 /* WallpaperRendererTests.swift */; };
 		F0E6588F39FB1D686BC49C26 /* WallpaperIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96272C8411EF64DC7E33D6E /* WallpaperIntents.swift */; };
 		F14DBEA7654D43C3112415CE /* LockScreenStudioWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 80A87BF142A949E51D9A748D /* LockScreenStudioWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F3FE5495EBB9DCBB3B1DD2B7 /* AutomationStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F5D439768CA2CD0E32D760 /* AutomationStatus.swift */; };
 		F4EDF928532A52008A773035 /* ShortcutsGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B33633B740A28F639951BC /* ShortcutsGuideView.swift */; };
 		F6D1708682364B31BE3B0A41 /* ExportHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 984A9A206C694854E03B8D21 /* ExportHistoryView.swift */; };
 		F82BEFF835FD250F7C1734DC /* WallpaperTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF351495945507C66158306 /* WallpaperTemplate.swift */; };
@@ -106,6 +110,7 @@
 		3152A659220D46E2ED3FA83C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		349E56A1C6424CB924EE74BA /* TodoWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoWidget.swift; sourceTree = "<group>"; };
 		3935D90C5B8F62A4E06C91EE /* MarkTodoDoneIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTodoDoneIntent.swift; sourceTree = "<group>"; };
+		46F5D439768CA2CD0E32D760 /* AutomationStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationStatus.swift; sourceTree = "<group>"; };
 		480DF013705A1EEFCAE59C58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4D7947B12804A10A17869B94 /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
 		5695A2872CF5294A1BD10036 /* LockScreenStudioStore.storekit */ = {isa = PBXFileReference; path = LockScreenStudioStore.storekit; sourceTree = "<group>"; };
@@ -130,6 +135,7 @@
 		D0CBE4E5AE08C56C5101CDAF /* GradientPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientPreset.swift; sourceTree = "<group>"; };
 		D3FD0F2B4D2086D6BABBCA34 /* PanelConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelConfigurationTests.swift; sourceTree = "<group>"; };
 		D5D93E2CEC642F6F2B39345B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		DD6987B5F3F914262C39271A /* WallpaperNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperNotification.swift; sourceTree = "<group>"; };
 		DEA47866F7E090BFC05C68AB /* ThemeConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfiguration.swift; sourceTree = "<group>"; };
 		DF9514901F1810413CBB8517 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
 		E6EE77BC484C7D03F21A907B /* ExportHistoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportHistoryItem.swift; sourceTree = "<group>"; };
@@ -329,8 +335,10 @@
 		D34F461EF6736E412AEDC5DF /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				46F5D439768CA2CD0E32D760 /* AutomationStatus.swift */,
 				3935D90C5B8F62A4E06C91EE /* MarkTodoDoneIntent.swift */,
 				668AEB0DAC10E3F9C7D5A78A /* SharedContainer.swift */,
+				DD6987B5F3F914262C39271A /* WallpaperNotification.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -485,6 +493,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE5026768CA82BA9E74138F8 /* AppIconOption.swift in Sources */,
+				F3FE5495EBB9DCBB3B1DD2B7 /* AutomationStatus.swift in Sources */,
 				B293CEB40A8B5D0A20BE2B1F /* DashboardProject.swift in Sources */,
 				5CF55B6B3ACB230C6F7F0696 /* ExportHistoryItem.swift in Sources */,
 				5F2CC4D4895794E300472BDE /* ExportPreset.swift in Sources */,
@@ -496,6 +505,7 @@
 				9668EAAEA7027D592C81B6AE /* ThemeConfiguration.swift in Sources */,
 				6E8CEAA7F13BFF64F5BD00E7 /* TodoItem.swift in Sources */,
 				062DB4FA954BDE7531BA9FA5 /* TodoWidget.swift in Sources */,
+				851F9C3C3D3251313964C9A0 /* WallpaperNotification.swift in Sources */,
 				D2D3B32F49EBF9E3D1E7BFE1 /* WallpaperTemplate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -505,6 +515,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B90B81912634C45F46B30689 /* AppIconOption.swift in Sources */,
+				AEA41773B49CFD094E31F873 /* AutomationStatus.swift in Sources */,
 				BE7AD6022D679967E060FB3C /* BackgroundTaskManager.swift in Sources */,
 				9B9A9E492267A9ACBD936D21 /* CalendarService.swift in Sources */,
 				C35B73EAA9D28DB7CB50F5BC /* DashboardProject.swift in Sources */,
@@ -534,6 +545,7 @@
 				FB25170565AA096CDCB48A39 /* ThemePickerSheet.swift in Sources */,
 				75EDF8BF95620B148C72B559 /* TodoItem.swift in Sources */,
 				F0E6588F39FB1D686BC49C26 /* WallpaperIntents.swift in Sources */,
+				26136521042F0D388C4F4CF8 /* WallpaperNotification.swift in Sources */,
 				8B406269998AE174C99D7BFC /* WallpaperRenderer.swift in Sources */,
 				F82BEFF835FD250F7C1734DC /* WallpaperTemplate.swift in Sources */,
 			);
@@ -637,7 +649,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudioWidget/LockScreenStudioWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudioWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -645,7 +657,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.10.0;
+				MARKETING_VERSION = 1.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app.widget;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -675,7 +687,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudioWidget/LockScreenStudioWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudioWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -683,7 +695,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.10.0;
+				MARKETING_VERSION = 1.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app.widget;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -697,14 +709,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.0;
+				MARKETING_VERSION = 1.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -717,14 +729,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.0;
+				MARKETING_VERSION = 1.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

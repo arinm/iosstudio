@@ -27,13 +27,13 @@ export default function FeatureAuto() {
           className="text-center mb-20"
         >
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-            Updates automatically.
+            Fresh wallpaper.
             <br />
-            No manual refresh.
+            Every morning.
           </h2>
           <p className="mt-6 text-lg text-white/50 max-w-lg mx-auto">
-            Your wallpaper stays fresh using Apple Shortcuts — quietly in the
-            background.
+            Apple Shortcuts generates your dashboard and saves it to Photos on
+            your schedule. One tap from the notification to apply.
           </p>
         </motion.div>
 

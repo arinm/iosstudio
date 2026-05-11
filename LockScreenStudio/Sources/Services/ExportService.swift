@@ -93,7 +93,30 @@ final class ExportService {
 
     // MARK: - Save to Photos
 
+    enum PhotosError: Error {
+        /// The user has denied or restricted Photos add-only access. Caller
+        /// should surface a clear remediation message instead of failing
+        /// silently — particularly important for Shortcuts automations
+        /// where there's no UI to prompt the user inline.
+        case permissionDenied
+    }
+
     func saveToPhotos(_ image: UIImage) async throws {
+        // Ensure we have at least .addOnly access. If status is .notDetermined
+        // this prompts the user; from a background AppIntent the prompt may
+        // not surface, so a denied status surfaces a typed error the caller
+        // can use to change the notification body.
+        let current = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+        let status: PHAuthorizationStatus
+        if current == .notDetermined {
+            status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        } else {
+            status = current
+        }
+        guard status == .authorized || status == .limited else {
+            throw PhotosError.permissionDenied
+        }
+
         try await PHPhotoLibrary.shared().performChanges {
             PHAssetChangeRequest.creationRequestForAsset(from: image)
         }
