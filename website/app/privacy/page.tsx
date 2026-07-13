@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Lock Screen Studio",
+  title: "Privacy Policy",
+  description:
+    "Learn how Lock Screen Studio processes calendar, task, and photo data privately on your iPhone.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen px-6 py-32 max-w-3xl mx-auto">
-      <a
+      <Link
         href="/"
         className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors mb-8"
       >
@@ -15,10 +21,10 @@ export default function PrivacyPage() {
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         Back to Home
-      </a>
+      </Link>
       <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
       <div className="prose prose-invert prose-sm max-w-none text-white/60 space-y-6">
-        <p>Last updated: March 2026</p>
+        <p>Last updated: July 2026</p>
 
         <h2 className="text-xl font-semibold text-white/80 mt-8">
           Overview
@@ -33,10 +39,19 @@ export default function PrivacyPage() {
           Data Collection &amp; Storage
         </h2>
         <p>
-          Lock Screen Studio does <strong>not</strong> collect, store, or transmit any personal
-          data to external servers. All data processing happens entirely on your device.
-          We do not operate any backend servers, databases, or cloud infrastructure
-          that receives your data.
+          Your calendar entries, reminders, tasks, photos, wallpaper content, and template names
+          are processed on your device and are not transmitted to us.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white/80 mt-8">
+          Reminders Access
+        </h2>
+        <p>
+          If you choose Apple Reminders as a To-Do panel source, the App reads
+          selected incomplete reminders via EventKit solely while generating your
+          wallpaper. Reminder titles, list names, and due dates stay on your device
+          and are never included in analytics. You can revoke access at any time via
+          iOS Settings &gt; Privacy &amp; Security &gt; Reminders.
         </p>
 
         <h2 className="text-xl font-semibold text-white/80 mt-8">
@@ -84,17 +99,17 @@ export default function PrivacyPage() {
           Analytics &amp; Tracking
         </h2>
         <p>
-          We do not use any third-party analytics, advertising, or tracking services.
-          We do not collect crash reports, usage statistics, or device identifiers.
-          The App does not contain any SDKs that track user behavior.
+          Lock Screen Studio does not include third-party analytics or advertising trackers
+          and does not transmit product-usage events. We do not track your activity across
+          other companies&apos; apps or websites.
         </p>
 
         <h2 className="text-xl font-semibold text-white/80 mt-8">
           Data Sharing
         </h2>
         <p>
-          We do not share, sell, or transfer any user data to third parties.
-          Since no data is collected, there is no data to share.
+          We do not sell your data. Payment data is handled separately by Apple as described
+          in the Subscriptions &amp; Payments section.
         </p>
 
         <h2 className="text-xl font-semibold text-white/80 mt-8">

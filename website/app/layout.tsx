@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+const BASE_URL = "https://www.lockscreenstudio.com";
+const APP_STORE_URL =
+  "https://apps.apple.com/app/lock-screen-studio/id6761021115";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -14,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s — Lock Screen Studio",
   },
   description:
-    "Transform your iPhone Lock Screen into a personal dashboard with agenda, priorities, to-dos, countdown, and more. A fresh wallpaper saved to Photos every morning via Apple Shortcuts - one tap to apply.",
+    "Transform your iPhone Lock Screen into a personal dashboard with agenda, priorities, to-dos, countdowns, and more. Apple Shortcuts saves a fresh wallpaper to Photos every morning, ready to apply.",
   keywords: [
     "lock screen",
     "lock screen dashboard",
@@ -27,7 +31,7 @@ export const metadata: Metadata = {
     "shortcuts",
     "automation",
   ],
-  metadataBase: new URL("https://lockscreenstudio.app"),
+  metadataBase: new URL(BASE_URL),
   alternates: {
     canonical: "/",
   },
@@ -35,7 +39,7 @@ export const metadata: Metadata = {
     title: "Lock Screen Studio — Lock Screen Dashboard for iPhone",
     description:
       "Transform your iPhone Lock Screen into a personal dashboard with agenda, priorities, to-dos, and more.",
-    url: "https://lockscreenstudio.app",
+    url: BASE_URL,
     siteName: "Lock Screen Studio",
     type: "website",
     locale: "en_US",
@@ -49,6 +53,9 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  itunes: {
+    appId: "6761021115",
   },
 };
 
@@ -67,8 +74,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
               name: "Lock Screen Studio",
+              url: BASE_URL,
+              downloadUrl: APP_STORE_URL,
               operatingSystem: "iOS",
-              applicationCategory: "UtilitiesApplication",
+              applicationCategory: "ProductivityApplication",
               offers: {
                 "@type": "Offer",
                 price: "0",

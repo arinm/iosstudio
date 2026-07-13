@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Lock Screen Studio",
+  title: "Terms of Service",
+  description: "Terms governing the use of Lock Screen Studio for iPhone.",
+  alternates: {
+    canonical: "/terms",
+  },
 };
 
 export default function TermsPage() {
   return (
     <main className="min-h-screen px-6 py-32 max-w-3xl mx-auto">
-      <a
+      <Link
         href="/"
         className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors mb-8"
       >
@@ -15,7 +20,7 @@ export default function TermsPage() {
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         Back to Home
-      </a>
+      </Link>
       <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
       <div className="prose prose-invert prose-sm max-w-none text-white/60 space-y-6">
         <p>Last updated: March 2026</p>

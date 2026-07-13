@@ -7,7 +7,10 @@ final class SubscriptionManagerTests: XCTestCase {
     // MARK: - Feature Gating
 
     func testFreeFeatureAccessWithoutPro() {
-        let manager = SubscriptionManager()
+        let manager = SubscriptionManager(
+            startStoreKitTasks: false,
+            honorsDebugOverride: false
+        )
         // Without any purchases, isPro should be false
         XCTAssertFalse(manager.isPro)
 
@@ -30,15 +33,31 @@ final class SubscriptionManagerTests: XCTestCase {
     // MARK: - Export Limits
 
     func testFreeExportLimit() {
-        let manager = SubscriptionManager()
+        _ = SubscriptionManager(
+            startStoreKitTasks: false,
+            honorsDebugOverride: false
+        )
         XCTAssertEqual(SubscriptionManager.freeExportLimit, 3)
     }
 
     func testCanExportWhenNotExhausted() {
-        let manager = SubscriptionManager()
+        let manager = SubscriptionManager(
+            startStoreKitTasks: false,
+            honorsDebugOverride: false
+        )
         // Fresh state (no exports today) should allow export
         // Note: This depends on UserDefaults state
         XCTAssertTrue(manager.canExport)
+    }
+
+    func testLegacyLifetimeEntitlementStillUnlocksPro() {
+        let manager = SubscriptionManager(
+            startStoreKitTasks: false,
+            initialPurchasedProductIDs: ["com.lockscreenstudio.pro.lifetime"],
+            honorsDebugOverride: false
+        )
+
+        XCTAssertTrue(manager.isPro)
     }
 
     // MARK: - Product IDs

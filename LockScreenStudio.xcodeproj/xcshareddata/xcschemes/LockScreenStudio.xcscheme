@@ -39,6 +39,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1D930B0769C0BD640EFAB1B1"
+               BuildableName = "LockScreenStudioTests.xctest"
+               BlueprintName = "LockScreenStudioTests"
+               ReferencedContainer = "container:LockScreenStudio.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

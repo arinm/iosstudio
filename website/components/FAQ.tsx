@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef } from "react";
 
@@ -11,7 +11,7 @@ const faqs = [
   },
   {
     q: "How does the wallpaper update each day?",
-    a: "Lock Screen Studio integrates with Apple Shortcuts. You set up an automation that runs on a schedule you pick (e.g., 7:00 AM) — it generates a fresh wallpaper with your latest agenda and todos, saves it to Photos, and sends a notification. Tap the notification → Photos → Use as Wallpaper → Lock Screen. One tap to apply.",
+    a: "Lock Screen Studio integrates with Apple Shortcuts. You set up an automation that runs on a schedule you pick (e.g., 7:00 AM) — it generates a fresh wallpaper with your latest agenda and todos, saves it to Photos, and sends a notification when it is ready. Open Photos, then choose Share → Use as Wallpaper → Lock Screen.",
   },
   {
     q: "Why isn't applying the wallpaper fully automatic?",
@@ -37,43 +37,52 @@ const faqs = [
 
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
+  const contentId = useId();
 
   return (
-    <button
-      onClick={() => setOpen(!open)}
-      className="w-full text-left p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] transition-all duration-300"
-    >
-      <div className="flex items-center justify-between gap-4">
-        <h3 className="font-semibold text-white/90">{q}</h3>
-        <motion.svg
-          animate={{ rotate: open ? 45 : 0 }}
-          transition={{ duration: 0.2 }}
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="rgba(255,255,255,0.4)"
-          strokeWidth="2"
-          className="flex-shrink-0"
-        >
-          <path d="M12 5v14M5 12h14" />
-        </motion.svg>
-      </div>
+    <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] transition-all duration-300">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-controls={contentId}
+        className="w-full text-left p-6"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <span className="font-semibold text-white/90">{q}</span>
+          <motion.svg
+            animate={{ rotate: open ? 45 : 0 }}
+            transition={{ duration: 0.2 }}
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="rgba(255,255,255,0.4)"
+            strokeWidth="2"
+            className="flex-shrink-0"
+            aria-hidden="true"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </motion.svg>
+        </div>
+      </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
+            id={contentId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="overflow-hidden"
+            role="region"
+            className="overflow-hidden px-6"
           >
-            <p className="mt-4 text-sm text-white/40 leading-relaxed">{a}</p>
+            <p className="pb-6 text-sm text-white/40 leading-relaxed">{a}</p>
           </motion.div>
         )}
       </AnimatePresence>
-    </button>
+    </div>
   );
 }
 
@@ -83,6 +92,23 @@ export default function FAQ() {
 
   return (
     <section id="faq" className="py-32 px-6" ref={ref}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map(({ q, a }) => ({
+              "@type": "Question",
+              name: q,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: a,
+              },
+            })),
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}

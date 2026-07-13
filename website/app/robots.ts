@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://lockscreenstudio.app/sitemap.xml",
+    sitemap: "https://www.lockscreenstudio.com/sitemap.xml",
   };
 }

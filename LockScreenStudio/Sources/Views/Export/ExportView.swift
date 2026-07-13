@@ -1,5 +1,6 @@
 import SwiftUI
 import Photos
+import StoreKit
 
 struct ExportView: View {
     let image: UIImage
@@ -9,6 +10,7 @@ struct ExportView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.requestReview) private var requestReview
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
 
     @State private var selectedPreset: DevicePreset = .current
@@ -49,7 +51,7 @@ struct ExportView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) {
-                PaywallView()
+                PaywallView(source: "export")
             }
             .sheet(isPresented: $exportSuccess) {
                 PostExportSheet(onDismiss: { dismiss() })
@@ -202,6 +204,16 @@ struct ExportView: View {
             return
         }
 
+        var analyticsProperties = AnalyticsService.templateProperties(template)
+        analyticsProperties["format"] = selectedFormat.rawValue
+        analyticsProperties["device_preset"] = selectedPreset.id
+        analyticsProperties["is_pro"] = String(subscriptionManager.isPro)
+        analyticsProperties.merge(
+            AnalyticsService.remindersProperties(for: template.panels),
+            uniquingKeysWith: { _, newValue in newValue }
+        )
+        AnalyticsService.shared.track(.exportStarted, properties: analyticsProperties)
+
         isExporting = true
         defer { isExporting = false }
 
@@ -222,7 +234,18 @@ struct ExportView: View {
             subscriptionManager.recordExport()
             saveHistoryEntry(image: result.image)
             exportSuccess = true
+            AnalyticsService.shared.track(.exportCompleted, properties: analyticsProperties)
+
+            // Ask for a review after a few genuine successes (positive moment).
+            // Threshold + once-per-version gating live in ReviewRequestManager;
+            // iOS additionally throttles the actual prompt.
+            if ReviewRequestManager.registerPositiveMomentAndShouldPrompt() {
+                requestReview()
+            }
         } catch {
+            var failureProperties = analyticsProperties
+            failureProperties["stage"] = "render_or_photo_save"
+            AnalyticsService.shared.track(.exportFailed, properties: failureProperties)
             errorMessage = "Failed to save: \(error.localizedDescription)"
         }
     }

@@ -2,6 +2,12 @@ import SwiftUI
 import StoreKit
 
 struct PaywallView: View {
+    let source: String
+
+    init(source: String = "unknown") {
+        self.source = source
+    }
+
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
     @Environment(\.dismiss) private var dismiss
 
@@ -49,6 +55,10 @@ struct PaywallView: View {
             }
             .onAppear {
                 selectedPlan = subscriptionManager.yearlyProduct
+                AnalyticsService.shared.track(
+                    .paywallViewed,
+                    properties: ["source": source]
+                )
             }
         }
     }
@@ -127,15 +137,6 @@ struct PaywallView: View {
                     product: yearly,
                     title: "Yearly",
                     subtitle: yearly.displayPrice + "/year",
-                    badge: "SAVE 44%"
-                )
-            }
-
-            if let lifetime = subscriptionManager.lifetimeProduct {
-                planCard(
-                    product: lifetime,
-                    title: "Lifetime",
-                    subtitle: lifetime.displayPrice + " once",
                     badge: "BEST VALUE"
                 )
             }
@@ -249,14 +250,27 @@ struct PaywallView: View {
     private var footerSection: some View {
         VStack(spacing: 8) {
             Button("Restore Purchases") {
-                Task { await subscriptionManager.restorePurchases() }
+                Task {
+                    AnalyticsService.shared.track(
+                        .restoreStarted,
+                        properties: ["source": source]
+                    )
+                    let outcome = await subscriptionManager.restorePurchases()
+                    let event: AnalyticsEvent.Name
+                    switch outcome {
+                    case .restored: event = .restoreCompleted
+                    case .noPurchases: event = .restoreNoPurchases
+                    case .failed: event = .restoreFailed
+                    }
+                    AnalyticsService.shared.track(event, properties: ["source": source])
+                }
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
 
             HStack(spacing: 16) {
-                Link("Terms of Service", destination: URL(string: "https://lockscreenstudio.app/terms")!)
-                Link("Privacy Policy", destination: URL(string: "https://lockscreenstudio.app/privacy")!)
+                Link("Terms of Service", destination: URL(string: "https://www.lockscreenstudio.com/terms")!)
+                Link("Privacy Policy", destination: URL(string: "https://www.lockscreenstudio.com/privacy")!)
             }
             .font(.caption)
             .foregroundStyle(.tertiary)
@@ -272,10 +286,6 @@ struct PaywallView: View {
     private var ctaButtonTitle: String {
         guard let plan = selectedPlan else { return "Subscribe" }
 
-        if plan.id == SubscriptionManager.lifetimeProductID {
-            return "Buy Once"
-        }
-
         if plan.id == SubscriptionManager.yearlyProductID,
            let sub = plan.subscription,
            let intro = sub.introductoryOffer,
@@ -290,14 +300,23 @@ struct PaywallView: View {
 
     private func purchase() async {
         guard let product = selectedPlan else { return }
+        let properties = [
+            "source": source,
+            "product_id": product.id,
+        ]
+        AnalyticsService.shared.track(.purchaseStarted, properties: properties)
         isPurchasing = true
 
         do {
             let success = try await subscriptionManager.purchase(product)
             if success {
+                AnalyticsService.shared.track(.purchaseCompleted, properties: properties)
                 dismiss()
+            } else {
+                AnalyticsService.shared.track(.purchaseNotCompleted, properties: properties)
             }
         } catch {
+            AnalyticsService.shared.track(.purchaseFailed, properties: properties)
             errorMessage = error.localizedDescription
             showError = true
         }

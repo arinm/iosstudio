@@ -123,7 +123,7 @@ struct OnboardingView: View {
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
 
-                Text("Pair with Apple Shortcuts so your iPhone generates and saves a fresh wallpaper to Photos every morning. One tap from the notification to apply.")
+                Text("Pair with Apple Shortcuts so your iPhone generates and saves a fresh wallpaper to Photos every morning, ready for you to apply.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -132,8 +132,8 @@ struct OnboardingView: View {
 
             VStack(spacing: 10) {
                 automationBullet(icon: "sunrise.fill", text: "Generates at 7 AM, saved to Photos")
-                automationBullet(icon: "moon.zzz.fill", text: "Dark theme when Focus turns on")
-                automationBullet(icon: "location.fill", text: "Fresh wallpaper when you arrive at work")
+                automationBullet(icon: "bell.badge.fill", text: "Notification when it's ready")
+                automationBullet(icon: "hand.tap.fill", text: "One tap to apply - that's it")
             }
             .padding(.horizontal, 32)
 
@@ -229,7 +229,7 @@ struct OnboardingView: View {
                 permissionRow(
                     icon: "bell.badge",
                     title: "Notifications",
-                    subtitle: "Tap-to-apply when a fresh wallpaper is ready",
+                    subtitle: "Know when a fresh wallpaper is ready",
                     granted: notificationsGranted
                 ) {
                     Task {

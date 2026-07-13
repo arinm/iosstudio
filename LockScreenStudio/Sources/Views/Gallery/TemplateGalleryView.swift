@@ -5,9 +5,14 @@ struct TemplateGalleryView: View {
     @Query(sort: \WallpaperTemplate.sortOrder) private var templates: [WallpaperTemplate]
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
+    @EnvironmentObject private var templateImportCoordinator: TemplateImportCoordinator
     @State private var showSettings = false
     @State private var showPaywall = false
     @State private var showHistory = false
+    @State private var showTemplateImporter = false
+    @State private var importAlertTitle = ""
+    @State private var importAlertMessage = ""
+    @State private var showImportAlert = false
 
     var body: some View {
         ScrollView {
@@ -24,6 +29,14 @@ struct TemplateGalleryView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 12) {
+                    Button {
+                        showTemplateImporter = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.down")
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("Import Template")
+
                     Button {
                         showHistory = true
                     } label: {
@@ -49,10 +62,31 @@ struct TemplateGalleryView: View {
             NavigationStack { HistoryView() }
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(source: "gallery")
+        }
+        .fileImporter(
+            isPresented: $showTemplateImporter,
+            allowedContentTypes: [.lockScreenStudioTemplate]
+        ) { result in
+            switch result {
+            case .success(let url):
+                importTemplate(from: url, source: "file_picker")
+            case .failure(let error):
+                if (error as? CocoaError)?.code == .userCancelled { return }
+                presentImportFailure(error, source: "file_picker")
+            }
+        }
+        .alert(importAlertTitle, isPresented: $showImportAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(importAlertMessage)
         }
         .onAppear {
             TemplateSeeder.seedIfNeeded(context: modelContext)
+            importPendingTemplateIfNeeded()
+        }
+        .onChange(of: templateImportCoordinator.pendingURL) {
+            importPendingTemplateIfNeeded()
         }
     }
 
@@ -205,6 +239,7 @@ struct TemplateGalleryView: View {
             description: "Custom template",
             layoutType: .singleColumn,
             isPro: false,
+            isBuiltIn: false,
             sortOrder: (templates.last?.sortOrder ?? 0) + 1
         )
         // Start with just Date & Time panel
@@ -212,7 +247,76 @@ struct TemplateGalleryView: View {
         template.panels = [datePanel]
         modelContext.insert(template)
         try? modelContext.save()
+        AnalyticsService.shared.track(.customTemplateCreated)
         newTemplate = template
+    }
+
+    private func importPendingTemplateIfNeeded() {
+        guard let url = templateImportCoordinator.consumePendingURL() else { return }
+        importTemplate(from: url, source: "open_url")
+    }
+
+    private func importTemplate(from url: URL, source: String) {
+        do {
+            let nextSortOrder = (templates.map(\.sortOrder).max() ?? -1) + 1
+            let template = try TemplateSharingService.importTemplate(
+                from: url,
+                sortOrder: nextSortOrder
+            )
+            template.name = uniqueTemplateName(for: template.name)
+            modelContext.insert(template)
+            do {
+                try modelContext.save()
+            } catch {
+                // Cancel only this insertion. A rollback on the shared main
+                // context could discard unrelated edits still open elsewhere.
+                modelContext.delete(template)
+                throw error
+            }
+
+            var properties = TemplateSharingService.analyticsProperties(for: template)
+            properties["source"] = source
+            AnalyticsService.shared.track(.templateImported, properties: properties)
+
+            importAlertTitle = "Template Imported"
+            importAlertMessage = "\(template.name) is ready in your gallery."
+            showImportAlert = true
+        } catch {
+            presentImportFailure(error, source: source)
+        }
+    }
+
+    private func uniqueTemplateName(for requestedName: String) -> String {
+        let existingNames = Set(templates.map { $0.name.lowercased() })
+        guard existingNames.contains(requestedName.lowercased()) else {
+            return requestedName
+        }
+
+        let copyName = "\(requestedName) Copy"
+        guard existingNames.contains(copyName.lowercased()) else {
+            return copyName
+        }
+
+        var copyNumber = 2
+        while existingNames.contains("\(copyName) \(copyNumber)".lowercased()) {
+            copyNumber += 1
+        }
+        return "\(copyName) \(copyNumber)"
+    }
+
+    private func presentImportFailure(_ error: Error, source: String) {
+        let sharingError = error as? TemplateSharingError
+        AnalyticsService.shared.track(
+            .templateImportFailed,
+            properties: [
+                "reason": sharingError?.analyticsReason ?? "file_picker_error",
+                "source": source,
+            ]
+        )
+        importAlertTitle = "Couldn't Import Template"
+        importAlertMessage = sharingError?.localizedDescription
+            ?? "The selected file couldn't be opened."
+        showImportAlert = true
     }
 }
 
@@ -351,5 +455,6 @@ struct TemplateCardView: View {
     NavigationStack {
         TemplateGalleryView()
             .environmentObject(SubscriptionManager())
+            .environmentObject(TemplateImportCoordinator())
     }
 }

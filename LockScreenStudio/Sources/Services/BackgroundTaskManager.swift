@@ -182,7 +182,7 @@ struct PanelConfigSnapshot: Codable {
     let isEnabled: Bool
     let configJSON: Data?
     let title: String?
-    let showTitle: Bool
+    let showTitle: Bool?
 
     init(from panel: PanelConfiguration) {
         self.panelType = panel.panelType.rawValue
@@ -190,7 +190,7 @@ struct PanelConfigSnapshot: Codable {
         self.isEnabled = panel.isVisible
         self.configJSON = panel.configData
         self.title = panel.title
-        self.showTitle = panel.showTitle
+        self.showTitle = panel.isTitleShown
     }
 
     func toPanelConfiguration() -> PanelConfiguration {
@@ -201,7 +201,7 @@ struct PanelConfigSnapshot: Codable {
             title: title,
             configData: configJSON
         )
-        config.showTitle = showTitle
+        config.showTitle = showTitle ?? true
         return config
     }
 }

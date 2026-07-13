@@ -34,7 +34,7 @@ export default function PhoneMockup({
   screenshot,
 }: PhoneMockupProps) {
   const s = sizes[size];
-  const grad = gradient || gradients[Math.floor(Math.random() * gradients.length)];
+  const grad = gradient || gradients[0];
 
   return (
     <div className={`relative ${s.w} ${s.h} flex-shrink-0 ${className}`}>

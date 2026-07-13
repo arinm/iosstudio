@@ -113,13 +113,13 @@ struct GenerateWallpaperIntent: AppIntent {
         let service = ExportService()
         let context = ModelContext(SharedContainer.makeModelContainer())
 
-        let searchName = templateName.templateName
         let descriptor = FetchDescriptor<WallpaperTemplate>(
-            predicate: #Predicate { $0.name == searchName }
+            predicate: #Predicate { $0.isBuiltIn }
         )
-        guard let template = try context.fetch(descriptor).first else {
+        guard let template = try context.fetch(descriptor).first(where: templateName.matches) else {
             throw IntentError.noTemplateFound
         }
+        templateName.backfillStableKeyIfNeeded(on: template, context: context)
 
         let priorities = try context.fetch(FetchDescriptor<PriorityItem>())
         let todos = try context.fetch(FetchDescriptor<TodoItem>())
@@ -217,13 +217,13 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
         let service = ExportService()
         let context = ModelContext(SharedContainer.makeModelContainer())
 
-        let searchName = templateName.templateName
         let descriptor = FetchDescriptor<WallpaperTemplate>(
-            predicate: #Predicate { $0.name == searchName }
+            predicate: #Predicate { $0.isBuiltIn }
         )
-        guard let template = try context.fetch(descriptor).first else {
+        guard let template = try context.fetch(descriptor).first(where: templateName.matches) else {
             throw IntentError.noTemplateFound
         }
+        templateName.backfillStableKeyIfNeeded(on: template, context: context)
 
         let priorities = try context.fetch(FetchDescriptor<PriorityItem>())
         let todos = try context.fetch(FetchDescriptor<TodoItem>())
@@ -339,6 +339,31 @@ enum TemplateNameEnum: String, AppEnum {
         case .minimalNotes: return "Minimal Notes"
         case .fullDashboard: return "Full Dashboard"
         }
+    }
+
+    private var builtInKey: BuiltInTemplateKey {
+        // Every App Intent template case has a matching stable built-in key.
+        BuiltInTemplateKey(rawValue: rawValue)!
+    }
+
+    fileprivate func matches(_ template: WallpaperTemplate) -> Bool {
+        if let key = template.builtInKey {
+            return key == builtInKey.rawValue
+        }
+
+        // Compatibility for an App Intent run immediately after upgrading,
+        // before the main app has had a chance to run the seed migration.
+        return template.isBuiltIn && template.sortOrder == builtInKey.sortOrder
+    }
+
+    @MainActor
+    fileprivate func backfillStableKeyIfNeeded(
+        on template: WallpaperTemplate,
+        context: ModelContext
+    ) {
+        guard template.builtInKey == nil else { return }
+        template.builtInKey = builtInKey.rawValue
+        try? context.save()
     }
 }
 

@@ -1,5 +1,8 @@
 import Foundation
 import UserNotifications
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Sends the "Wallpaper Updated" notification used to nudge the user to apply
 /// the freshly-generated wallpaper from Photos.
@@ -8,12 +11,17 @@ import UserNotifications
 /// (`WallpaperIntents`) so the messaging stays consistent.
 enum WallpaperNotification {
 
+    /// userInfo key describing what the notification is about, so the tap
+    /// handler can route: straight to Photos on success, or leave the user in
+    /// the app when there's a permission problem to fix.
+    static let outcomeUserInfoKey = "wallpaperNotificationOutcome"
+
     /// What happened during the wallpaper generation. Drives notification copy
     /// so the user gets actionable feedback instead of a useless "go open Photos
     /// to find nothing" prompt when Photos permission is missing.
-    enum Outcome {
-        case savedToPhotos
-        case photosPermissionDenied
+    enum Outcome: String {
+        case savedToPhotos = "saved"
+        case photosPermissionDenied = "photos_denied"
     }
 
     /// Posts a "Wallpaper Updated" notification. Best-effort — silently no-ops
@@ -41,6 +49,7 @@ enum WallpaperNotification {
             content.body = "Your fresh wallpaper was generated but couldn't be saved. Open Settings > Privacy > Photos and allow Add Only access."
         }
         content.sound = .default
+        content.userInfo = [outcomeUserInfoKey: outcome.rawValue]
 
         let request = UNNotificationRequest(
             identifier: "wallpaper-refresh-\(Date().timeIntervalSince1970)",

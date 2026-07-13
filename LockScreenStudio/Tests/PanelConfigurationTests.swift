@@ -3,6 +3,33 @@ import XCTest
 
 final class PanelConfigurationTests: XCTestCase {
 
+    func testMissingShowTitleValueDefaultsToVisible() {
+        let panel = PanelConfiguration(panelType: .agenda)
+        panel.showTitle = nil
+
+        XCTAssertTrue(panel.isTitleShown)
+    }
+
+    func testLegacyBackgroundSnapshotWithoutShowTitleDecodesAsVisible() throws {
+        let data = try XCTUnwrap(
+            """
+            {
+              "panelType": "agenda",
+              "sortOrder": 0,
+              "isEnabled": true,
+              "configJSON": null,
+              "title": "Agenda"
+            }
+            """.data(using: .utf8)
+        )
+
+        let snapshot = try JSONDecoder().decode(PanelConfigSnapshot.self, from: data)
+        let panel = snapshot.toPanelConfiguration()
+
+        XCTAssertNil(snapshot.showTitle)
+        XCTAssertTrue(panel.isTitleShown)
+    }
+
     // MARK: - Config Encoding/Decoding
 
     func testAgendaConfigRoundTrip() {
@@ -34,7 +61,13 @@ final class PanelConfigurationTests: XCTestCase {
 
     func testTodoConfigRoundTrip() {
         let panel = PanelConfiguration(panelType: .todo)
-        let config = TodoConfig(showCompleted: true, maxItems: 8)
+        let config = TodoConfig(
+            showCompleted: true,
+            maxItems: 8,
+            source: .combined,
+            reminderListIdentifier: "example-list",
+            reminderFilter: .upcoming
+        )
 
         panel.encodeConfig(config)
         let decoded = panel.decodeConfig(TodoConfig.self)
@@ -42,6 +75,28 @@ final class PanelConfigurationTests: XCTestCase {
         XCTAssertNotNil(decoded)
         XCTAssertEqual(decoded?.showCompleted, true)
         XCTAssertEqual(decoded?.maxItems, 8)
+        XCTAssertEqual(decoded?.source, .combined)
+        XCTAssertEqual(decoded?.reminderListIdentifier, "example-list")
+        XCTAssertEqual(decoded?.reminderFilter, .upcoming)
+    }
+
+    func testLegacyTodoConfigDefaultsToLocalSource() throws {
+        let data = try XCTUnwrap(
+            """
+            {
+              "showCompleted": true,
+              "maxItems": 8
+            }
+            """.data(using: .utf8)
+        )
+
+        let decoded = try JSONDecoder().decode(TodoConfig.self, from: data)
+
+        XCTAssertTrue(decoded.showCompleted)
+        XCTAssertEqual(decoded.maxItems, 8)
+        XCTAssertEqual(decoded.source, .local)
+        XCTAssertNil(decoded.reminderListIdentifier)
+        XCTAssertEqual(decoded.reminderFilter, .allIncomplete)
     }
 
     func testDateTimeConfigRoundTrip() {

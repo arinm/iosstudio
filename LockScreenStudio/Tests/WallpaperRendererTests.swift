@@ -1,4 +1,5 @@
 import XCTest
+import SwiftData
 @testable import LockScreenStudio
 
 @MainActor
@@ -195,5 +196,57 @@ final class WallpaperRendererTests: XCTestCase {
         let result = try renderer.render(request)
         XCTAssertNotNil(result.image)
         XCTAssertFalse(result.imageData.isEmpty)
+    }
+
+    // MARK: - Built-in Template Migration
+
+    func testTemplateSeedMigrationPreservesRenameAndDemotesDuplicate() throws {
+        let configuration = ModelConfiguration(
+            schema: SharedContainer.schema,
+            isStoredInMemoryOnly: true
+        )
+        let container = try ModelContainer(
+            for: SharedContainer.schema,
+            configurations: [configuration]
+        )
+        let context = ModelContext(container)
+        let suiteName = "TemplateSeederTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(4, forKey: "templateSeedVersion")
+
+        let renamed = WallpaperTemplate(
+            name: "My Morning Command Center",
+            isBuiltIn: true,
+            sortOrder: BuiltInTemplateKey.todayDashboard.sortOrder
+        )
+        let oldSeederDuplicate = WallpaperTemplate(
+            name: "Today Dashboard",
+            isBuiltIn: true,
+            sortOrder: BuiltInTemplateKey.todayDashboard.sortOrder
+        )
+        context.insert(renamed)
+        context.insert(oldSeederDuplicate)
+        try context.save()
+
+        XCTAssertTrue(TemplateSeeder.seedIfNeeded(context: context, defaults: defaults))
+
+        let templates = try context.fetch(FetchDescriptor<WallpaperTemplate>())
+        let migratedBuiltIns = templates.filter {
+            $0.builtInKey == BuiltInTemplateKey.todayDashboard.rawValue && $0.isBuiltIn
+        }
+        XCTAssertEqual(migratedBuiltIns.count, 1)
+        XCTAssertEqual(migratedBuiltIns.first?.name, "My Morning Command Center")
+        XCTAssertFalse(oldSeederDuplicate.isBuiltIn)
+        XCTAssertNil(oldSeederDuplicate.builtInKey)
+        XCTAssertEqual(defaults.integer(forKey: "templateSeedVersion"), 5)
+
+        for key in BuiltInTemplateKey.allCases {
+            XCTAssertEqual(
+                templates.filter { $0.isBuiltIn && $0.builtInKey == key.rawValue }.count,
+                1,
+                "Expected exactly one built-in template for \(key.rawValue)"
+            )
+        }
     }
 }

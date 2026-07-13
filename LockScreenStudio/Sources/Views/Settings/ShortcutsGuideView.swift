@@ -34,32 +34,71 @@ struct ShortcutsSetupSheet: View {
     // MARK: - Intro
 
     private var intro: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 10) {
                 Image(systemName: "bolt.circle.fill")
                     .font(.title2)
                     .foregroundStyle(.indigo)
+                    .symbolEffect(.pulse, options: .repeat(2))
                 Text("Wake up to a fresh wallpaper")
                     .font(.headline)
             }
-            Text(.init("Your iPhone comes with a free app called **Shortcuts** - think of it as a tiny robot that does things for you. We'll teach it one job: *every morning, generate a fresh wallpaper and save it to your Photos*. Setup takes about 2 minutes. You only do it once."))
+
+            Text(.init("Teach the free **Shortcuts** app one job: make you a fresh wallpaper every morning. Set it up once, about 2 minutes."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            Text(.init("On iOS 26, **Apple removed the action that lets apps change your wallpaper automatically**. The good news: your iPhone will still save the fresh wallpaper to Photos every morning and send you a notification - one tap to apply it."))
+            howItWorksStrip
+
+            Text(.init("Why the last tap is yours: **iOS doesn't let apps change your wallpaper by themselves.** Your iPhone does everything else automatically."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .padding(.top, 2)
-
-            Text("Labels in the steps below may differ slightly on your iOS version - look for the closest match.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    /// Visual 3-stage flow so the user sees at a glance what is automatic and
+    /// what the single manual tap is — instead of reading two paragraphs.
+    private var howItWorksStrip: some View {
+        HStack(spacing: 4) {
+            howItWorksStage(icon: "sparkles", label: "Generates\nitself", automatic: true)
+            stageArrow
+            howItWorksStage(icon: "photo.on.rectangle", label: "Saved to\nPhotos", automatic: true)
+            stageArrow
+            howItWorksStage(icon: "hand.tap.fill", label: "One tap\nto apply", automatic: false)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .background(Color.indigo.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func howItWorksStage(icon: String, label: String, automatic: Bool) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(automatic ? Color.indigo : Color.orange)
+                .frame(height: 24)
+            Text(label)
+                .font(.caption2)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.primary)
+            Text(automatic ? "automatic" : "you")
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(automatic ? Color.indigo : Color.orange)
+                .textCase(.uppercase)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var stageArrow: some View {
+        Image(systemName: "chevron.right")
+            .font(.caption2.bold())
+            .foregroundStyle(.tertiary)
     }
 
     // MARK: - Recommended recipe (always expanded)
@@ -87,7 +126,7 @@ struct ShortcutsSetupSheet: View {
     private var moreRecipesDisclosure: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                     showMoreRecipes.toggle()
                 }
             } label: {
@@ -119,7 +158,7 @@ struct ShortcutsSetupSheet: View {
         return VStack(alignment: .leading, spacing: 0) {
             Button {
                 if prominent { return }
-                withAnimation(.easeInOut(duration: 0.2)) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                     expandedRecipeID = expandedRecipeID == recipe.id ? nil : recipe.id
                 }
             } label: {
@@ -158,10 +197,15 @@ struct ShortcutsSetupSheet: View {
                 VStack(alignment: .leading, spacing: 14) {
                     Divider()
 
-                    Text("Step by step")
-                        .font(.caption.bold())
-                        .foregroundStyle(.secondary)
-                        .tracking(0.5)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Step by step")
+                            .font(.caption.bold())
+                            .foregroundStyle(.secondary)
+                            .tracking(0.5)
+                        Text("Button names can differ slightly between iOS versions - pick the closest match.")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
 
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(Array(recipe.steps.enumerated()), id: \.offset) { idx, step in
@@ -235,7 +279,7 @@ struct ShortcutsSetupSheet: View {
     private var customSetupDisclosure: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                     showCustom.toggle()
                 }
             } label: {
@@ -290,7 +334,7 @@ struct ShortcutsSetupSheet: View {
             tipRow(icon: "bell.badge", text: "Didn't get a notification? Make sure Lock Screen Studio has notification permission enabled in your iPhone's Settings app → Notifications → Lock Screen Studio.")
             tipRow(icon: "play.circle", text: "Test now without waiting: Shortcuts → Automation → tap your automation → tap the ▶ triangle.")
             tipRow(icon: "photo.on.rectangle", text: "Don't see the new wallpaper in Photos? Make sure the app has permission: Settings → Privacy & Security → Photos → Lock Screen Studio → Add Only or Full Access.")
-            tipRow(icon: "exclamationmark.circle", text: "Why the manual final tap? Apple removed the \"Set Wallpaper\" Shortcuts action in iOS 26. The fastest workflow now is automation → notification → tap once to apply.")
+            tipRow(icon: "exclamationmark.circle", text: "Why the manual final step? Apple removed the \"Set Wallpaper\" Shortcuts action in iOS 26. The workflow now is automation → notification → open Photos → apply the new wallpaper.")
         }
     }
 
@@ -346,22 +390,22 @@ struct ShortcutsSetupSheet: View {
     /// Shared "what happens when it runs" block reused by every recipe to keep
     /// the iOS-26 manual-apply flow explained consistently in one place.
     private static let manualApplyVerify =
-        "When the automation runs, your iPhone generates a fresh wallpaper, saves it to Photos, and shows you a notification \"Wallpaper Updated\". Tap the notification → Photos opens → tap **Share** → **Use as Wallpaper** → **Lock Screen**. One tap to apply, no need to open this app."
+        "You'll get a **\"Wallpaper Updated\"** notification. Tap it - Photos opens. Your wallpaper is the newest image: tap **Share** → **Use as Wallpaper** → **Lock Screen**. Done."
 
     static let recipes: [AutomationRecipe] = [
         AutomationRecipe(
             id: "morning",
             icon: "sunrise.fill",
             title: "Daily morning refresh",
-            summary: "A fresh wallpaper waiting in Photos every morning - one tap to apply.",
+            summary: "A fresh wallpaper waiting in Photos every morning, ready to apply.",
             steps: [
-                "On your iPhone, swipe down from the middle of the Home Screen to open **Search**. Type **Shortcuts** and tap the app (purple/blue square with two swirls).",
-                "At the bottom you'll see two tabs. Tap **Automation**.",
-                "If it's your first time, tap the big **New Automation** button in the middle of the screen. If you already have automations, tap **+** in the top right.",
-                "Scroll the long list until you see **Time of Day** and tap it.",
-                "Set the time (try **7:00 AM**). Under \"Repeat\" make sure **Daily** is selected. Tap **Next** in the top right.",
-                "You'll see a search bar. Type **Generate Today's Wallpaper** and tap the result that appears under the **Lock Screen Studio** heading (that's this app).",
-                "Tap **Next** (top right). On the review screen, **set Automation to \"Run Immediately\"** and leave **\"Notify When Run\"** off. Tap **Done**.",
+                "Swipe down on your Home Screen to open **Search**, type **Shortcuts**, and open the app (purple/blue square with two swirls).",
+                "Tap the **Automation** tab at the bottom.",
+                "Tap **New Automation** (or **+** in the top right if you already have some).",
+                "Pick **Time of Day** from the list.",
+                "Set a time like **7:00 AM**, make sure **Daily** is selected, then tap **Next**.",
+                "In the search bar, type **Generate Today's Wallpaper** and tap the result under **Lock Screen Studio** (that's this app).",
+                "Tap **Next**, set Automation to **Run Immediately**, leave **Notify When Run** off, and tap **Done**.",
             ],
             verify: manualApplyVerify
         ),

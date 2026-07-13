@@ -1,48 +1,95 @@
 import Foundation
+import OSLog
 import SwiftData
 
 /// Seeds the database with built-in templates on first launch.
 struct TemplateSeeder {
 
-    private static let currentSeedVersion = 4
+    private static let currentSeedVersion = 5
+    private static let logger = Logger(
+        subsystem: "com.lockscreenstudio.app",
+        category: "TemplateSeeder"
+    )
 
-    static func seedIfNeeded(context: ModelContext) {
-        let storedVersion = UserDefaults.standard.integer(forKey: "templateSeedVersion")
+    @discardableResult
+    static func seedIfNeeded(
+        context: ModelContext,
+        defaults: UserDefaults = .standard
+    ) -> Bool {
+        let storedVersion = defaults.integer(forKey: "templateSeedVersion")
+        guard storedVersion < currentSeedVersion else { return true }
 
-        if storedVersion == 0 {
-            // First launch: seed all templates
+        do {
             let descriptor = FetchDescriptor<WallpaperTemplate>(
                 predicate: #Predicate { $0.isBuiltIn }
             )
-            let existing = (try? context.fetchCount(descriptor)) ?? 0
-            guard existing == 0 else {
-                UserDefaults.standard.set(currentSeedVersion, forKey: "templateSeedVersion")
-                return
-            }
-
-            for template in builtInTemplates() {
-                context.insert(template)
-            }
-            try? context.save()
-            UserDefaults.standard.set(currentSeedVersion, forKey: "templateSeedVersion")
-        } else if storedVersion < currentSeedVersion {
-            // Incremental seed: add new templates that don't exist yet
-            let descriptor = FetchDescriptor<WallpaperTemplate>(
-                predicate: #Predicate { $0.isBuiltIn }
+            let existing = try context.fetch(descriptor)
+            let desired = builtInTemplates()
+            let canonicalNames = Dictionary(
+                uniqueKeysWithValues: desired.compactMap { template in
+                    template.builtInKey.map { ($0, template.name) }
+                }
             )
-            let existing = (try? context.fetch(descriptor)) ?? []
-            let existingNames = Set(existing.map(\.name))
 
-            for template in builtInTemplates() where !existingNames.contains(template.name) {
+            // v5 migration: old records used the editable display name as their
+            // identity. Backfill by the original immutable sort order so renamed
+            // templates keep working and are not seeded a second time.
+            for template in existing where template.builtInKey == nil {
+                template.builtInKey = BuiltInTemplateKey(sortOrder: template.sortOrder)?.rawValue
+            }
+
+            // Custom templates created by older versions inherited the old
+            // `isBuiltIn = true` default. Their sort order starts after the
+            // canonical range, so normalize them before grouping and analytics.
+            for template in existing
+            where template.builtInKey == nil
+                && BuiltInTemplateKey(sortOrder: template.sortOrder) == nil {
+                template.isBuiltIn = false
+            }
+
+            // Older incremental seeders could create both a renamed built-in and
+            // a fresh canonical copy. Keep the renamed record as the canonical
+            // built-in and preserve every extra record as a custom template.
+            // This makes App Intent lookup deterministic without deleting user data.
+            let groupedByKey = Dictionary(
+                grouping: existing.compactMap { template in
+                    template.builtInKey.map { ($0, template) }
+                },
+                by: { $0.0 }
+            )
+            for (key, entries) in groupedByKey where entries.count > 1 {
+                let templates = entries.map(\.1)
+                let canonicalName = canonicalNames[key]
+                let survivor = templates
+                    .filter { $0.name != canonicalName }
+                    .sorted { $0.id.uuidString < $1.id.uuidString }
+                    .first
+                    ?? templates.sorted { $0.id.uuidString < $1.id.uuidString }.first!
+
+                for duplicate in templates where duplicate.id != survivor.id {
+                    duplicate.builtInKey = nil
+                    duplicate.isBuiltIn = false
+                }
+            }
+
+            let existingKeys = Set(existing.compactMap { template in
+                template.isBuiltIn ? template.builtInKey : nil
+            })
+            for template in desired where !existingKeys.contains(template.builtInKey ?? "") {
                 context.insert(template)
             }
-            try? context.save()
-            UserDefaults.standard.set(currentSeedVersion, forKey: "templateSeedVersion")
+
+            try context.save()
+            defaults.set(currentSeedVersion, forKey: "templateSeedVersion")
+            return true
+        } catch {
+            logger.error("Template seed migration failed: \(error.localizedDescription, privacy: .public)")
+            return false
         }
     }
 
     private static func builtInTemplates() -> [WallpaperTemplate] {
-        [
+        let templates = [
             makeTodayDashboard(),
             makeMinimalAgenda(),
             makePriorityFocus(),
@@ -58,6 +105,11 @@ struct TemplateSeeder {
             makeFullDashboard(),
             makeJustTodo(),
         ]
+
+        for template in templates {
+            template.builtInKey = BuiltInTemplateKey(sortOrder: template.sortOrder)?.rawValue
+        }
+        return templates
     }
 
     private static func makeJustTodo() -> WallpaperTemplate {

@@ -23,7 +23,7 @@ const steps = [
     number: "03",
     title: "Generate & Apply",
     description:
-      "Hit Generate to save the wallpaper to Photos, then apply as your Lock Screen. Pair with Apple Shortcuts so a fresh one lands in Photos every morning — one tap to apply.",
+      "Hit Generate to save the wallpaper to Photos, then apply it as your Lock Screen. Pair with Apple Shortcuts so a fresh one lands in Photos every morning, ready when you are.",
     screenshot: "/screenshots/export-screen.png",
   },
 ];

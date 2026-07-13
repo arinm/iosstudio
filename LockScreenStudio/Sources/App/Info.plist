@@ -8,6 +8,21 @@
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Lock Screen Studio Template</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lockscreenstudio.template</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Lock Screen Studio</string>
 	<key>CFBundleExecutable</key>
@@ -28,10 +43,36 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Lock Screen Studio reads your calendar events to display them on your wallpaper. Your data never leaves your device.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Lock Screen Studio saves generated wallpapers to your Photo Library so you can set them as your Lock Screen.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Lock Screen Studio reads your reminders to display selected incomplete items on your wallpaper. Your data never leaves your device.</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.json</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Lock Screen Studio Template</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.lockscreenstudio.template</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>lockscreenstudio</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/vnd.lockscreenstudio.template+json</string>
+			</dict>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

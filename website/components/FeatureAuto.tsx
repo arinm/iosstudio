@@ -33,7 +33,7 @@ export default function FeatureAuto() {
           </h2>
           <p className="mt-6 text-lg text-white/50 max-w-lg mx-auto">
             Apple Shortcuts generates your dashboard and saves it to Photos on
-            your schedule. One tap from the notification to apply.
+            your schedule. A notification lets you know when it is ready in Photos.
           </p>
         </motion.div>
 

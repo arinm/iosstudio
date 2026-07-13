@@ -7,9 +7,14 @@ import EventKit
 final class PanelDataBuilder {
 
     private let calendarService: CalendarService
+    private let remindersService: any RemindersProviding
 
-    init(calendarService: CalendarService = CalendarService()) {
+    init(
+        calendarService: CalendarService = CalendarService(),
+        remindersService: any RemindersProviding = RemindersService.shared
+    ) {
         self.calendarService = calendarService
+        self.remindersService = remindersService
     }
 
     /// Builds render data for all visible panels in a template.
@@ -35,7 +40,7 @@ final class PanelDataBuilder {
             case .topThree:
                 renderData.append(buildTopThreePanel(panel, priorities: priorities, date: date))
             case .todo:
-                renderData.append(buildTodoPanel(panel, todos: todos))
+                renderData.append(await buildTodoPanel(panel, todos: todos, date: date))
             case .habitsHeatmap:
                 renderData.append(buildHabitsPanel(panel))
             case .quote:
@@ -173,24 +178,65 @@ final class PanelDataBuilder {
             lines = Self.samplePriorityLines
         }
 
-        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
+        return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: lines)
     }
 
-    private func buildTodoPanel(_ panel: PanelConfiguration, todos: [TodoItem]) -> PanelRenderData {
+    private func buildTodoPanel(
+        _ panel: PanelConfiguration,
+        todos: [TodoItem],
+        date: Date
+    ) async -> PanelRenderData {
         let config = panel.decodeConfig(TodoConfig.self) ?? TodoConfig()
 
-        let filteredTodos = todos
-            .sorted { $0.sortOrder < $1.sortOrder }
-            .filter { config.showCompleted || !$0.isCompleted }
-            .prefix(config.maxItems)
+        var lines: [PanelLine] = []
+        let reminderAuthorizationStatus = config.source.usesAppleReminders
+            ? await remindersService.currentAuthorizationStatus()
+            : nil
+        let isReminderListAvailable = config.source.usesAppleReminders
+            ? await remindersService.isListAvailable(config.reminderListIdentifier)
+            : true
+        let shouldRenderLocalTodos = config.source.usesLocalTodos
+            || (
+                config.source == .appleReminders
+                    && (reminderAuthorizationStatus != .authorized || !isReminderListAvailable)
+            )
 
-        let lines: [PanelLine] = filteredTodos.map { item in
-            .todoItem(text: item.text, completed: item.isCompleted)
+        if shouldRenderLocalTodos {
+            let localLines = todos
+                .sorted { $0.sortOrder < $1.sortOrder }
+                .filter { config.showCompleted || !$0.isCompleted }
+                .map { item in
+                    PanelLine.todoItem(text: item.text, completed: item.isCompleted)
+                }
+            lines.append(contentsOf: localLines)
         }
 
-        let emptyLines: [PanelLine] = lines.isEmpty ? Self.sampleTodoLines : lines
+        if config.source.usesAppleReminders,
+           reminderAuthorizationStatus == .authorized,
+           isReminderListAvailable {
+            let reminders = await remindersService.fetchReminders(
+                filter: config.reminderFilter,
+                listIdentifier: config.reminderListIdentifier,
+                referenceDate: date
+            )
+            lines.append(contentsOf: reminders.map { reminder in
+                .todoItem(text: reminder.title, completed: reminder.isCompleted)
+            })
+        }
 
-        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: emptyLines)
+        let limitedLines = Array(lines.prefix(max(1, config.maxItems)))
+
+        let displayLines: [PanelLine]
+        if limitedLines.isEmpty,
+           config.source == .appleReminders,
+           reminderAuthorizationStatus == .authorized,
+           isReminderListAvailable {
+            displayLines = [.text("No reminders")]
+        } else {
+            displayLines = limitedLines.isEmpty ? Self.sampleTodoLines : limitedLines
+        }
+
+        return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: displayLines)
     }
 
     private func buildHabitsPanel(_ panel: PanelConfiguration) -> PanelRenderData {
@@ -243,7 +289,7 @@ final class PanelDataBuilder {
             lines.append(.subtitle("\(config.afterText) \(config.eventName)"))
         }
 
-        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
+        return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: lines)
     }
 
     private func buildNotesPanel(_ panel: PanelConfiguration) -> PanelRenderData {
@@ -261,7 +307,7 @@ final class PanelDataBuilder {
             // Empty — user configures via panel settings
         }
 
-        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
+        return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: lines)
     }
 
     private func buildQuotePanel(_ panel: PanelConfiguration) -> PanelRenderData {
@@ -277,7 +323,7 @@ final class PanelDataBuilder {
             // Empty — user configures via panel settings
         }
 
-        return PanelRenderData(title: panel.showTitle ? panel.title : nil, lines: lines)
+        return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: lines)
     }
 
     private func buildMonthlyCalendarPanel(_ panel: PanelConfiguration, date: Date) async -> PanelRenderData {

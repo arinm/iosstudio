@@ -11,4 +11,5 @@ struct MainTabView: View {
 #Preview {
     MainTabView()
         .environmentObject(SubscriptionManager())
+        .environmentObject(TemplateImportCoordinator())
 }

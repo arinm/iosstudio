@@ -174,7 +174,7 @@ export default function Hero() {
             transition={{ delay: 1, duration: 0.5 }}
             className="absolute -bottom-4 -right-4 bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg shadow-indigo-500/30"
           >
-            Fresh daily, one tap
+            Fresh daily, ready in Photos
           </motion.div>
         </motion.div>
       </div>

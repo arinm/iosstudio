@@ -18,6 +18,9 @@ struct EditorView: View {
     @State private var showAddPanel = false
     @State private var showRenameAlert = false
     @State private var renameDraft = ""
+    @State private var didTrackTemplateOpen = false
+    @State private var templateSharePayload: TemplateSharePayload?
+    @State private var templateShareErrorMessage: String?
 
     // Surfaces an automation nudge after the user generates their first wallpaper.
     @AppStorage("hasGeneratedOnce") private var hasGeneratedOnce: Bool = false
@@ -77,12 +80,21 @@ struct EditorView: View {
                 .accessibilityLabel("Rename template")
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showPreview = true
-                } label: {
-                    Image(systemName: "eye")
+                HStack(spacing: 12) {
+                    Button {
+                        shareTemplate()
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Share template")
+
+                    Button {
+                        showPreview = true
+                    } label: {
+                        Image(systemName: "eye")
+                    }
+                    .accessibilityLabel("Preview wallpaper")
                 }
-                .accessibilityLabel("Preview wallpaper")
             }
         }
         .alert("Rename template", isPresented: $showRenameAlert) {
@@ -113,7 +125,7 @@ struct EditorView: View {
                 .presentationDetents([.medium])
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(source: "editor")
         }
         .sheet(isPresented: $showShortcutsWizard) {
             ShortcutsWizardSheet()
@@ -125,7 +137,33 @@ struct EditorView: View {
             }
             .presentationDetents([.medium])
         }
-        .onAppear { loadPriorities() }
+        .sheet(item: $templateSharePayload) { payload in
+            ActivityShareSheet(items: [payload.fileURL]) {
+                try? FileManager.default.removeItem(at: payload.fileURL)
+                templateSharePayload = nil
+            }
+        }
+        .alert(
+            "Couldn't Share Template",
+            isPresented: Binding(
+                get: { templateShareErrorMessage != nil },
+                set: { if !$0 { templateShareErrorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(templateShareErrorMessage ?? "The template couldn't be prepared for sharing.")
+        }
+        .onAppear {
+            loadPriorities()
+            if !didTrackTemplateOpen {
+                AnalyticsService.shared.track(
+                    .templateOpened,
+                    properties: AnalyticsService.templateProperties(template)
+                )
+                didTrackTemplateOpen = true
+            }
+        }
         .overlay(alignment: .bottom) {
             if showRefreshToast {
                 refreshToast
@@ -135,6 +173,19 @@ struct EditorView: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showRefreshToast)
+    }
+
+    private func shareTemplate() {
+        do {
+            templateSharePayload = try TemplateSharingService.makeSharePayload(for: template)
+            AnalyticsService.shared.track(
+                .templateShareOpened,
+                properties: TemplateSharingService.analyticsProperties(for: template)
+            )
+        } catch {
+            templateShareErrorMessage = (error as? TemplateSharingError)?.localizedDescription
+                ?? "The template couldn't be prepared for sharing."
+        }
     }
 
     private var refreshToast: some View {
@@ -250,7 +301,7 @@ struct EditorView: View {
                     Text(panel.title)
                         .font(.body)
                         .foregroundStyle(.primary)
-                    Text(panel.showTitle ? "Title shown" : "Title hidden")
+                    Text(panel.isTitleShown ? "Title shown" : "Title hidden")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -272,7 +323,7 @@ struct EditorView: View {
         .buttonStyle(.plain)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .accessibilityLabel("\(panel.title) panel, \(panel.isVisible ? "visible" : "hidden"), title \(panel.showTitle ? "shown" : "hidden")")
+        .accessibilityLabel("\(panel.title) panel, \(panel.isVisible ? "visible" : "hidden"), title \(panel.isTitleShown ? "shown" : "hidden")")
         .accessibilityHint("Double tap to configure")
     }
 
@@ -314,67 +365,97 @@ struct EditorView: View {
         template.panels.first(where: { $0.panelType == .todo && $0.isVisible })?.title ?? "To-Do"
     }
 
+    private var activeTodoConfig: TodoConfig {
+        guard let panel = template.panels.first(where: {
+            $0.panelType == .todo && $0.isVisible
+        }) else {
+            return TodoConfig()
+        }
+        return panel.decodeConfig(TodoConfig.self) ?? TodoConfig()
+    }
+
     private var todoEditSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(todoPanelTitle)
                 .font(.headline)
 
-            VStack(spacing: 0) {
-                ForEach(todos) { todo in
+            if activeTodoConfig.source.usesLocalTodos {
+                VStack(spacing: 0) {
+                    ForEach(todos) { todo in
+                        HStack(spacing: 12) {
+                            Button {
+                                toggleTodo(todo)
+                            } label: {
+                                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(todo.isCompleted ? .green : .secondary)
+                            }
+
+                            Text(todo.text)
+                                .strikethrough(todo.isCompleted)
+                                .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+
+                            Spacer()
+
+                            Button {
+                                modelContext.delete(todo)
+                                try? modelContext.save()
+                                WidgetCenter.shared.reloadAllTimelines()
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+
+                        if todo.id != todos.last?.id {
+                            Divider().padding(.leading, 52)
+                        }
+                    }
+
+                    // Add new local todo
                     HStack(spacing: 12) {
                         Button {
-                            toggleTodo(todo)
+                            addTodo()
                         } label: {
-                            Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(todo.isCompleted ? .green : .secondary)
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(.indigo)
+                                .font(.title3)
                         }
+                        .disabled(newTodoText.trimmingCharacters(in: .whitespaces).isEmpty)
 
-                        Text(todo.text)
-                            .strikethrough(todo.isCompleted)
-                            .foregroundStyle(todo.isCompleted ? .secondary : .primary)
-
-                        Spacer()
-
-                        Button {
-                            modelContext.delete(todo)
-                            try? modelContext.save()
-                            WidgetCenter.shared.reloadAllTimelines()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                        TextField("Add a task...", text: $newTodoText)
+                            .submitLabel(.done)
+                            .onSubmit {
+                                addTodo()
+                            }
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-
-                    if todo.id != todos.last?.id {
-                        Divider().padding(.leading, 52)
-                    }
                 }
-
-                // Add new todo
-                HStack(spacing: 12) {
-                    Button {
-                        addTodo()
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundStyle(.indigo)
-                            .font(.title3)
-                    }
-                    .disabled(newTodoText.trimmingCharacters(in: .whitespaces).isEmpty)
-
-                    TextField("Add a task...", text: $newTodoText)
-                        .submitLabel(.done)
-                        .onSubmit {
-                            addTodo()
-                        }
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            } else {
+                Label {
+                    Text("This panel reads incomplete items from Apple Reminders. Manage them in the Reminders app.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } icon: {
+                    Image(systemName: "checklist")
+                        .foregroundStyle(.indigo)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .background(Color(.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+            if activeTodoConfig.source == .combined {
+                Text("Incomplete Apple Reminders are added after your Studio todos on the wallpaper.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -642,7 +723,7 @@ struct EditorView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Want a fresh wallpaper every morning?")
                         .font(.subheadline.bold())
-                    Text("Pair with Apple Shortcuts - generated and saved to Photos automatically. One tap to apply.")
+                    Text("Pair with Apple Shortcuts - generated and saved to Photos automatically, ready to apply.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Button {
@@ -805,13 +886,18 @@ struct EditorView: View {
 struct PanelConfigSheet: View {
     @Bindable var panel: PanelConfiguration
     @Environment(\.dismiss) private var dismiss
+    @State private var reminderAuthorizationStatus: ReminderAuthorizationStatus = .notDetermined
+    @State private var reminderLists: [ReminderListOption] = []
+    @State private var isRequestingReminderAccess = false
+
+    private let remindersService: any RemindersProviding = RemindersService.shared
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Panel") {
-                    Toggle("Show Title", isOn: $panel.showTitle)
-                    if panel.showTitle {
+                    Toggle("Show Title", isOn: $panel.isTitleShown)
+                    if panel.isTitleShown {
                         LabeledContent("Title") {
                             TextField("Enter title", text: $panel.title)
                                 .multilineTextAlignment(.trailing)
@@ -850,6 +936,9 @@ struct PanelConfigSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .task {
+                await refreshReminderState()
             }
         }
     }
@@ -894,39 +983,174 @@ struct PanelConfigSheet: View {
     private var todoConfigSection: some View {
         let config = panel.decodeConfig(TodoConfig.self) ?? TodoConfig()
 
-        return Section {
-            Toggle(isOn: Binding(
-                get: { config.showCompleted },
-                set: { newValue in
-                    var c = config
-                    c.showCompleted = newValue
-                    panel.encodeConfig(c)
-                }
-            )) {
-                Label {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Show completed todos")
-                        Text("Display done items with a strikethrough on the wallpaper.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+        return Group {
+            Section("To-Do Source") {
+                Picker("Source", selection: Binding(
+                    get: { config.source },
+                    set: { newValue in
+                        var updatedConfig = config
+                        updatedConfig.source = newValue
+                        panel.encodeConfig(updatedConfig)
+                        AnalyticsService.shared.track(
+                            .remindersSourceChanged,
+                            properties: ["source": newValue.rawValue]
+                        )
+
+                        if newValue.usesAppleReminders {
+                            Task { await requestReminderAccessIfNeeded() }
+                        }
                     }
-                } icon: {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.indigo)
+                )) {
+                    ForEach(TodoConfig.TodoSource.allCases) { source in
+                        Text(source.title).tag(source)
+                    }
+                }
+
+                if config.source.usesAppleReminders {
+                    reminderAccessRows(config: config)
                 }
             }
 
-            Stepper("Max items: \(config.maxItems)", value: Binding(
-                get: { config.maxItems },
-                set: { newValue in
-                    var c = config
-                    c.maxItems = newValue
-                    panel.encodeConfig(c)
+            Section {
+                if config.source.usesLocalTodos {
+                    Toggle(isOn: Binding(
+                        get: { config.showCompleted },
+                        set: { newValue in
+                            var updatedConfig = config
+                            updatedConfig.showCompleted = newValue
+                            panel.encodeConfig(updatedConfig)
+                        }
+                    )) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Show completed Studio todos")
+                                Text("Display completed local items with a strikethrough.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.indigo)
+                        }
+                    }
                 }
-            ), in: 1...10)
-        } header: {
-            Text("To-Do Settings")
+
+                Stepper("Max items: \(config.maxItems)", value: Binding(
+                    get: { config.maxItems },
+                    set: { newValue in
+                        var updatedConfig = config
+                        updatedConfig.maxItems = newValue
+                        panel.encodeConfig(updatedConfig)
+                    }
+                ), in: 1...10)
+            } header: {
+                Text("Display")
+            }
         }
+    }
+
+    @ViewBuilder
+    private func reminderAccessRows(config: TodoConfig) -> some View {
+        switch reminderAuthorizationStatus {
+        case .authorized:
+            Picker("List", selection: Binding<String?>(
+                get: { config.reminderListIdentifier },
+                set: { newValue in
+                    var updatedConfig = config
+                    updatedConfig.reminderListIdentifier = newValue
+                    panel.encodeConfig(updatedConfig)
+                }
+            )) {
+                Text("All Lists").tag(nil as String?)
+                ForEach(reminderLists) { list in
+                    Text(list.title).tag(Optional(list.id))
+                }
+            }
+
+            Picker("Due", selection: Binding(
+                get: { config.reminderFilter },
+                set: { newValue in
+                    var updatedConfig = config
+                    updatedConfig.reminderFilter = newValue
+                    panel.encodeConfig(updatedConfig)
+                }
+            )) {
+                ForEach(TodoConfig.ReminderFilter.allCases) { filter in
+                    Text(filter.title).tag(filter)
+                }
+            }
+        case .notDetermined:
+            Button {
+                Task { await requestReminderAccessIfNeeded() }
+            } label: {
+                if isRequestingReminderAccess {
+                    HStack {
+                        ProgressView()
+                        Text("Requesting Access…")
+                    }
+                } else {
+                    Label("Allow Reminders Access", systemImage: "checklist")
+                }
+            }
+            .disabled(isRequestingReminderAccess)
+        case .denied, .restricted:
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Reminders access is off. This panel will use local Studio todos.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Open Settings") {
+                    guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                    UIApplication.shared.open(url)
+                }
+            }
+        }
+    }
+
+    @MainActor
+    private func refreshReminderState() async {
+        let status = await remindersService.currentAuthorizationStatus()
+        reminderAuthorizationStatus = status
+        reminderLists = status == .authorized
+            ? await remindersService.availableLists()
+            : []
+
+        guard var config = panel.decodeConfig(TodoConfig.self) else { return }
+
+        if status != .authorized, config.source == .appleReminders {
+            // Keep the UI and renderer consistent after denial or revocation.
+            config.source = .local
+            panel.encodeConfig(config)
+            return
+        }
+
+        guard status == .authorized,
+              let selectedIdentifier = config.reminderListIdentifier,
+              !reminderLists.contains(where: { $0.id == selectedIdentifier }) else {
+            return
+        }
+
+        // A list may have been deleted in Reminders. Fall back to All Lists
+        // instead of silently rendering nothing forever.
+        config.reminderListIdentifier = nil
+        panel.encodeConfig(config)
+    }
+
+    @MainActor
+    private func requestReminderAccessIfNeeded() async {
+        let currentStatus = await remindersService.currentAuthorizationStatus()
+        guard currentStatus == .notDetermined else {
+            await refreshReminderState()
+            return
+        }
+
+        isRequestingReminderAccess = true
+        let granted = await remindersService.requestAccess()
+        isRequestingReminderAccess = false
+        AnalyticsService.shared.track(
+            .remindersPermissionResult,
+            properties: ["result": granted ? "granted" : "denied"]
+        )
+        await refreshReminderState()
     }
 
     private var dateTimeConfigSection: some View {

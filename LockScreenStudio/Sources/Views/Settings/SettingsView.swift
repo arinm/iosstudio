@@ -33,8 +33,8 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(source: "settings")
             }
             .sheet(isPresented: $showShortcutsGuide) {
                 ShortcutsGuideView()
@@ -122,9 +122,9 @@ struct SettingsView: View {
     private var automationFooter: String {
         switch automationMode {
         case "builtin":
-            return "iOS picks an opportune moment within your chosen window - exact timing isn't guaranteed. A fresh wallpaper is saved to Photos with a notification - tap once to apply. For precise scheduling (e.g. 7:00 AM sharp), use Shortcuts instead."
+            return "iOS picks an opportune moment within your chosen window - exact timing isn't guaranteed. A fresh wallpaper is saved to Photos and a notification lets you know it is ready. For precise scheduling (e.g. 7:00 AM sharp), use Shortcuts instead."
         case "shortcuts":
-            return "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. The fresh wallpaper lands in Photos with a notification; one tap to apply. (Apple removed direct wallpaper-setting from Shortcuts in iOS 26.)"
+            return "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. The fresh wallpaper lands in Photos and a notification lets you know it is ready. (Apple removed direct wallpaper-setting from Shortcuts in iOS 26.)"
         default:
             return "Off: your wallpaper won't update on its own. Pick Built-in for fire-and-forget, or Shortcuts for precise scheduling."
         }
@@ -204,7 +204,20 @@ struct SettingsView: View {
             }
 
             Button {
-                Task { await subscriptionManager.restorePurchases() }
+                Task {
+                    AnalyticsService.shared.track(
+                        .restoreStarted,
+                        properties: ["source": "settings"]
+                    )
+                    let outcome = await subscriptionManager.restorePurchases()
+                    let event: AnalyticsEvent.Name
+                    switch outcome {
+                    case .restored: event = .restoreCompleted
+                    case .noPurchases: event = .restoreNoPurchases
+                    case .failed: event = .restoreFailed
+                    }
+                    AnalyticsService.shared.track(event, properties: ["source": "settings"])
+                }
             } label: {
                 Text("Restore Purchases")
             }
@@ -245,8 +258,8 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Link("Privacy Policy", destination: URL(string: "https://lockscreenstudio.app/privacy")!)
-            Link("Terms of Service", destination: URL(string: "https://lockscreenstudio.app/terms")!)
+            Link("Privacy Policy", destination: URL(string: "https://www.lockscreenstudio.com/privacy")!)
+            Link("Terms of Service", destination: URL(string: "https://www.lockscreenstudio.com/terms")!)
         }
     }
 

@@ -10,12 +10,17 @@ import SwiftUI
 @MainActor
 final class SubscriptionManager: ObservableObject {
 
+    enum RestoreOutcome {
+        case restored
+        case noPurchases
+        case failed
+    }
+
     // MARK: - Product IDs
 
     static let monthlyProductID = "com.lockscreenstudio.pro.monthly"
     static let yearlyProductID = "com.lockscreenstudio.pro.yearly"
-    static let lifetimeProductID = "com.lockscreenstudio.pro.lifetime"
-    static let allProductIDs: Set<String> = [monthlyProductID, yearlyProductID, lifetimeProductID]
+    static let allProductIDs: Set<String> = [monthlyProductID, yearlyProductID]
 
     // MARK: - Published State
 
@@ -23,12 +28,13 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var purchasedProductIDs: Set<String> = []
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
+    private let honorsDebugOverride: Bool
 
     /// True if the user has an active Pro subscription.
     /// In DEBUG builds, set "debug_force_pro" in UserDefaults to override.
     var isPro: Bool {
         #if DEBUG
-        if UserDefaults.standard.bool(forKey: "debug_force_pro") {
+        if honorsDebugOverride && UserDefaults.standard.bool(forKey: "debug_force_pro") {
             return true
         }
         #endif
@@ -48,15 +54,18 @@ final class SubscriptionManager: ObservableObject {
         products.first { $0.id == Self.yearlyProductID }
     }
 
-    var lifetimeProduct: Product? {
-        products.first { $0.id == Self.lifetimeProductID }
-    }
-
     // MARK: - Transaction Listener
 
     private var transactionListener: Task<Void, Error>?
 
-    init() {
+    init(
+        startStoreKitTasks: Bool = true,
+        initialPurchasedProductIDs: Set<String> = [],
+        honorsDebugOverride: Bool = true
+    ) {
+        self.honorsDebugOverride = honorsDebugOverride
+        purchasedProductIDs = initialPurchasedProductIDs
+        guard startStoreKitTasks else { return }
         transactionListener = listenForTransactions()
         Task {
             await loadProducts()
@@ -116,19 +125,26 @@ final class SubscriptionManager: ObservableObject {
 
     // MARK: - Restore
 
-    func restorePurchases() async {
+    @discardableResult
+    func restorePurchases() async -> RestoreOutcome {
         isLoading = true
         errorMessage = nil
 
         defer { isLoading = false }
 
-        // Sync with App Store
-        try? await AppStore.sync()
+        do {
+            try await AppStore.sync()
+        } catch {
+            errorMessage = "Unable to restore purchases. Please try again."
+            return .failed
+        }
         await updatePurchasedProducts()
 
         if purchasedProductIDs.isEmpty {
             errorMessage = "No active subscriptions found."
+            return .noPurchases
         }
+        return .restored
     }
 
     // MARK: - Entitlement Check

@@ -10,7 +10,14 @@ final class PanelConfiguration {
     var sortOrder: Int
     var isVisible: Bool
     var title: String
-    var showTitle: Bool
+    /// Optional for lightweight migration from stores created before this
+    /// preference existed. A missing value preserves the original behavior.
+    var showTitle: Bool?
+
+    var isTitleShown: Bool {
+        get { showTitle ?? true }
+        set { showTitle = newValue }
+    }
 
     /// Type-specific configuration stored as JSON data.
     /// Decoded by each panel's renderer using its own Codable struct.
@@ -141,8 +148,91 @@ struct TopThreeConfig: Codable {
 }
 
 struct TodoConfig: Codable {
-    var showCompleted: Bool = false
-    var maxItems: Int = 5
+    var showCompleted: Bool
+    var maxItems: Int
+    var source: TodoSource
+    var reminderListIdentifier: String?
+    var reminderFilter: ReminderFilter
+
+    init(
+        showCompleted: Bool = false,
+        maxItems: Int = 5,
+        source: TodoSource = .local,
+        reminderListIdentifier: String? = nil,
+        reminderFilter: ReminderFilter = .allIncomplete
+    ) {
+        self.showCompleted = showCompleted
+        self.maxItems = maxItems
+        self.source = source
+        self.reminderListIdentifier = reminderListIdentifier
+        self.reminderFilter = reminderFilter
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case showCompleted
+        case maxItems
+        case source
+        case reminderListIdentifier
+        case reminderFilter
+    }
+
+    /// Configurations saved before Apple Reminders support only contain
+    /// `showCompleted` and `maxItems`. Decode every new field defensively so
+    /// existing To-Do panels keep their original local-only behavior.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        showCompleted = try container.decodeIfPresent(Bool.self, forKey: .showCompleted) ?? false
+        maxItems = try container.decodeIfPresent(Int.self, forKey: .maxItems) ?? 5
+        source = try container.decodeIfPresent(TodoSource.self, forKey: .source) ?? .local
+        reminderListIdentifier = try container.decodeIfPresent(
+            String.self,
+            forKey: .reminderListIdentifier
+        )
+        reminderFilter = try container.decodeIfPresent(
+            ReminderFilter.self,
+            forKey: .reminderFilter
+        ) ?? .allIncomplete
+    }
+
+    enum TodoSource: String, Codable, CaseIterable, Identifiable {
+        case local
+        case appleReminders = "apple_reminders"
+        case combined
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .local: return "Lock Screen Studio"
+            case .appleReminders: return "Apple Reminders"
+            case .combined: return "Combined"
+            }
+        }
+
+        var usesLocalTodos: Bool {
+            self != .appleReminders
+        }
+
+        var usesAppleReminders: Bool {
+            self != .local
+        }
+    }
+
+    enum ReminderFilter: String, Codable, CaseIterable, Identifiable {
+        case today
+        case upcoming
+        case allIncomplete = "all_incomplete"
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .today: return "Today"
+            case .upcoming: return "Next 7 Days"
+            case .allIncomplete: return "All Incomplete"
+            }
+        }
+    }
 }
 
 struct DateTimeConfig: Codable {
