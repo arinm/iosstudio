@@ -74,7 +74,7 @@ enum PanelType: String, Codable, CaseIterable, Identifiable {
         case .topThree: return "Top 3"
         case .todo: return "To-Do"
         case .dateTime: return "Date & Time"
-        case .habitsHeatmap: return "Habits"
+        case .habitsHeatmap: return "Consistency"
         case .quote: return "Quote"
         case .countdown: return "Countdown"
         case .notes: return "Notes"
@@ -98,10 +98,9 @@ enum PanelType: String, Codable, CaseIterable, Identifiable {
 
     /// Whether this panel type is available to users (shown in Add Panel sheet)
     var isAvailable: Bool {
-        switch self {
-        case .habitsHeatmap: return false // Removed for v1.0 — uses fake data
-        default: return true
-        }
+        // habitsHeatmap was hidden in v1.0 because it rendered sample data;
+        // since v1.13 it shows the user's real todo-completion history.
+        true
     }
 
     var isPro: Bool {
@@ -251,8 +250,44 @@ struct HabitsHeatmapConfig: Codable {
 }
 
 struct QuoteConfig: Codable {
-    var text: String = ""
-    var author: String = ""
+    enum Source: String, Codable, CaseIterable, Identifiable {
+        case custom
+        case pack
+
+        var id: String { rawValue }
+    }
+
+    var text: String
+    var author: String
+    var source: Source
+    /// One of `QuotePackLibrary.allPacks` ids when `source == .pack`.
+    var packID: String?
+
+    init(
+        text: String = "",
+        author: String = "",
+        source: Source = .custom,
+        packID: String? = nil
+    ) {
+        self.text = text
+        self.author = author
+        self.source = source
+        self.packID = packID
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case text, author, source, packID
+    }
+
+    /// Configs saved before quote packs existed only carry text/author.
+    /// Decode the new fields defensively so old panels keep their custom quote.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        text = try container.decodeIfPresent(String.self, forKey: .text) ?? ""
+        author = try container.decodeIfPresent(String.self, forKey: .author) ?? ""
+        source = try container.decodeIfPresent(Source.self, forKey: .source) ?? .custom
+        packID = try container.decodeIfPresent(String.self, forKey: .packID)
+    }
 }
 
 struct CountdownConfig: Codable {

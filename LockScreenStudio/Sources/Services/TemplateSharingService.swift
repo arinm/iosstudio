@@ -288,11 +288,24 @@ enum TemplateSharingService {
                 let config = try JSONDecoder().decode(DateTimeConfig.self, from: data)
                 return try JSONEncoder().encode(config)
             case .habitsHeatmap:
-                throw TemplateSharingError.unsupportedPanel
+                // Shareable since v1.13: the config carries only layout prefs.
+                // Reset habitName (legacy field that may hold personal text)
+                // and clamp weeks to the UI's allowed range.
+                var config = try JSONDecoder().decode(HabitsHeatmapConfig.self, from: data)
+                config.habitName = "Habit"
+                config.weeksToShow = max(4, min(config.weeksToShow, 20))
+                return try JSONEncoder().encode(config)
             case .quote:
                 var config = try JSONDecoder().decode(QuoteConfig.self, from: data)
                 config.text = clipped(config.text, maxLength: 500)
                 config.author = clipped(config.author, maxLength: 120)
+                // An unknown pack id (e.g. from a newer app version) falls
+                // back to the user's custom text instead of a broken panel.
+                if config.source == .pack,
+                   config.packID.flatMap({ QuotePackLibrary.pack(id: $0) }) == nil {
+                    config.source = .custom
+                    config.packID = nil
+                }
                 return try JSONEncoder().encode(config)
             case .countdown:
                 var config = try JSONDecoder().decode(CountdownConfig.self, from: data)

@@ -64,7 +64,7 @@ struct ShortcutsSetupSheet: View {
     /// what the single manual tap is — instead of reading two paragraphs.
     private var howItWorksStrip: some View {
         HStack(spacing: 4) {
-            howItWorksStage(icon: "sparkles", label: "Generates\nitself", automatic: true)
+            howItWorksStage(icon: "arrow.triangle.2.circlepath", label: "Generates\nitself", automatic: true)
             stageArrow
             howItWorksStage(icon: "photo.on.rectangle", label: "Saved to\nPhotos", automatic: true)
             stageArrow

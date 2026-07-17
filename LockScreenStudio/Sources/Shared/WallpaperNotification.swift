@@ -27,7 +27,7 @@ enum WallpaperNotification {
     /// Posts a "Wallpaper Updated" notification. Best-effort — silently no-ops
     /// if the user has denied notifications. Requests permission first if the
     /// status is `.notDetermined`.
-    static func sendRefreshed(outcome: Outcome = .savedToPhotos) async {
+    static func sendRefreshed(outcome: Outcome = .savedToPhotos, summary: String? = nil) async {
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
 
@@ -43,7 +43,7 @@ enum WallpaperNotification {
         switch outcome {
         case .savedToPhotos:
             content.title = "Wallpaper Updated"
-            content.body = "Tap to open Photos and apply your fresh Lock Screen."
+            content.body = summary ?? "Tap to open Photos and apply your fresh Lock Screen."
         case .photosPermissionDenied:
             content.title = "Lock Screen Studio needs Photos access"
             content.body = "Your fresh wallpaper was generated but couldn't be saved. Open Settings > Privacy > Photos and allow Add Only access."

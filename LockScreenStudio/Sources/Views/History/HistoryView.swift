@@ -180,7 +180,7 @@ struct HistoryView: View {
 
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Image(systemName: "sparkles")
+            Image(systemName: "square.grid.3x3.bottomleft.filled")
                 .font(.system(size: 36))
                 .foregroundStyle(.indigo.opacity(0.6))
             Text("Your streak starts today")

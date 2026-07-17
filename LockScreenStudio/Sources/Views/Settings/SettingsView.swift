@@ -198,7 +198,7 @@ struct SettingsView: View {
                 Button {
                     showPaywall = true
                 } label: {
-                    Label("Upgrade to Pro", systemImage: "sparkles")
+                    Label("Upgrade to Pro", systemImage: "crown.fill")
                         .foregroundStyle(.indigo)
                 }
             }

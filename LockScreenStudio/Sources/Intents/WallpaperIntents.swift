@@ -62,7 +62,10 @@ struct GenerateTodayWallpaperIntent: AppIntent {
                 // chained after this can still consume the image.
             }
         }
-        await WallpaperNotification.sendRefreshed(outcome: photosOutcome)
+        let summary = photosOutcome == .savedToPhotos
+            ? await WallpaperNotificationSummary.build(todos: todos)
+            : nil
+        await WallpaperNotification.sendRefreshed(outcome: photosOutcome, summary: summary)
 
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
@@ -151,7 +154,10 @@ struct GenerateWallpaperIntent: AppIntent {
                 // chained after this can still consume the image.
             }
         }
-        await WallpaperNotification.sendRefreshed(outcome: photosOutcome)
+        let summary = photosOutcome == .savedToPhotos
+            ? await WallpaperNotificationSummary.build(todos: todos)
+            : nil
+        await WallpaperNotification.sendRefreshed(outcome: photosOutcome, summary: summary)
 
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
@@ -259,7 +265,10 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
                 // chained after this can still consume the image.
             }
         }
-        await WallpaperNotification.sendRefreshed(outcome: photosOutcome)
+        let summary = photosOutcome == .savedToPhotos
+            ? await WallpaperNotificationSummary.build(todos: todos)
+            : nil
+        await WallpaperNotification.sendRefreshed(outcome: photosOutcome, summary: summary)
 
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(

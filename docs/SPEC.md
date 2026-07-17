@@ -62,12 +62,15 @@ Time to "aha": **< 60 seconds.**
 | P1 | Custom templates (user creates layouts) |
 | P1 | Shortcut Pack: pre-built shortcuts with install flow |
 | P1 | More typography options (font families, weights) |
-| P2 | Weather panel (WeatherKit) |
 | P2 | Widget companion (iOS 17 interactive widgets) |
 | P2 | Template sharing (export/import template JSON) |
 | P2 | Smart Switching (time-based mode auto-switch via Shortcuts) |
 | P2 | Photo background support (blur + overlay panels) |
 | P2 | Multiple wallpaper queue (pre-generate week's wallpapers) |
+
+Product decision: no native Weather panel. A static forecast duplicates the
+live iOS Weather widget while adding location permission, network dependency,
+and WeatherKit complexity without enough user value.
 
 ---
 
@@ -201,6 +204,5 @@ App Launch
 | 17 | P1 | Habits Heatmap panel | GitHub-style grid, manual data entry |
 | 18 | P1 | Reminders integration | Permission flow, fetch reminders, display in panel |
 | 19 | P1 | Custom template builder | Drag-drop panels, save custom layout |
-| 20 | P2 | Weather panel | WeatherKit integration, location permission |
-| 21 | P2 | Photo background | Photo picker, blur, overlay composition |
-| 22 | P2 | Template sharing | Export/import JSON, share sheet |
+| 20 | P2 | Photo background | Photo picker, blur, overlay composition |
+| 21 | P2 | Template sharing | Export/import JSON, share sheet |

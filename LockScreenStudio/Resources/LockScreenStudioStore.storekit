@@ -81,7 +81,7 @@
           "introductoryOffer" : {
             "internalID" : "F3A1B2C3",
             "paymentMode" : "free",
-            "subscriptionPeriod" : "P3D"
+            "subscriptionPeriod" : "P1W"
           },
           "localizations" : [
             {

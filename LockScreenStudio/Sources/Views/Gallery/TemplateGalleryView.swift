@@ -115,7 +115,7 @@ struct TemplateGalleryView: View {
             showPaywall = true
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: "sparkles")
+                Image(systemName: "crown.fill")
                     .font(.title3)
                     .foregroundStyle(.indigo)
 

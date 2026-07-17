@@ -42,9 +42,9 @@ final class PanelDataBuilder {
             case .todo:
                 renderData.append(await buildTodoPanel(panel, todos: todos, date: date))
             case .habitsHeatmap:
-                renderData.append(buildHabitsPanel(panel))
+                renderData.append(buildHabitsPanel(panel, todos: todos, date: date))
             case .quote:
-                renderData.append(buildQuotePanel(panel))
+                renderData.append(buildQuotePanel(panel, date: date))
             case .countdown:
                 renderData.append(buildCountdownPanel(panel, date: date))
             case .notes:
@@ -239,24 +239,65 @@ final class PanelDataBuilder {
         return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: displayLines)
     }
 
-    private func buildHabitsPanel(_ panel: PanelConfiguration) -> PanelRenderData {
+    /// Renders the user's real todo-completion history as a contribution-style
+    /// heatmap. Data comes from `TodoItem.completedAt` — the same source as the
+    /// in-app History view — so the wallpaper shows a genuine streak, not
+    /// sample data (which is why this panel was disabled in v1.0).
+    private func buildHabitsPanel(
+        _ panel: PanelConfiguration,
+        todos: [TodoItem],
+        date: Date
+    ) -> PanelRenderData {
         let config = panel.decodeConfig(HabitsHeatmapConfig.self) ?? HabitsHeatmapConfig()
-        let weeks = config.weeksToShow
+        let weeks = max(4, min(config.weeksToShow, 20))
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: date)
 
-        // Generate deterministic sample data based on habit name seed
+        // Count completions per day.
+        var countsByDay: [Date: Int] = [:]
+        for todo in todos {
+            guard let completedAt = todo.completedAt else { continue }
+            countsByDay[cal.startOfDay(for: completedAt), default: 0] += 1
+        }
+
+        // Grid is column-major (index = week * 7 + day, day 0 = top row).
+        // Anchor the last column to the Monday of the current week so today is
+        // always in the rightmost column, matching the in-app History heatmap.
+        let weekday = cal.component(.weekday, from: today) // Gregorian: 1=Sun, 2=Mon …
+        let daysFromMonday = (weekday + 5) % 7             // Mon→0 … Sun→6
+        guard let currentMonday = cal.date(byAdding: .day, value: -daysFromMonday, to: today),
+              let firstMonday = cal.date(byAdding: .weekOfYear, value: -(weeks - 1), to: currentMonday)
+        else {
+            return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: [.heatmapGrid(weeks: weeks, data: [])])
+        }
+
         var data: [Int] = []
-        var seed: UInt64 = 42
-        for char in config.habitName.unicodeScalars { seed = seed &+ UInt64(char.value) }
-        for i in 0..<(weeks * 7) {
-            seed = seed &* 6364136223846793005 &+ 1442695040888963407
-            let val = Int((seed >> 33) % 6) // 0-5, biased toward lower
-            data.append(min(val, 4))
+        data.reserveCapacity(weeks * 7)
+        var cursor = firstMonday
+        for _ in 0..<(weeks * 7) {
+            if cursor > today {
+                data.append(0) // future days in the current week stay empty
+            } else {
+                data.append(Self.heatLevel(for: countsByDay[cursor, default: 0]))
+            }
+            cursor = cal.date(byAdding: .day, value: 1, to: cursor) ?? cursor
         }
 
         return PanelRenderData(
-            title: panel.title,
+            title: panel.isTitleShown ? panel.title : nil,
             lines: [.heatmapGrid(weeks: weeks, data: data)]
         )
+    }
+
+    /// Same thresholds as the in-app History heatmap so both surfaces agree.
+    static func heatLevel(for count: Int) -> Int {
+        switch count {
+        case 0: return 0
+        case 1: return 1
+        case 2...3: return 2
+        case 4...6: return 3
+        default: return 4
+        }
     }
 
     // MARK: - Sample Data (shown before user adds their own)
@@ -310,17 +351,30 @@ final class PanelDataBuilder {
         return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: lines)
     }
 
-    private func buildQuotePanel(_ panel: PanelConfiguration) -> PanelRenderData {
+    private func buildQuotePanel(_ panel: PanelConfiguration, date: Date) -> PanelRenderData {
         let config = panel.decodeConfig(QuoteConfig.self) ?? QuoteConfig()
-        var lines: [PanelLine] = []
 
-        if !config.text.isEmpty {
-            lines.append(.text("\"\(config.text)\""))
-            if !config.author.isEmpty {
-                lines.append(.text("— \(config.author)"))
-            }
+        // Resolve the quote: a curated pack rotates deterministically per day
+        // (regenerating within the same day yields the same quote); custom
+        // shows the user's own text.
+        let text: String
+        let author: String
+        if config.source == .pack,
+           let packID = config.packID,
+           let daily = QuotePackLibrary.todaysQuote(packID: packID, on: date) {
+            text = daily.text
+            author = daily.author
         } else {
-            // Empty — user configures via panel settings
+            text = config.text
+            author = config.author
+        }
+
+        var lines: [PanelLine] = []
+        if !text.isEmpty {
+            lines.append(.text("\"\(text)\""))
+            if !author.isEmpty {
+                lines.append(.text("— \(author)"))
+            }
         }
 
         return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: lines)
