@@ -80,7 +80,8 @@ final class BackgroundTaskManager {
             priorities: priorities
         )
         if success {
-            await WallpaperNotification.sendRefreshed()
+            let summary = await WallpaperNotificationSummary.build(todos: todos)
+            await WallpaperNotification.sendRefreshed(summary: summary)
         }
         task.setTaskCompleted(success: success)
     }

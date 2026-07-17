@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: "What's included in Pro?",
-    a: "Pro gives you access to all templates, gradient backgrounds, alternative app icons, the ability to add unlimited custom panels to any template, and priority support. Available as a monthly or yearly subscription with a free trial.",
+    a: "Pro gives you access to all templates, gradient backgrounds, alternative app icons, the ability to add unlimited custom panels to any template, and priority support. Available as a monthly or yearly subscription - the yearly plan starts with a 7-day free trial.",
   },
   {
     q: "Can I use my own photos as backgrounds?",

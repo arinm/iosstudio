@@ -26,7 +26,7 @@ final class ExportService {
     ) async throws -> WallpaperRenderer.RenderResult {
         let renderTheme = Self.buildRenderTheme(from: theme)
         let (position, clockPadding) = Self.readLayoutSettings()
-        let bgImage = Self.loadBackgroundImage()
+        let bgImage = Self.loadBackgroundImage(for: date)
 
         let panelData = await panelDataBuilder.buildPanelData(
             for: panels,
@@ -66,7 +66,7 @@ final class ExportService {
     ) async throws -> UIImage {
         let renderTheme = Self.buildRenderTheme(from: theme)
         let (position, clockPadding) = Self.readLayoutSettings()
-        let bgImage = Self.loadBackgroundImage()
+        let bgImage = Self.loadBackgroundImage(for: date)
         let (photoX, photoY) = Self.readPhotoOffset()
         let (blur, dim) = Self.readPhotoEffects()
 
@@ -198,14 +198,56 @@ final class ExportService {
         try? data.write(to: backgroundImageURL)
     }
 
-    static func loadBackgroundImage() -> UIImage? {
+    static func loadBackgroundImage(for date: Date = .now) -> UIImage? {
         guard UserDefaults.standard.string(forKey: "backgroundMode") == "photo" else { return nil }
+
+        // A shuffle set takes precedence: deterministic daily pick, so every
+        // generation within the same day uses the same photo (matching the
+        // app's "today's look" model) and tomorrow rotates to the next one.
+        let shuffleFiles = shufflePhotoURLs()
+        if !shuffleFiles.isEmpty {
+            let day = Calendar.current.ordinality(of: .day, in: .era, for: date) ?? 0
+            return UIImage(contentsOfFile: shuffleFiles[day % shuffleFiles.count].path)
+        }
+
         guard FileManager.default.fileExists(atPath: backgroundImageURL.path) else { return nil }
         return UIImage(contentsOfFile: backgroundImageURL.path)
     }
 
     static func deleteBackgroundImage() {
         try? FileManager.default.removeItem(at: backgroundImageURL)
+        try? FileManager.default.removeItem(at: shuffleDirectoryURL)
+    }
+
+    // MARK: - Shuffle Background Photos
+
+    static var shuffleDirectoryURL: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("ShuffleBackgrounds", isDirectory: true)
+    }
+
+    /// Replaces the shuffle set with up to 10 photos. One photo behaves like a
+    /// fixed background; two or more rotate daily.
+    static func saveShufflePhotos(_ images: [UIImage]) {
+        let fm = FileManager.default
+        try? fm.removeItem(at: shuffleDirectoryURL)
+        guard !images.isEmpty else { return }
+        try? fm.createDirectory(at: shuffleDirectoryURL, withIntermediateDirectories: true)
+        for (index, image) in images.prefix(10).enumerated() {
+            guard let data = image.jpegData(compressionQuality: 0.85) else { continue }
+            let url = shuffleDirectoryURL.appendingPathComponent(String(format: "shuffle_%02d.jpg", index))
+            try? data.write(to: url)
+        }
+    }
+
+    static func shufflePhotoURLs() -> [URL] {
+        let urls = (try? FileManager.default.contentsOfDirectory(
+            at: shuffleDirectoryURL,
+            includingPropertiesForKeys: nil
+        )) ?? []
+        return urls
+            .filter { $0.pathExtension == "jpg" }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 
     // MARK: - Layout Settings

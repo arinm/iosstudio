@@ -15,7 +15,8 @@ struct ThemePickerSheet: View {
     @AppStorage("photoBlur") private var photoBlur: Double = 0
     @AppStorage("photoDim") private var photoDim: Double = 0.45
 
-    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var shuffleCount: Int = 0
     @State private var bgThumbnail: UIImage?
 
     var body: some View {
@@ -72,9 +73,11 @@ struct ThemePickerSheet: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
 
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("Custom photo")
+                                        Text(shuffleCount > 1 ? "\(shuffleCount) photos" : "Custom photo")
                                             .font(.caption)
-                                        Text("A dark overlay is added for text readability")
+                                        Text(shuffleCount > 1
+                                            ? "A different photo each day"
+                                            : "A dark overlay is added for text readability")
                                             .font(.caption2)
                                             .foregroundStyle(.secondary)
                                     }
@@ -84,6 +87,8 @@ struct ThemePickerSheet: View {
                                     Button {
                                         backgroundMode = "dark"
                                         bgThumbnail = nil
+                                        shuffleCount = 0
+                                        selectedPhotos = []
                                         ExportService.deleteBackgroundImage()
                                     } label: {
                                         Image(systemName: "xmark.circle.fill")
@@ -198,20 +203,28 @@ struct ThemePickerSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .onChange(of: selectedPhoto) { _, newItem in
-                guard let newItem else { return }
+            .onChange(of: selectedPhotos) { _, newItems in
+                guard !newItems.isEmpty else { return }
                 Task {
-                    guard let data = try? await newItem.loadTransferable(type: Data.self),
-                          let image = UIImage(data: data) else { return }
-                    ExportService.saveBackgroundImage(image)
+                    var images: [UIImage] = []
+                    for item in newItems {
+                        if let data = try? await item.loadTransferable(type: Data.self),
+                           let image = UIImage(data: data) {
+                            images.append(image)
+                        }
+                    }
+                    guard !images.isEmpty else { return }
+                    ExportService.saveShufflePhotos(images)
                     backgroundMode = "photo"
                     selectedScheme = "dark" // white text on photo overlay
-                    bgThumbnail = image
+                    shuffleCount = images.count
+                    bgThumbnail = ExportService.loadBackgroundImage()
                 }
             }
             .onAppear {
                 if backgroundMode == "photo" {
-                    if let image = UIImage(contentsOfFile: ExportService.backgroundImageURL.path) {
+                    shuffleCount = ExportService.shufflePhotoURLs().count
+                    if let image = ExportService.loadBackgroundImage() {
                         bgThumbnail = image
                     }
                 }
@@ -348,7 +361,8 @@ struct ThemePickerSheet: View {
         let isLocked = !subscriptionManager.isPro
 
         return PhotosPicker(
-            selection: $selectedPhoto,
+            selection: $selectedPhotos,
+            maxSelectionCount: 10,
             matching: .images
         ) {
             VStack(spacing: 6) {

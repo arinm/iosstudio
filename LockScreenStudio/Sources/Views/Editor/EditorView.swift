@@ -16,6 +16,7 @@ struct EditorView: View {
     @State private var showPaywall = false
     @State private var showShortcutsWizard = false
     @State private var showAddPanel = false
+    @State private var pendingProPaywall = false
     @State private var showRenameAlert = false
     @State private var renameDraft = ""
     @State private var didTrackTemplateOpen = false
@@ -133,9 +134,23 @@ struct EditorView: View {
         }
         .sheet(isPresented: $showAddPanel) {
             AddPanelSheet { type in
-                addPanel(type: type)
+                // Paywall at the moment of intent: free users tapping a Pro
+                // panel get the upgrade sheet instead of a silent free unlock.
+                // Deferred via pendingProPaywall — presenting a sibling sheet
+                // while this one is still dismissing is unreliable in SwiftUI.
+                if type.isPro && !subscriptionManager.isPro {
+                    pendingProPaywall = true
+                } else {
+                    addPanel(type: type)
+                }
             }
             .presentationDetents([.medium])
+        }
+        .onChange(of: showAddPanel) { _, isPresented in
+            if !isPresented && pendingProPaywall {
+                pendingProPaywall = false
+                showPaywall = true
+            }
         }
         .sheet(item: $templateSharePayload) { payload in
             ActivityShareSheet(items: [payload.fileURL]) {
@@ -190,7 +205,7 @@ struct EditorView: View {
 
     private var refreshToast: some View {
         HStack(spacing: 12) {
-            Image(systemName: "sparkles")
+            Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(.indigo)
             Text(refreshToastMessage)
                 .font(.subheadline)
@@ -717,7 +732,7 @@ struct EditorView: View {
             && AutomationStatus.lastRunDate == nil
             && !dismissedAutomationBanner {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "sparkles")
+                Image(systemName: "bolt.fill")
                     .foregroundStyle(.indigo)
                     .font(.title3)
                 VStack(alignment: .leading, spacing: 4) {
@@ -769,7 +784,7 @@ struct EditorView: View {
             }
         } label: {
             HStack {
-                Image(systemName: "sparkles")
+                Image(systemName: "photo.badge.plus")
                 Text("Generate")
                     .font(.headline)
             }
@@ -1269,30 +1284,83 @@ struct PanelConfigSheet: View {
         }
     }
 
+    @ViewBuilder
     private var quoteConfigSection: some View {
         let config = panel.decodeConfig(QuoteConfig.self) ?? QuoteConfig()
 
-        return Section("Quote") {
-            TextField("Quote text", text: Binding(
-                get: { config.text },
+        Section {
+            Picker("Source", selection: Binding(
+                get: { config.source },
                 set: { newValue in
                     var c = config
-                    c.text = newValue
+                    c.source = newValue
+                    if newValue == .pack && c.packID == nil {
+                        c.packID = QuotePackLibrary.allPacks.first?.id
+                    }
                     panel.encodeConfig(c)
                 }
-            ), axis: .vertical)
-            .lineLimit(2...6)
+            )) {
+                Text("My own quote").tag(QuoteConfig.Source.custom)
+                Text("Daily quote pack").tag(QuoteConfig.Source.pack)
+            }
+            .pickerStyle(.segmented)
 
-            LabeledContent("Author") {
-                TextField("Optional", text: Binding(
-                    get: { config.author },
+            if config.source == .pack {
+                Picker("Pack", selection: Binding(
+                    get: { config.packID ?? QuotePackLibrary.allPacks.first?.id ?? "" },
                     set: { newValue in
                         var c = config
-                        c.author = newValue
+                        c.packID = newValue
                         panel.encodeConfig(c)
                     }
-                ))
-                .multilineTextAlignment(.trailing)
+                )) {
+                    ForEach(QuotePackLibrary.allPacks) { pack in
+                        Label(pack.name, systemImage: pack.systemImage).tag(pack.id)
+                    }
+                }
+
+                if let packID = config.packID,
+                   let daily = QuotePackLibrary.todaysQuote(packID: packID) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Today's quote")
+                            .font(.caption.bold())
+                            .foregroundStyle(.secondary)
+                        Text("\u{201C}\(daily.text)\u{201D}")
+                            .font(.subheadline.italic())
+                        Text("— \(daily.author)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+            } else {
+                TextField("Quote text", text: Binding(
+                    get: { config.text },
+                    set: { newValue in
+                        var c = config
+                        c.text = newValue
+                        panel.encodeConfig(c)
+                    }
+                ), axis: .vertical)
+                .lineLimit(2...6)
+
+                LabeledContent("Author") {
+                    TextField("Optional", text: Binding(
+                        get: { config.author },
+                        set: { newValue in
+                            var c = config
+                            c.author = newValue
+                            panel.encodeConfig(c)
+                        }
+                    ))
+                    .multilineTextAlignment(.trailing)
+                }
+            }
+        } header: {
+            Text("Quote")
+        } footer: {
+            if config.source == .pack {
+                Text("A new quote from this pack appears each day when you generate. All quotes are classics - no internet needed.")
             }
         }
     }
@@ -1300,19 +1368,7 @@ struct PanelConfigSheet: View {
     private var habitsConfigSection: some View {
         let config = panel.decodeConfig(HabitsHeatmapConfig.self) ?? HabitsHeatmapConfig()
 
-        return Section("Habits Heatmap") {
-            LabeledContent("Habit") {
-                TextField("Habit name", text: Binding(
-                    get: { config.habitName },
-                    set: { newValue in
-                        var c = config
-                        c.habitName = newValue
-                        panel.encodeConfig(c)
-                    }
-                ))
-                .multilineTextAlignment(.trailing)
-            }
-
+        return Section {
             Stepper("Weeks: \(config.weeksToShow)", value: Binding(
                 get: { config.weeksToShow },
                 set: { newValue in
@@ -1321,6 +1377,10 @@ struct PanelConfigSheet: View {
                     panel.encodeConfig(c)
                 }
             ), in: 4...20)
+        } header: {
+            Text("Consistency Heatmap")
+        } footer: {
+            Text("Shows your real todo-completion history, one cell per day - the more you complete, the brighter the cell. Same data as the History screen.")
         }
     }
 

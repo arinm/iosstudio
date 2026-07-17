@@ -142,16 +142,25 @@ final class TemplateSharingServiceTests: XCTestCase {
         }
     }
 
-    func testExportRejectsUnavailablePanel() {
+    /// habitsHeatmap became shareable in v1.13 (real-data Consistency panel).
+    /// Export must sanitize the config: legacy habitName reset so no personal
+    /// text travels, and weeksToShow clamped to the UI range.
+    func testExportSanitizesHabitsHeatmapConfig() throws {
+        let panel = PanelConfiguration(panelType: .habitsHeatmap)
+        panel.encodeConfig(HabitsHeatmapConfig(habitName: "My private habit", weeksToShow: 99))
         let source = WallpaperTemplate(
-            name: "Unavailable Panel",
+            name: "Consistency Panel",
             isBuiltIn: false,
-            panels: [PanelConfiguration(panelType: .habitsHeatmap)]
+            panels: [panel]
         )
 
-        XCTAssertThrowsError(try TemplateSharingService.exportData(for: source)) { error in
-            XCTAssertEqual(error as? TemplateSharingError, .unsupportedPanel)
-        }
+        let data = try TemplateSharingService.exportData(for: source)
+        let imported = try TemplateSharingService.importTemplate(from: data, sortOrder: 0)
+        let importedPanel = try XCTUnwrap(imported.panels.first { $0.panelType == .habitsHeatmap })
+        let config = try XCTUnwrap(importedPanel.decodeConfig(HabitsHeatmapConfig.self))
+
+        XCTAssertEqual(config.habitName, "Habit", "personal habit name must not travel in shared files")
+        XCTAssertEqual(config.weeksToShow, 20, "weeks must be clamped to the UI maximum")
     }
 
     func testExportRejectsMoreThanMaximumPanels() {
