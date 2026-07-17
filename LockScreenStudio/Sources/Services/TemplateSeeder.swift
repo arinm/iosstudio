@@ -17,13 +17,21 @@ struct TemplateSeeder {
         defaults: UserDefaults = .standard
     ) -> Bool {
         let storedVersion = defaults.integer(forKey: "templateSeedVersion")
-        guard storedVersion < currentSeedVersion else { return true }
 
         do {
             let descriptor = FetchDescriptor<WallpaperTemplate>(
                 predicate: #Predicate { $0.isBuiltIn }
             )
             let existing = try context.fetch(descriptor)
+
+            // Trusting the version counter alone is unsafe: the stored version
+            // (UserDefaults) and the actual store can desync — e.g. the App Group
+            // migration races the widget creating an empty store first, a store is
+            // reset, or iCloud restores defaults but not the database. When that
+            // happens the version says "already seeded" while the gallery is empty.
+            // Re-seed whenever the built-ins are actually gone so it self-heals.
+            guard storedVersion < currentSeedVersion || existing.isEmpty else { return true }
+
             let desired = builtInTemplates()
             let canonicalNames = Dictionary(
                 uniqueKeysWithValues: desired.compactMap { template in

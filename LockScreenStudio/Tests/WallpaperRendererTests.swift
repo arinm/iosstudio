@@ -249,4 +249,37 @@ final class WallpaperRendererTests: XCTestCase {
             )
         }
     }
+
+    /// Regression: the stored seed version and the actual store can desync (App
+    /// Group migration racing the widget, a reset store, iCloud restoring
+    /// defaults but not the DB). When the version says "already seeded" but no
+    /// built-ins exist, the seeder must re-seed so the gallery isn't empty.
+    func testSeedSelfHealsWhenBuiltInsMissingDespiteCurrentVersion() throws {
+        let configuration = ModelConfiguration(
+            schema: SharedContainer.schema,
+            isStoredInMemoryOnly: true
+        )
+        let container = try ModelContainer(
+            for: SharedContainer.schema,
+            configurations: [configuration]
+        )
+        let context = ModelContext(container)
+        let suiteName = "TemplateSeederTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        // Version already current, but the store holds only a user's custom
+        // template — no built-ins.
+        defaults.set(5, forKey: "templateSeedVersion")
+        let custom = WallpaperTemplate(name: "My Template", isBuiltIn: false, sortOrder: 1)
+        context.insert(custom)
+        try context.save()
+
+        XCTAssertTrue(TemplateSeeder.seedIfNeeded(context: context, defaults: defaults))
+
+        let templates = try context.fetch(FetchDescriptor<WallpaperTemplate>())
+        let builtIns = templates.filter(\.isBuiltIn)
+        XCTAssertEqual(builtIns.count, BuiltInTemplateKey.allCases.count, "all built-ins should be re-seeded")
+        XCTAssertTrue(templates.contains { $0.name == "My Template" && !$0.isBuiltIn }, "custom template must survive")
+    }
 }
