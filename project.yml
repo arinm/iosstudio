@@ -22,6 +22,7 @@ targets:
     scheme:
       testTargets:
         - LockScreenStudioTests
+        - LockScreenStudioUITests
     sources:
       - path: LockScreenStudio/Sources
       - path: LockScreenStudio/Resources
@@ -71,6 +72,19 @@ targets:
         com.apple.developer.healthkit.access: []
         com.apple.security.application-groups:
           - group.com.lockscreenstudio.shared
+
+  LockScreenStudioUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: LockScreenStudio/UITests
+    dependencies:
+      - target: LockScreenStudio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockscreenstudio.uitests
+        GENERATE_INFOPLIST_FILE: true
+        TEST_TARGET_NAME: LockScreenStudio
 
   LockScreenStudioTests:
     type: bundle.unit-test

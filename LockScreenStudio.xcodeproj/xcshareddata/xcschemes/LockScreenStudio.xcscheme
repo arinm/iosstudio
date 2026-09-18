@@ -50,6 +50,17 @@
                ReferencedContainer = "container:LockScreenStudio.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "309565DF51E7455C2B7EB9C7"
+               BuildableName = "LockScreenStudioUITests.xctest"
+               BlueprintName = "LockScreenStudioUITests"
+               ReferencedContainer = "container:LockScreenStudio.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
