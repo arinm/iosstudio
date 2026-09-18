@@ -28,6 +28,9 @@ final class WallpaperNotificationRouter: NSObject, UNUserNotificationCenterDeleg
         let url: URL? = switch outcome {
         case .savedToPhotos: URL(string: "photos-redirect://")
         case .photosPermissionDenied: URL(string: UIApplication.openSettingsURLString)
+        // Nothing to jump to — tapping just opens the app, which is right when
+        // the shortcut already applied the wallpaper.
+        case .generatedOnly: nil
         }
 
         if let url {

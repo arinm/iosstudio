@@ -8,13 +8,16 @@ final class PanelDataBuilder {
 
     private let calendarService: CalendarService
     private let remindersService: any RemindersProviding
+    private let healthService: any HealthProviding
 
     init(
         calendarService: CalendarService = CalendarService(),
-        remindersService: any RemindersProviding = RemindersService.shared
+        remindersService: any RemindersProviding = RemindersService.shared,
+        healthService: any HealthProviding = HealthService.shared
     ) {
         self.calendarService = calendarService
         self.remindersService = remindersService
+        self.healthService = healthService
     }
 
     /// Builds render data for all visible panels in a template.
@@ -27,6 +30,10 @@ final class PanelDataBuilder {
         let visiblePanels = panels
             .filter(\.isVisible)
             .sorted { $0.sortOrder < $1.sortOrder }
+
+        // Fetched once for the whole template rather than per panel: two
+        // Consistency panels would otherwise mean two HealthKit queries.
+        let healthCounts = await dailyStepCounts(for: visiblePanels, date: date)
 
         var renderData: [PanelRenderData] = []
 
@@ -42,7 +49,9 @@ final class PanelDataBuilder {
             case .todo:
                 renderData.append(await buildTodoPanel(panel, todos: todos, date: date))
             case .habitsHeatmap:
-                renderData.append(buildHabitsPanel(panel, todos: todos, date: date))
+                renderData.append(
+                    buildHabitsPanel(panel, todos: todos, date: date, healthCounts: healthCounts)
+                )
             case .quote:
                 renderData.append(buildQuotePanel(panel, date: date))
             case .countdown:
@@ -239,17 +248,47 @@ final class PanelDataBuilder {
         return PanelRenderData(title: panel.isTitleShown ? panel.title : nil, lines: displayLines)
     }
 
-    /// Renders the user's real todo-completion history as a contribution-style
-    /// heatmap. Data comes from `TodoItem.completedAt` — the same source as the
-    /// in-app History view — so the wallpaper shows a genuine streak, not
-    /// sample data (which is why this panel was disabled in v1.0).
+    /// Daily step counts for the Consistency panels, or empty when none of the
+    /// visible panels asked for Health.
+    private func dailyStepCounts(
+        for panels: [PanelConfiguration],
+        date: Date
+    ) async -> [Date: Int] {
+        let weeks = panels
+            .filter { $0.panelType == .habitsHeatmap }
+            .compactMap { panel -> Int? in
+                let config = panel.decodeConfig(HabitsHeatmapConfig.self) ?? HabitsHeatmapConfig()
+                guard config.source.needsHealthAccess else { return nil }
+                return max(4, min(config.weeksToShow, HabitsHeatmapConfig.maxWeeks))
+            }
+            .max()
+
+        guard weeks != nil else { return [:] }
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: date)
+        // Always a full year, not `weeks * 7`: the grid only draws the visible
+        // columns, but the streak headline counts back past them, and a window
+        // sized to the grid would silently cap a 200-day streak at the grid width.
+        let lookback = HabitsHeatmapConfig.maxWeeks * 7
+        guard let start = calendar.date(byAdding: .day, value: -lookback, to: today) else {
+            return [:]
+        }
+        return await healthService.dailyStepCounts(from: start, to: today)
+    }
+
+    /// Renders the user's real activity history as a contribution-style
+    /// heatmap, optionally headed by the current streak. Data comes from
+    /// `TodoItem.completedAt` and/or Apple Health steps depending on the
+    /// panel's configured source — never sample data.
     private func buildHabitsPanel(
         _ panel: PanelConfiguration,
         todos: [TodoItem],
-        date: Date
+        date: Date,
+        healthCounts: [Date: Int] = [:]
     ) -> PanelRenderData {
         let config = panel.decodeConfig(HabitsHeatmapConfig.self) ?? HabitsHeatmapConfig()
-        let weeks = max(4, min(config.weeksToShow, 20))
+        let weeks = max(4, min(config.weeksToShow, HabitsHeatmapConfig.maxWeeks))
         let cal = Calendar.current
         let today = cal.startOfDay(for: date)
 
@@ -273,33 +312,57 @@ final class PanelDataBuilder {
 
         var data: [Int] = []
         data.reserveCapacity(weeks * 7)
+        // Kept alongside `data` so the streak is computed from exactly what the
+        // grid shows — the two can never tell different stories.
+        var levels: [Date: Int] = [:]
         var cursor = firstMonday
         for _ in 0..<(weeks * 7) {
             if cursor > today {
                 data.append(0) // future days in the current week stay empty
             } else {
-                data.append(Self.heatLevel(for: countsByDay[cursor, default: 0]))
+                let level = ConsistencyLevel.level(
+                    source: config.source,
+                    todoCount: countsByDay[cursor, default: 0],
+                    steps: healthCounts[cursor, default: 0]
+                )
+                data.append(level)
+                if level > 0 { levels[cursor] = level }
             }
-            cursor = cal.date(byAdding: .day, value: 1, to: cursor) ?? cursor
+            // Re-normalised every step: a midnight DST transition otherwise
+            // leaves the cursor at 01:00 and every later lookup into the
+            // startOfDay-keyed dictionaries misses, blanking the rest of the grid.
+            cursor = cal.startOfDay(for: cal.date(byAdding: .day, value: 1, to: cursor) ?? cursor)
         }
+
+        var lines: [PanelLine] = []
+        if config.showStreak {
+            // Scored over every day with data rather than only the visible
+            // columns, so a 100-day streak isn't reported as 84 just because
+            // the grid is set to 12 weeks.
+            var streakLevels = levels
+            for day in Set(countsByDay.keys).union(healthCounts.keys) where day < firstMonday {
+                let level = ConsistencyLevel.level(
+                    source: config.source,
+                    todoCount: countsByDay[day, default: 0],
+                    steps: healthCounts[day, default: 0]
+                )
+                if level > 0 { streakLevels[day] = level }
+            }
+            let streak = ConsistencyCalendar.streak(endingAt: today, levels: streakLevels, calendar: cal)
+            lines.append(.heroText("\(streak)"))
+            // "day" is attributive here, so it stays singular at any count:
+            // "1 day streak", "23 day streak".
+            lines.append(.subtitle("day streak"))
+        }
+        lines.append(.heatmapGrid(weeks: weeks, data: data))
 
         return PanelRenderData(
             title: panel.isTitleShown ? panel.title : nil,
-            lines: [.heatmapGrid(weeks: weeks, data: data)]
+            lines: lines
         )
     }
 
     /// Same thresholds as the in-app History heatmap so both surfaces agree.
-    static func heatLevel(for count: Int) -> Int {
-        switch count {
-        case 0: return 0
-        case 1: return 1
-        case 2...3: return 2
-        case 4...6: return 3
-        default: return 4
-        }
-    }
-
     // MARK: - Sample Data (shown before user adds their own)
 
     private static let sampleAgendaLines: [PanelLine] = []

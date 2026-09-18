@@ -738,7 +738,7 @@ struct EditorView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Want a fresh wallpaper every morning?")
                         .font(.subheadline.bold())
-                    Text("Pair with Apple Shortcuts - generated and saved to Photos automatically, ready to apply.")
+                    Text("Pair with Apple Shortcuts - built and applied to your Lock Screen automatically.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Button {
@@ -904,8 +904,11 @@ struct PanelConfigSheet: View {
     @State private var reminderAuthorizationStatus: ReminderAuthorizationStatus = .notDetermined
     @State private var reminderLists: [ReminderListOption] = []
     @State private var isRequestingReminderAccess = false
+    @State private var isRequestingHealthAccess = false
+    @State private var healthAuthorized = false
 
     private let remindersService: any RemindersProviding = RemindersService.shared
+    private let healthService: any HealthProviding = HealthService.shared
 
     var body: some View {
         NavigationStack {
@@ -954,6 +957,7 @@ struct PanelConfigSheet: View {
             }
             .task {
                 await refreshReminderState()
+                await refreshHealthState()
             }
         }
     }
@@ -1168,6 +1172,41 @@ struct PanelConfigSheet: View {
         await refreshReminderState()
     }
 
+    private func weeksLabel(_ weeks: Int) -> String {
+        weeks >= HabitsHeatmapConfig.maxWeeks ? "Weeks: full year" : "Weeks: \(weeks)"
+    }
+
+    private func habitsFooter(for source: HabitsHeatmapConfig.Source) -> String {
+        switch source {
+        case .todos:
+            return "Shows your real todo-completion history, one cell per day - the more you complete, the brighter the cell. Same data as the History screen."
+        case .health:
+            return "Colours each day by your step count, read from Apple Health. A full cell means you hit roughly 10,000 steps. Read-only - nothing is written back to Health."
+        case .combined:
+            return "A day counts if you either completed todos or moved. The brighter of the two wins, so a long walk still fills the cell on a day with no todos."
+        }
+    }
+
+    /// HealthKit never discloses read authorization, so "authorized" here means
+    /// a probe query actually returned data. A user who granted access but has
+    /// no step samples yet still sees the prompt button - harmless, since iOS
+    /// silently no-ops a second request once permission has been decided.
+    private func refreshHealthState() async {
+        guard healthService.isAvailable else {
+            healthAuthorized = false
+            return
+        }
+        healthAuthorized = await healthService.currentlyAuthorized()
+    }
+
+    private func requestHealthAccessIfNeeded() async {
+        guard healthService.isAvailable, !healthAuthorized else { return }
+        isRequestingHealthAccess = true
+        _ = await healthService.requestAccess()
+        isRequestingHealthAccess = false
+        await refreshHealthState()
+    }
+
     private var dateTimeConfigSection: some View {
         let config = panel.decodeConfig(DateTimeConfig.self) ?? DateTimeConfig()
 
@@ -1369,18 +1408,62 @@ struct PanelConfigSheet: View {
         let config = panel.decodeConfig(HabitsHeatmapConfig.self) ?? HabitsHeatmapConfig()
 
         return Section {
-            Stepper("Weeks: \(config.weeksToShow)", value: Binding(
+            Picker("Source", selection: Binding(
+                get: { config.source },
+                set: { newValue in
+                    var c = config
+                    c.source = newValue
+                    panel.encodeConfig(c)
+                    if newValue.needsHealthAccess {
+                        Task { await requestHealthAccessIfNeeded() }
+                    }
+                }
+            )) {
+                ForEach(HabitsHeatmapConfig.Source.allCases) { source in
+                    Text(source.displayName).tag(source)
+                }
+            }
+
+            Toggle("Show streak", isOn: Binding(
+                get: { config.showStreak },
+                set: { newValue in
+                    var c = config
+                    c.showStreak = newValue
+                    panel.encodeConfig(c)
+                }
+            ))
+
+            Stepper(weeksLabel(config.weeksToShow), value: Binding(
                 get: { config.weeksToShow },
                 set: { newValue in
                     var c = config
                     c.weeksToShow = newValue
                     panel.encodeConfig(c)
                 }
-            ), in: 4...20)
+            ), in: 4...HabitsHeatmapConfig.maxWeeks)
+
+            if config.source.needsHealthAccess {
+                if !healthService.isAvailable {
+                    Label("Health data isn't available on this device", systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if !healthAuthorized {
+                    Button {
+                        Task { await requestHealthAccessIfNeeded() }
+                    } label: {
+                        if isRequestingHealthAccess {
+                            ProgressView()
+                        } else {
+                            Label("Allow Apple Health access", systemImage: "heart.text.square")
+                        }
+                    }
+                    .disabled(isRequestingHealthAccess)
+                }
+            }
         } header: {
             Text("Consistency Heatmap")
         } footer: {
-            Text("Shows your real todo-completion history, one cell per day - the more you complete, the brighter the cell. Same data as the History screen.")
+            Text(habitsFooter(for: config.source))
         }
     }
 

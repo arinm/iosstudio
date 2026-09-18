@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Lock Screen Studio reads your daily step count to colour your Consistency widget. It is read-only, never written back, and never leaves your device.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Lock Screen Studio</string>
 	<key>CFBundleExecutable</key>

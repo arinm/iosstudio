@@ -9,6 +9,10 @@ struct SettingsView: View {
     @AppStorage("autoRefreshEnabled") private var autoRefreshEnabled = false
     @AppStorage("autoRefreshInterval") private var autoRefreshInterval: Double = 24
     @AppStorage("automationMode") private var automationMode: String = "off" // off | builtin | shortcuts
+    /// Lives in the App Group suite so the Shortcuts-triggered intents read the
+    /// same value — see `AutomationPreferences`.
+    @AppStorage(AutomationPreferences.savesToPhotosKey, store: AutomationPreferences.defaults)
+    private var automationSavesToPhotos = false
 
     @State private var calendarAuthorized = false
     @State private var showPaywall = false
@@ -111,6 +115,7 @@ struct SettingsView: View {
                 } label: {
                     Label("Open Automation Gallery", systemImage: "bolt.fill")
                 }
+                Toggle("Also save to Photos", isOn: $automationSavesToPhotos)
             }
         } header: {
             Text("Automation")
@@ -124,7 +129,9 @@ struct SettingsView: View {
         case "builtin":
             return "iOS picks an opportune moment within your chosen window - exact timing isn't guaranteed. A fresh wallpaper is saved to Photos and a notification lets you know it is ready. For precise scheduling (e.g. 7:00 AM sharp), use Shortcuts instead."
         case "shortcuts":
-            return "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. The fresh wallpaper lands in Photos and a notification lets you know it is ready. (Apple removed direct wallpaper-setting from Shortcuts in iOS 26.)"
+            return automationSavesToPhotos
+                ? "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. Pair it with the Shortcuts \"Set Wallpaper\" action and your Lock Screen updates itself, hands-free.\n\nEvery run also keeps a copy in Photos. Handy as a history, but a daily automation adds up fast."
+                : "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. Pair it with the Shortcuts \"Set Wallpaper\" action and your Lock Screen updates itself, hands-free.\n\nTurn on \"Also save to Photos\" only if you want a copy of every wallpaper in your library - the Set Wallpaper step doesn\'t need one."
         default:
             return "Off: your wallpaper won't update on its own. Pick Built-in for fire-and-forget, or Shortcuts for precise scheduling."
         }
@@ -139,10 +146,9 @@ struct SettingsView: View {
             }
             BackgroundTaskManager.shared.scheduleRefreshIfEnabled()
         case "shortcuts":
-            // BGTask path off, but we still need notifications because the
-            // entire post-iOS-26 flow is: automation runs → notification
-            // arrives → user taps to apply. Without notification permission
-            // the user has no idea their wallpaper is ready.
+            // BGTask path off, but we still want notifications: they're how the
+            // user learns a run happened at all, and they carry the "needs
+            // Photos access" recovery prompt when the archive is switched on.
             autoRefreshEnabled = false
             BackgroundTaskManager.shared.cancelScheduledRefresh()
             Task {

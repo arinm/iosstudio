@@ -22,6 +22,9 @@ enum WallpaperNotification {
     enum Outcome: String {
         case savedToPhotos = "saved"
         case photosPermissionDenied = "photos_denied"
+        /// Rendered but deliberately not archived — the user's shortcut applies
+        /// it directly through the system "Set Wallpaper" action.
+        case generatedOnly = "generated_only"
     }
 
     /// Posts a "Wallpaper Updated" notification. Best-effort — silently no-ops
@@ -43,7 +46,13 @@ enum WallpaperNotification {
         switch outcome {
         case .savedToPhotos:
             content.title = "Wallpaper Updated"
-            content.body = summary ?? "Tap to open Photos and apply your fresh Lock Screen."
+            // The summary carries no call to action, so append the one that
+            // only applies when a copy really did land in Photos.
+            content.body = summary.map { $0 + " Tap to open Photos." }
+                ?? "Tap to open Photos and apply your fresh Lock Screen."
+        case .generatedOnly:
+            content.title = "Wallpaper Updated"
+            content.body = summary ?? "Your fresh Lock Screen is ready."
         case .photosPermissionDenied:
             content.title = "Lock Screen Studio needs Photos access"
             content.body = "Your fresh wallpaper was generated but couldn't be saved. Open Settings > Privacy > Photos and allow Add Only access."

@@ -8,6 +8,23 @@ struct TodoEntry: TimelineEntry {
     let date: Date
     let todos: [TodoSnapshot]
     let totalIncomplete: Int
+    /// Todos finished *today*. The todo list itself is never day-scoped — it
+    /// is a standing list — so counting lifetime completions would leave the
+    /// Lock Screen ring pinned near full forever.
+    let completedToday: Int
+
+    /// Everything outstanding plus what has been ticked off today.
+    ///
+    /// Note this is NOT "today's todos" — the list is a standing backlog with
+    /// no per-day scoping, so any label built from it must say "left" or "open",
+    /// never "left today".
+    var outstandingTotal: Int { totalIncomplete + completedToday }
+
+    /// How much of the outstanding work was cleared today, 0...1.
+    var progress: Double {
+        guard outstandingTotal > 0 else { return 0 }
+        return Double(completedToday) / Double(outstandingTotal)
+    }
 }
 
 /// Lightweight value type so the widget doesn't carry SwiftData @Model objects
@@ -29,7 +46,8 @@ struct TodoTimelineProvider: TimelineProvider {
                 TodoSnapshot(id: UUID(), text: "Tap to mark done", isCompleted: false),
                 TodoSnapshot(id: UUID(), text: "Stays in sync with the app", isCompleted: false),
             ],
-            totalIncomplete: 2
+            totalIncomplete: 2,
+            completedToday: 1
         )
     }
 
@@ -75,10 +93,16 @@ struct TodoTimelineProvider: TimelineProvider {
         let snapshots = ordered.prefix(6).map {
             TodoSnapshot(id: $0.id, text: $0.text, isCompleted: $0.isCompleted)
         }
+        let startOfToday = Calendar.current.startOfDay(for: .now)
+        let completedToday = completed.filter {
+            ($0.completedAt ?? .distantPast) >= startOfToday
+        }.count
+
         return TodoEntry(
             date: .now,
             todos: Array(snapshots),
-            totalIncomplete: incomplete.count
+            totalIncomplete: incomplete.count,
+            completedToday: completedToday
         )
     }
 }

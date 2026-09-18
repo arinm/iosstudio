@@ -160,7 +160,11 @@ final class TemplateSharingServiceTests: XCTestCase {
         let config = try XCTUnwrap(importedPanel.decodeConfig(HabitsHeatmapConfig.self))
 
         XCTAssertEqual(config.habitName, "Habit", "personal habit name must not travel in shared files")
-        XCTAssertEqual(config.weeksToShow, 20, "weeks must be clamped to the UI maximum")
+        XCTAssertEqual(
+            config.weeksToShow,
+            HabitsHeatmapConfig.maxWeeks,
+            "weeks must be clamped to the UI maximum, which the editor raised to a full year"
+        )
     }
 
     func testExportRejectsMoreThanMaximumPanels() {

@@ -44,13 +44,15 @@ struct ShortcutsSetupSheet: View {
                     .font(.headline)
             }
 
-            Text(.init("Teach the free **Shortcuts** app one job: make you a fresh wallpaper every morning. Set it up once, about 2 minutes."))
+            Text(.init(ShortcutLibrary.hasAnyShareLink
+                ? "Teach the free **Shortcuts** app one job: build a fresh wallpaper every morning and put it straight on your Lock Screen. Pick a recipe below and add it in one tap."
+                : "Teach the free **Shortcuts** app one job: build a fresh wallpaper every morning and put it straight on your Lock Screen. Set it up once, about 2 minutes."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
             howItWorksStrip
 
-            Text(.init("Why the last tap is yours: **iOS doesn't let apps change your wallpaper by themselves.** Your iPhone does everything else automatically."))
+            Text(.init("**Lock Screen Studio can't change your wallpaper by itself** - iOS doesn't allow that. The Shortcuts app can, so your automation does it for you."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -64,11 +66,11 @@ struct ShortcutsSetupSheet: View {
     /// what the single manual tap is — instead of reading two paragraphs.
     private var howItWorksStrip: some View {
         HStack(spacing: 4) {
-            howItWorksStage(icon: "arrow.triangle.2.circlepath", label: "Generates\nitself", automatic: true)
+            howItWorksStage(icon: "clock.badge.checkmark", label: "Trigger\nfires", automatic: true)
             stageArrow
-            howItWorksStage(icon: "photo.on.rectangle", label: "Saved to\nPhotos", automatic: true)
+            howItWorksStage(icon: "arrow.triangle.2.circlepath", label: "Wallpaper\nbuilt", automatic: true)
             stageArrow
-            howItWorksStage(icon: "hand.tap.fill", label: "One tap\nto apply", automatic: false)
+            howItWorksStage(icon: "lock.iphone", label: "Lock Screen\nupdated", automatic: true)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -194,11 +196,16 @@ struct ShortcutsSetupSheet: View {
             .disabled(prominent)
 
             if isExpanded {
+                let shareLink = ShortcutLibrary.shareLink(for: recipe.id)
                 VStack(alignment: .leading, spacing: 14) {
                     Divider()
 
+                    if let shareLink {
+                        addToShortcutsButton(shareLink)
+                    }
+
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Step by step")
+                        Text(shareLink == nil ? "Step by step" : "Or build it yourself")
                             .font(.caption.bold())
                             .foregroundStyle(.secondary)
                             .tracking(0.5)
@@ -272,6 +279,34 @@ struct ShortcutsSetupSheet: View {
         )
     }
 
+    /// Primary path once a ready-made shortcut has been published: one tap to
+    /// import, instead of a seven-step walkthrough.
+    private func addToShortcutsButton(_ link: URL) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Button {
+                UIApplication.shared.open(link)
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "square.and.arrow.down")
+                        .font(.subheadline.bold())
+                    Text("Add to Shortcuts")
+                        .font(.subheadline.bold())
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.indigo)
+                .foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
+
+            Text(.init("Shortcuts opens with everything filled in. Tap **Add Shortcut**, then switch the automation on - iOS deliberately ships shared automations turned off."))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     // MARK: - Custom Setup (collapsed)
 
     @State private var showCustom = false
@@ -300,8 +335,9 @@ struct ShortcutsSetupSheet: View {
                     stepRow(number: 1, text: "Open the **Shortcuts** app and tap the **Automation** tab.")
                     stepRow(number: 2, text: "Create a new automation with any trigger (Time of Day, Focus mode, Location, Alarm, Sunset, etc.).")
                     stepRow(number: 3, text: "Add action: **\"Generate Today's Wallpaper\"** or **\"Generate Wallpaper\"** (search by name).")
-                    stepRow(number: 4, text: "Set **Automation: Run Immediately** so it triggers silently. Leave **Notify When Run** off.")
-                    stepRow(number: 5, text: "Tap **Done**. When the automation runs, the wallpaper lands in your Photos with a notification - tap to apply.")
+                    stepRow(number: 4, text: "Add the system **\"Set Wallpaper\"** action right below it, targeting **Lock Screen**. It consumes the image step 3 produced.")
+                    stepRow(number: 5, text: "Set **Automation: Run Immediately** so it triggers silently. Leave **Notify When Run** off.")
+                    stepRow(number: 6, text: "Tap **Done**. From now on your Lock Screen updates itself on that trigger.")
                 }
                 .padding(14)
                 .background(Color(.secondarySystemBackground))
@@ -333,8 +369,8 @@ struct ShortcutsSetupSheet: View {
                 .foregroundStyle(.secondary)
             tipRow(icon: "bell.badge", text: "Didn't get a notification? Make sure Lock Screen Studio has notification permission enabled in your iPhone's Settings app → Notifications → Lock Screen Studio.")
             tipRow(icon: "play.circle", text: "Test now without waiting: Shortcuts → Automation → tap your automation → tap the ▶ triangle.")
-            tipRow(icon: "photo.on.rectangle", text: "Don't see the new wallpaper in Photos? Make sure the app has permission: Settings → Privacy & Security → Photos → Lock Screen Studio → Add Only or Full Access.")
-            tipRow(icon: "exclamationmark.circle", text: "Why the manual final step? Apple removed the \"Set Wallpaper\" Shortcuts action in iOS 26. The workflow now is automation → notification → open Photos → apply the new wallpaper.")
+            tipRow(icon: "photo.on.rectangle", text: "Want a copy in Photos too? Automations don't save one by default. Turn on **Also save to Photos** in Settings → Automation, and allow Photos access when asked.")
+            tipRow(icon: "photo.badge.checkmark", text: "Wallpaper didn't change? Check that **Set Wallpaper** sits directly below the Generate step and is set to **Lock Screen**. If its image slot looks empty, tap it and pick the variable from the step above.")
         }
     }
 
@@ -387,10 +423,10 @@ struct ShortcutsSetupSheet: View {
         let verify: String
     }
 
-    /// Shared "what happens when it runs" block reused by every recipe to keep
-    /// the iOS-26 manual-apply flow explained consistently in one place.
-    private static let manualApplyVerify =
-        "You'll get a **\"Wallpaper Updated\"** notification. Tap it - Photos opens. Your wallpaper is the newest image: tap **Share** → **Use as Wallpaper** → **Lock Screen**. Done."
+    /// Shared "what happens when it runs" block reused by every recipe so the
+    /// hands-off flow is explained consistently in one place.
+    private static let autoApplyVerify =
+        "Lock your iPhone and look - the new wallpaper is already there. Don't want to wait for the trigger? Shortcuts → your automation → tap the ▶ triangle to run it now."
 
     static let recipes: [AutomationRecipe] = [
         AutomationRecipe(
@@ -405,9 +441,10 @@ struct ShortcutsSetupSheet: View {
                 "Pick **Time of Day** from the list.",
                 "Set a time like **7:00 AM**, make sure **Daily** is selected, then tap **Next**.",
                 "In the search bar, type **Generate Today's Wallpaper** and tap the result under **Lock Screen Studio** (that's this app).",
+                "Tap **+** underneath, search **Set Wallpaper**, and add it. Make sure it targets **Lock Screen** - it picks up the image from the step above automatically.",
                 "Tap **Next**, set Automation to **Run Immediately**, leave **Notify When Run** off, and tap **Done**.",
             ],
-            verify: manualApplyVerify
+            verify: autoApplyVerify
         ),
         AutomationRecipe(
             id: "alarm",
@@ -419,9 +456,10 @@ struct ShortcutsSetupSheet: View {
                 "Tap **New Automation** (first time) or **+** (top right) and pick **Alarm**.",
                 "Choose **Is Stopped** and tap **Next**.",
                 "Search **Generate Today's Wallpaper** and tap it.",
+                "Search **Set Wallpaper** and add it below. Confirm it targets **Lock Screen**.",
                 "Tap **Next**. Set Automation to **Run Immediately**, leave **Notify When Run** off, tap **Done**.",
             ],
-            verify: manualApplyVerify
+            verify: autoApplyVerify
         ),
         AutomationRecipe(
             id: "focus",
@@ -433,10 +471,11 @@ struct ShortcutsSetupSheet: View {
                 "Tap **New Automation** or **+**, then pick **Focus**.",
                 "Tap the Focus you want (e.g. **Work**), choose **Is Turned On**, then **Next**.",
                 "Search **Generate Wallpaper** and tap it. In the action, pick your work template and choose Dark theme.",
+                "Search **Set Wallpaper** and add it below, targeting **Lock Screen**.",
                 "Tap **Next**. Set Automation to **Run Immediately**, leave **Notify When Run** off, tap **Done**.",
                 "To also get a light version when Focus turns off: repeat from step 2, but choose **Is Turned Off** and a Light theme.",
             ],
-            verify: manualApplyVerify
+            verify: autoApplyVerify
         ),
         AutomationRecipe(
             id: "location",
@@ -448,9 +487,10 @@ struct ShortcutsSetupSheet: View {
                 "Tap **New Automation** or **+**, then pick **Arrive**.",
                 "Tap **Location**, search for your work address, select it, then tap **Done** and **Next**.",
                 "Search **Generate Wallpaper** and tap it. Pick the **Meeting Day** template.",
+                "Search **Set Wallpaper** and add it below, targeting **Lock Screen**.",
                 "Tap **Next**. Set Automation to **Run Immediately**, leave **Notify When Run** off, tap **Done**.",
             ],
-            verify: manualApplyVerify
+            verify: autoApplyVerify
         ),
         AutomationRecipe(
             id: "sunset",
@@ -461,10 +501,11 @@ struct ShortcutsSetupSheet: View {
                 "Open the **Shortcuts** app and tap the **Automation** tab.",
                 "Tap **New Automation** or **+**, then pick **Sunset**. Tap **Next**.",
                 "Search **Generate Wallpaper** and tap it. Pick a template and Dark theme.",
+                "Search **Set Wallpaper** and add it below, targeting **Lock Screen**.",
                 "Tap **Next**. Set Automation to **Run Immediately**, leave **Notify When Run** off, tap **Done**.",
                 "To also get a light version at sunrise: repeat from step 2 with **Sunrise** and a Light theme.",
             ],
-            verify: manualApplyVerify
+            verify: autoApplyVerify
         ),
     ]
 }

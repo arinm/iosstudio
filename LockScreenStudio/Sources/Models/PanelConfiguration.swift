@@ -245,8 +245,63 @@ struct DateTimeConfig: Codable {
 }
 
 struct HabitsHeatmapConfig: Codable {
+
+    /// Where the grid's colour comes from.
+    enum Source: String, Codable, CaseIterable, Identifiable {
+        /// Todos ticked inside this app — the original behaviour.
+        case todos
+        /// Daily step count from Apple Health.
+        case health
+        /// A day counts if either source shows activity. "Did you show up?"
+        case combined
+
+        var id: String { rawValue }
+
+        var displayName: String {
+            switch self {
+            case .todos: return "Todos"
+            case .health: return "Apple Health"
+            case .combined: return "Both"
+            }
+        }
+
+        /// True when this source needs Health authorization before it renders.
+        var needsHealthAccess: Bool { self != .todos }
+    }
+
+    /// 53 covers a full year; the renderer shrinks cells to fit and clamps at
+    /// a 4pt floor, so the widest grid still draws legibly.
+    static let maxWeeks = 53
+
     var habitName: String = "Habit"
     var weeksToShow: Int = 12
+    var source: Source = .todos
+    /// Shows the current streak as a headline above the grid.
+    var showStreak: Bool = true
+
+    init(
+        habitName: String = "Habit",
+        weeksToShow: Int = 12,
+        source: Source = .todos,
+        showStreak: Bool = true
+    ) {
+        self.habitName = habitName
+        self.weeksToShow = weeksToShow
+        self.source = source
+        self.showStreak = showStreak
+    }
+
+    /// Hand-written so panels saved before `source` existed still decode with
+    /// their habitName and weeksToShow intact. Synthesized Codable throws on a
+    /// missing key, and `decodeConfig` swallows the error and falls back to a
+    /// fresh default — which would silently reset every existing user's panel.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        habitName = try container.decodeIfPresent(String.self, forKey: .habitName) ?? "Habit"
+        weeksToShow = try container.decodeIfPresent(Int.self, forKey: .weeksToShow) ?? 12
+        source = try container.decodeIfPresent(Source.self, forKey: .source) ?? .todos
+        showStreak = try container.decodeIfPresent(Bool.self, forKey: .showStreak) ?? true
+    }
 }
 
 struct QuoteConfig: Codable {

@@ -11,8 +11,14 @@ import UIKit
 struct GenerateTodayWallpaperIntent: AppIntent {
     static let title: LocalizedStringResource = "Generate Today's Wallpaper"
     static let description = IntentDescription(
-        "Creates a wallpaper image with today's agenda, priorities, and tasks.",
-        categoryName: "Wallpaper"
+        """
+        Builds a fresh lock screen wallpaper from today's agenda, priorities, and tasks, and returns it as an image. Follow this with the Set Wallpaper action to change your lock screen automatically.
+        """,
+        categoryName: "Wallpaper",
+        searchKeywords: [
+            "wallpaper", "lock screen", "background", "daily", "today",
+            "refresh", "change wallpaper", "morning", "agenda",
+        ]
     )
     static let openAppWhenRun = false
 
@@ -46,26 +52,7 @@ struct GenerateTodayWallpaperIntent: AppIntent {
             date: .now
         )
 
-        // Save to Photos automatically so the user gets the new wallpaper in
-        // their library without needing a separate "Save to Photo Album" step.
-        // Apple removed the system "Set Wallpaper" Shortcuts action in iOS 26
-        // so the user applies it manually with one tap from the notification.
-        var photosOutcome: WallpaperNotification.Outcome = .savedToPhotos
-        if let image = UIImage(data: result.imageData) {
-            do {
-                try await service.saveToPhotos(image)
-            } catch ExportService.PhotosError.permissionDenied {
-                photosOutcome = .photosPermissionDenied
-            } catch {
-                // Other failures (write error, etc.) fall through silently —
-                // the IntentFile is still returned so power-user shortcuts
-                // chained after this can still consume the image.
-            }
-        }
-        let summary = photosOutcome == .savedToPhotos
-            ? await WallpaperNotificationSummary.build(todos: todos)
-            : nil
-        await WallpaperNotification.sendRefreshed(outcome: photosOutcome, summary: summary)
+        await deliverWallpaperSideEffects(result: result, todos: todos, service: service)
 
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
@@ -86,8 +73,14 @@ struct GenerateTodayWallpaperIntent: AppIntent {
 struct GenerateWallpaperIntent: AppIntent {
     static let title: LocalizedStringResource = "Generate Wallpaper"
     static let description = IntentDescription(
-        "Creates a wallpaper image using a specific template.",
-        categoryName: "Wallpaper"
+        """
+        Builds a lock screen wallpaper from a template you choose and returns it as an image. Follow this with the Set Wallpaper action to change your lock screen automatically.
+        """,
+        categoryName: "Wallpaper",
+        searchKeywords: [
+            "wallpaper", "lock screen", "background", "template", "theme",
+            "change wallpaper", "set wallpaper",
+        ]
     )
     static let openAppWhenRun = false
 
@@ -142,22 +135,7 @@ struct GenerateWallpaperIntent: AppIntent {
             date: .now
         )
 
-        var photosOutcome: WallpaperNotification.Outcome = .savedToPhotos
-        if let image = UIImage(data: result.imageData) {
-            do {
-                try await service.saveToPhotos(image)
-            } catch ExportService.PhotosError.permissionDenied {
-                photosOutcome = .photosPermissionDenied
-            } catch {
-                // Other failures (write error, etc.) fall through silently —
-                // the IntentFile is still returned so power-user shortcuts
-                // chained after this can still consume the image.
-            }
-        }
-        let summary = photosOutcome == .savedToPhotos
-            ? await WallpaperNotificationSummary.build(todos: todos)
-            : nil
-        await WallpaperNotification.sendRefreshed(outcome: photosOutcome, summary: summary)
+        await deliverWallpaperSideEffects(result: result, todos: todos, service: service)
 
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
@@ -178,8 +156,14 @@ struct GenerateWallpaperIntent: AppIntent {
 struct GenerateWallpaperWithParametersIntent: AppIntent {
     static let title: LocalizedStringResource = "Generate Wallpaper (Advanced)"
     static let description = IntentDescription(
-        "Creates a wallpaper image with full control over date, theme, device preset, and format.",
-        categoryName: "Wallpaper"
+        """
+        Builds a lock screen wallpaper with full control over date, theme, device preset, and file format. Follow this with the Set Wallpaper action to change your lock screen automatically.
+        """,
+        categoryName: "Wallpaper",
+        searchKeywords: [
+            "wallpaper", "lock screen", "background", "advanced", "custom",
+            "change wallpaper", "set wallpaper",
+        ]
     )
     static let openAppWhenRun = false
 
@@ -253,22 +237,7 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
             date: targetDate
         )
 
-        var photosOutcome: WallpaperNotification.Outcome = .savedToPhotos
-        if let image = UIImage(data: result.imageData) {
-            do {
-                try await service.saveToPhotos(image)
-            } catch ExportService.PhotosError.permissionDenied {
-                photosOutcome = .photosPermissionDenied
-            } catch {
-                // Other failures (write error, etc.) fall through silently —
-                // the IntentFile is still returned so power-user shortcuts
-                // chained after this can still consume the image.
-            }
-        }
-        let summary = photosOutcome == .savedToPhotos
-            ? await WallpaperNotificationSummary.build(todos: todos)
-            : nil
-        await WallpaperNotification.sendRefreshed(outcome: photosOutcome, summary: summary)
+        await deliverWallpaperSideEffects(result: result, todos: todos, service: service)
 
         let fileURL = try service.saveToTemporaryFile(result)
         let intentFile = IntentFile(
@@ -280,6 +249,44 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
         AutomationStatus.recordRun()
         return .result(value: intentFile)
     }
+}
+
+// MARK: - Shared post-render side effects
+
+/// Optional Photos archive plus the "ready" notification, shared by all three
+/// generate intents so the behaviour can't drift between them.
+///
+/// Photos is deliberately NOT on the critical path: the recommended recipe
+/// feeds the returned `IntentFile` straight into the system "Set Wallpaper"
+/// action. See `AutomationPreferences.savesToPhotos`.
+@MainActor
+private func deliverWallpaperSideEffects(
+    result: WallpaperRenderer.RenderResult,
+    todos: [TodoItem],
+    service: ExportService
+) async {
+    var outcome: WallpaperNotification.Outcome = .generatedOnly
+
+    if AutomationPreferences.savesToPhotos, let image = UIImage(data: result.imageData) {
+        do {
+            try await service.saveToPhotos(image)
+            // Only claim success after the save actually returned: the
+            // notification deep-links into Photos, and pointing the user at a
+            // library with no new image is worse than saying nothing.
+            outcome = .savedToPhotos
+        } catch ExportService.PhotosError.permissionDenied {
+            outcome = .photosPermissionDenied
+        } catch {
+            // Disk full, iCloud error, etc. The IntentFile is still returned so
+            // a shortcut chaining "Set Wallpaper" still works; the notification
+            // just stays on the neutral .generatedOnly copy.
+        }
+    }
+
+    let summary = outcome == .photosPermissionDenied
+        ? nil
+        : await WallpaperNotificationSummary.build(todos: todos)
+    await WallpaperNotification.sendRefreshed(outcome: outcome, summary: summary)
 }
 
 // MARK: - Intent Enums (Shortcuts Parameters)

@@ -440,8 +440,9 @@ final class WallpaperRenderer {
 
             case .heatmapGrid(let weeks, let data):
                 // Draw a GitHub-style contribution heatmap grid
-                let gap: CGFloat = 2
-                let cellSize: CGFloat = max(4, min(8, (rect.width - CGFloat(weeks - 1) * gap) / CGFloat(weeks)))
+                let (cellSize, gap) = Self.heatmapMetrics(
+                    weeks: weeks, width: rect.width, theme: theme
+                )
                 let cornerRadius: CGFloat = cellSize * 0.25
 
                 for week in 0..<weeks {
@@ -606,8 +607,9 @@ struct PanelRenderData {
             case .subtitle:
                 height += theme.bodyFontSize + theme.lineSpacing
             case .heatmapGrid(let weeks, _):
-                let cellSize: CGFloat = max(4, min(8, (width - CGFloat(weeks - 1) * 2) / CGFloat(weeks)))
-                let gap: CGFloat = 2
+                let (cellSize, gap) = WallpaperRenderer.heatmapMetrics(
+                    weeks: weeks, width: width, theme: theme
+                )
                 height += 7 * (cellSize + gap) + theme.lineSpacing
             case .calendarGrid:
                 let cellSize = min((width - 6 * 3) / 7, theme.bodyFontSize * 1.2)
@@ -620,6 +622,31 @@ struct PanelRenderData {
         }
 
         return height
+    }
+}
+
+extension WallpaperRenderer {
+
+    /// Cell and gap size for the contribution grid, shared by the layout pass
+    /// and the drawing pass so the reserved height always matches what is
+    /// painted.
+    ///
+    /// Sizes derive from `bodyFontSize` rather than absolute units: the
+    /// renderer works in device pixels, so the old hard-coded 8-unit ceiling
+    /// drew a grid roughly 2.7pt wide — invisible on a real wallpaper. The
+    /// monthly calendar grid already scaled this way; the heatmap was the
+    /// outlier.
+    nonisolated static func heatmapMetrics(
+        weeks: Int,
+        width: CGFloat,
+        theme: RenderTheme
+    ) -> (cell: CGFloat, gap: CGFloat) {
+        let gap = max(1, theme.bodyFontSize * 0.09)
+        let available = width - CGFloat(max(0, weeks - 1)) * gap
+        // Capped so a short 4-week grid doesn't render as giant slabs, and
+        // floored so a full 53-week year still has a visible cell.
+        let cell = max(gap * 2, min(theme.bodyFontSize * 1.1, available / CGFloat(max(1, weeks))))
+        return (cell, gap)
     }
 }
 

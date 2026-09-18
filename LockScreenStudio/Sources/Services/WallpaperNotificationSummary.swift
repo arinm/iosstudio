@@ -2,7 +2,11 @@ import Foundation
 
 /// Builds the one-line day summary used in the "Wallpaper Updated"
 /// notification, so the notification is useful before the user even taps it:
-/// "3 events today, first at 09:00 · 5 todos open. Tap to open Photos and apply."
+/// "3 events today, first at 09:00 · 5 todos open."
+///
+/// Deliberately carries no call to action: the same summary is used whether the
+/// wallpaper was archived to Photos or applied straight from the shortcut, and
+/// only the caller knows which.
 ///
 /// Lives in the app target (not Shared) because it depends on CalendarService;
 /// the widget never sends this notification.
@@ -44,6 +48,6 @@ enum WallpaperNotificationSummary {
         }
 
         guard !parts.isEmpty else { return nil }
-        return parts.joined(separator: " · ") + ". Tap to open Photos and apply."
+        return parts.joined(separator: " · ") + "."
     }
 }

@@ -293,7 +293,7 @@ enum TemplateSharingService {
                 // and clamp weeks to the UI's allowed range.
                 var config = try JSONDecoder().decode(HabitsHeatmapConfig.self, from: data)
                 config.habitName = "Habit"
-                config.weeksToShow = max(4, min(config.weeksToShow, 20))
+                config.weeksToShow = max(4, min(config.weeksToShow, HabitsHeatmapConfig.maxWeeks))
                 return try JSONEncoder().encode(config)
             case .quote:
                 var config = try JSONDecoder().decode(QuoteConfig.self, from: data)

@@ -123,7 +123,7 @@ struct OnboardingView: View {
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
 
-                Text("Pair with Apple Shortcuts so your iPhone generates and saves a fresh wallpaper to Photos every morning, ready for you to apply.")
+                Text("Pair with Apple Shortcuts so your iPhone builds a fresh wallpaper every morning and puts it on your Lock Screen by itself.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -131,9 +131,9 @@ struct OnboardingView: View {
             }
 
             VStack(spacing: 10) {
-                automationBullet(icon: "sunrise.fill", text: "Generates at 7 AM, saved to Photos")
-                automationBullet(icon: "bell.badge.fill", text: "Notification when it's ready")
-                automationBullet(icon: "hand.tap.fill", text: "One tap to apply - that's it")
+                automationBullet(icon: "sunrise.fill", text: "Builds itself at 7 AM")
+                automationBullet(icon: "lock.iphone", text: "Applied to your Lock Screen")
+                automationBullet(icon: "hand.raised.slash.fill", text: "No tapping - fully hands-free")
             }
             .padding(.horizontal, 32)
 

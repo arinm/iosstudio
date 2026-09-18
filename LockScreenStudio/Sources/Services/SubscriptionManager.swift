@@ -30,12 +30,26 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var errorMessage: String?
     private let honorsDebugOverride: Bool
 
+    /// Launch argument that forces Pro on for the whole process.
+    ///
+    /// UI tests need this rather than the Settings "Force Pro" toggle: `isPro`
+    /// is a computed property with no `objectWillChange`, so flipping the
+    /// stored flag mid-session does not reliably re-render views that already
+    /// read it. A launch argument is true from the first frame.
+    static let uiTestProArgument = "--uitest-pro"
+
     /// True if the user has an active Pro subscription.
-    /// In DEBUG builds, set "debug_force_pro" in UserDefaults to override.
+    /// In DEBUG builds, pass `--uitest-pro` at launch or set "debug_force_pro"
+    /// in UserDefaults to override.
     var isPro: Bool {
         #if DEBUG
-        if honorsDebugOverride && UserDefaults.standard.bool(forKey: "debug_force_pro") {
-            return true
+        if honorsDebugOverride {
+            if ProcessInfo.processInfo.arguments.contains(Self.uiTestProArgument) {
+                return true
+            }
+            if UserDefaults.standard.bool(forKey: "debug_force_pro") {
+                return true
+            }
         }
         #endif
         return !purchasedProductIDs.isEmpty

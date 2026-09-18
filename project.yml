@@ -37,6 +37,11 @@ targets:
     entitlements:
       path: LockScreenStudio/LockScreenStudio.entitlements
       properties:
+        # XcodeGen regenerates the .entitlements file from these properties on
+        # every `xcodegen generate`, so keys added to the file by hand are lost.
+        # They have to be declared here.
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
         com.apple.security.application-groups:
           - group.com.lockscreenstudio.shared
 
@@ -60,6 +65,10 @@ targets:
     entitlements:
       path: LockScreenStudioWidget/LockScreenStudioWidget.entitlements
       properties:
+        # The Year widget queries HealthKit from inside the extension, so it
+        # needs the entitlement in its own right.
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
         com.apple.security.application-groups:
           - group.com.lockscreenstudio.shared
 

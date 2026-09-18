@@ -16,6 +16,7 @@ struct LockScreenStudioApp: App {
         // taps are routed (straight to Photos on a successful refresh).
         WallpaperNotificationRouter.install()
         migrateAutomationModeIfNeeded()
+        AutomationPreferences.migrateSavesToPhotosIfNeeded()
         AnalyticsService.shared.track(
             .appOpened,
             properties: [
