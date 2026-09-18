@@ -47,6 +47,8 @@
 	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Lock Screen Studio reads your calendar events to display them on your wallpaper. Your data never leaves your device.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Lock Screen Studio never writes anything to Health. It only reads your daily step count, to colour the Consistency panel on your wallpaper.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Lock Screen Studio reads your daily step count to colour the Consistency panel on your wallpaper. It is read-only, never written back, and never leaves your device.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
