@@ -439,7 +439,7 @@ enum DeviceEnum: String, AppEnum, CaseIterable {
         .iPhone18Pro: "iPhone 18 Pro",
         .iPhone17ProMax: "iPhone 17 Pro Max",
         .iPhone17Pro: "iPhone 17 Pro",
-        .iPhone17Air: "iPhone 17 Air",
+        .iPhone17Air: "iPhone Air",
         .iPhone17: "iPhone 17",
         .iPhone16ProMax: "iPhone 16 Pro Max",
         .iPhone16Pro: "iPhone 16 Pro",

@@ -132,3 +132,58 @@ final class DeviceListConsistencyTests: XCTestCase {
         )
     }
 }
+
+// MARK: - Ambiguous panels
+
+/// `DevicePreset.current` falls back to nearest-resolution matching, and
+/// `min(by:)` is stable — on a tie it returns whichever preset is listed first.
+/// So two devices sharing a panel are indistinguishable by resolution, and the
+/// newer one silently wins. That is how adding the iPhone 18 made real iPhone
+/// 17 Pro devices report themselves as iPhone 18 Pro.
+final class AmbiguousPanelTests: XCTestCase {
+
+    /// Presets grouped by the panel they share, keeping only the ambiguous ones.
+    private var collidingGroups: [[DevicePreset]] {
+        Dictionary(grouping: DevicePreset.allPresets) { "\($0.screenWidth)x\($0.screenHeight)" }
+            .values
+            .filter { $0.count > 1 }
+            .map { $0 }
+    }
+
+    func testDevicesSharingAPanelAreDistinguishableByHardware() {
+        for group in collidingGroups {
+            let withoutIdentifiers = group.filter(\.modelIdentifiers.isEmpty)
+            XCTAssertTrue(
+                withoutIdentifiers.isEmpty,
+                """
+                These presets share a panel but have no hardware identifier, so \
+                `current` will label them as whichever is listed first: \
+                \(withoutIdentifiers.map(\.id).sorted())
+                """
+            )
+        }
+    }
+
+    func testNoTwoPresetsClaimTheSameHardware() {
+        var seen: [String: String] = [:]
+        for preset in DevicePreset.allPresets {
+            for identifier in preset.modelIdentifiers {
+                if let existing = seen[identifier] {
+                    XCTFail("\(identifier) is claimed by both \(existing) and \(preset.id)")
+                }
+                seen[identifier] = preset.id
+            }
+        }
+    }
+
+    func testIPhone17And18ProAreNotConfused() {
+        let ids = ["iphone17pro", "iphone17promax", "iphone18pro", "iphone18promax"]
+        for id in ids {
+            let preset = DevicePreset.allPresets.first { $0.id == id }
+            XCTAssertFalse(
+                preset?.modelIdentifiers.isEmpty ?? true,
+                "\(id) shares its panel with another phone and needs a hardware identifier"
+            )
+        }
+    }
+}
