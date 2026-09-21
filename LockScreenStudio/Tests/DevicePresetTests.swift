@@ -69,3 +69,66 @@ final class DevicePresetTests: XCTestCase {
         XCTAssertEqual(iphone16ProMax?.screenHeight, 2868)
     }
 }
+
+// MARK: - Device list drift
+
+/// The device list lives in two places — `DevicePreset.allPresets` for the app
+/// and `DeviceEnum` for Shortcuts — and nothing in the compiler ties them
+/// together. `DeviceEnum.devicePreset` falls back to `.current` on an unknown
+/// id, so a list that drifts fails silently instead of breaking the build.
+final class DeviceListConsistencyTests: XCTestCase {
+
+    private var presetIDs: Set<String> {
+        Set(DevicePreset.allPresets.map(\.id))
+    }
+
+    private var enumIDs: Set<String> {
+        Set(DeviceEnum.allCases.map(\.rawValue)).subtracting(["auto"])
+    }
+
+    func testEveryShortcutsDeviceResolvesToARealPreset() {
+        let missing = enumIDs.subtracting(presetIDs)
+        XCTAssertTrue(
+            missing.isEmpty,
+            "Shortcuts offers devices with no matching preset: \(missing.sorted())"
+        )
+    }
+
+    /// The direction that catches "a new phone was added to the app but not to
+    /// Shortcuts" — which is exactly how the iPhone 18 was missed.
+    func testEveryPresetIsOfferedInShortcuts() {
+        let missing = presetIDs.subtracting(enumIDs)
+        XCTAssertTrue(
+            missing.isEmpty,
+            "Devices missing from the Shortcuts picker: \(missing.sorted())"
+        )
+    }
+
+    func testEveryShortcutsDeviceHasADisplayName() {
+        for device in DeviceEnum.allCases {
+            XCTAssertNotNil(
+                DeviceEnum.caseDisplayRepresentations[device],
+                "\(device.rawValue) has no display name in Shortcuts"
+            )
+        }
+    }
+
+    func testIPhone18PresetsMatchTheRealPanels() {
+        let pro = DevicePreset.allPresets.first { $0.id == "iphone18pro" }
+        XCTAssertEqual(pro?.screenWidth, 1206)
+        XCTAssertEqual(pro?.screenHeight, 2622)
+
+        let proMax = DevicePreset.allPresets.first { $0.id == "iphone18promax" }
+        XCTAssertEqual(proMax?.screenWidth, 1320)
+        XCTAssertEqual(proMax?.screenHeight, 2868)
+    }
+
+    /// Regression: the fallback used to be `allPresets[2]`, which pointed at a
+    /// different phone every time a new one was added to the top of the list.
+    func testCurrentFallsBackToAKnownDevice() {
+        XCTAssertNotNil(
+            DevicePreset.allPresets.first { $0.id == "iphone17pro" },
+            "the documented fallback device must exist in the list"
+        )
+    }
+}

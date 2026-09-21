@@ -393,8 +393,11 @@ enum ThemeEnum: String, AppEnum {
     ]
 }
 
-enum DeviceEnum: String, AppEnum {
+enum DeviceEnum: String, AppEnum, CaseIterable {
     case auto
+    // iPhone 18
+    case iPhone18ProMax = "iphone18promax"
+    case iPhone18Pro = "iphone18pro"
     // iPhone 17
     case iPhone17ProMax = "iphone17promax"
     case iPhone17Pro = "iphone17pro"
@@ -432,6 +435,8 @@ enum DeviceEnum: String, AppEnum {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Device")
     static let caseDisplayRepresentations: [DeviceEnum: DisplayRepresentation] = [
         .auto: "Auto-detect",
+        .iPhone18ProMax: "iPhone 18 Pro Max",
+        .iPhone18Pro: "iPhone 18 Pro",
         .iPhone17ProMax: "iPhone 17 Pro Max",
         .iPhone17Pro: "iPhone 17 Pro",
         .iPhone17Air: "iPhone 17 Air",

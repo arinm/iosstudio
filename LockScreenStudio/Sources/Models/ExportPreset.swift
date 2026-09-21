@@ -82,6 +82,29 @@ struct DevicePreset: Identifiable, Hashable {
 extension DevicePreset {
     static let allPresets: [DevicePreset] = [
 
+        // MARK: iPhone 18
+        //
+        // Same panels as the 17 Pro line, so renders are pixel-identical and
+        // `current` already resolved correctly on these devices. Listed so the
+        // picker names the phone the user actually holds.
+
+        DevicePreset(
+            id: "iphone18promax",
+            name: "iPhone 18 Pro Max",
+            screenWidth: 1320,
+            screenHeight: 2868,
+            safeArea: .init(top: 450, bottom: 102, leading: 0, trailing: 0),
+            hasDynamicIsland: true
+        ),
+        DevicePreset(
+            id: "iphone18pro",
+            name: "iPhone 18 Pro",
+            screenWidth: 1206,
+            screenHeight: 2622,
+            safeArea: .init(top: 430, bottom: 96, leading: 0, trailing: 0),
+            hasDynamicIsland: true
+        ),
+
         // MARK: iPhone 17
 
         DevicePreset(
@@ -322,6 +345,11 @@ extension DevicePreset {
                       abs(CGFloat(preset2.screenHeight) - screenSize.height)
             return d1 < d2
         })
-        return match ?? allPresets[2] // Default to iPhone 15 Pro
+        // Looked up by id, not index: the list grows at the top with each new
+        // phone, and the old `allPresets[2]` silently pointed at a different
+        // device every time it did.
+        return match
+            ?? allPresets.first { $0.id == "iphone17pro" }
+            ?? allPresets[0]
     }
 }
