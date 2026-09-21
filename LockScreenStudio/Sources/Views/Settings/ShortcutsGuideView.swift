@@ -65,15 +65,15 @@ struct ShortcutsSetupSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    /// Visual 3-stage flow so the user sees at a glance what is automatic and
-    /// what the single manual tap is — instead of reading two paragraphs.
+    /// Visual 3-stage flow so the user sees at a glance that nothing is left
+    /// for them to do — instead of reading two paragraphs.
     private var howItWorksStrip: some View {
         HStack(spacing: 4) {
-            howItWorksStage(icon: "clock.badge.checkmark", label: "Trigger\nfires", automatic: true)
+            howItWorksStage(icon: "clock.badge.checkmark", label: "Trigger\nfires")
             stageArrow
-            howItWorksStage(icon: "arrow.triangle.2.circlepath", label: "Wallpaper\nbuilt", automatic: true)
+            howItWorksStage(icon: "arrow.triangle.2.circlepath", label: "Wallpaper\nbuilt")
             stageArrow
-            howItWorksStage(icon: "lock.iphone", label: "Lock Screen\nupdated", automatic: true)
+            howItWorksStage(icon: "lock.iphone", label: "Lock Screen\nupdated")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -82,19 +82,23 @@ struct ShortcutsSetupSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    private func howItWorksStage(icon: String, label: String, automatic: Bool) -> some View {
+    /// Every stage is automatic now. The old orange "you" variant is gone
+    /// rather than left unused — an unused branch reads as "a manual step is
+    /// still possible here", which is exactly the impression this strip exists
+    /// to remove.
+    private func howItWorksStage(icon: String, label: String) -> some View {
         VStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(automatic ? Color.indigo : Color.orange)
+                .foregroundStyle(Color.indigo)
                 .frame(height: 24)
             Text(label)
                 .font(.caption2)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.primary)
-            Text(automatic ? "automatic" : "you")
+            Text("automatic")
                 .font(.system(size: 9, weight: .bold))
-                .foregroundStyle(automatic ? Color.indigo : Color.orange)
+                .foregroundStyle(Color.indigo)
                 .textCase(.uppercase)
         }
         .frame(maxWidth: .infinity)
@@ -390,7 +394,7 @@ struct ShortcutsSetupSheet: View {
                     )
                     stepRow(
                         number: Self.openingSteps.count + 3,
-                        text: "Add the system **\"Set Wallpaper\"** action right below it, targeting **Lock Screen**."
+                        text: "Add the system **\"Set Wallpaper\"** action right below it, targeting **Lock Screen**. If it offers a **Show Preview** option, turn that off."
                     )
                     ForEach(Array(Self.finishingSteps.enumerated()), id: \.offset) { idx, step in
                         stepRow(number: Self.openingSteps.count + 4 + idx, text: .init(step))
