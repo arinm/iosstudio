@@ -122,13 +122,13 @@ struct ShortcutsSetupSheet: View {
                 Image(systemName: "sparkles")
                     .font(.caption.bold())
                     .foregroundStyle(.indigo)
-                Text("FASTEST WAY")
+                Text("WORTH A TRY FIRST")
                     .font(.caption2.bold())
                     .foregroundStyle(.indigo)
                     .tracking(0.5)
             }
 
-            Text(.init("Your iPhone can build this for you. In **Shortcuts**, tap **New Shortcut** and describe what you want:"))
+            Text(.init("Your iPhone can try to build this for you. In **Shortcuts**, tap **New Shortcut** and describe what you want:"))
                 .font(.subheadline)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -141,7 +141,7 @@ struct ShortcutsSetupSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text(.init("Say it in English - the actions are named in English, so that is what it matches on. Needs Apple Intelligence; if your iPhone doesn\u{2019}t have it, use the steps below instead."))
+            Text(.init("Say it in English - the actions are named in English, so that is what it matches on. Needs Apple Intelligence.\n\n**Check what it built.** It often gets the timing right but misses the work: if the shortcut just says \u{201C}Opens Lock Screen Studio\u{201D}, it skipped the two actions that matter. Build it by hand with the steps below instead - that takes two minutes and always works."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -431,7 +431,8 @@ struct ShortcutsSetupSheet: View {
             tipRow(icon: "bell.badge", text: "Didn't get a notification? Make sure Lock Screen Studio has notification permission enabled in your iPhone's Settings app → Notifications → Lock Screen Studio.")
             tipRow(icon: "play.circle", text: "Test now without waiting: open the shortcut in the **Shortcuts** app and tap the ▶ triangle. No need to wait for the trigger.")
             tipRow(icon: "photo.on.rectangle", text: "Want a copy in Photos too? Automations don't save one by default. Turn on **Also save to Photos** in Settings → Automation, and allow Photos access when asked.")
-            tipRow(icon: "photo.badge.checkmark", text: "Wallpaper didn't change? Check that **Set Wallpaper** sits directly below the Generate step and is set to **Lock Screen**. If its image slot looks empty, tap it and pick the variable from the step above.")
+            tipRow(icon: "hand.tap", text: "Asked to confirm every morning? That is the preview setting inside **Set Wallpaper**. Turn it off and it applies silently.")
+            tipRow(icon: "photo.badge.checkmark", text: "Wallpaper didn't change at all? Check that **Set Wallpaper** sits directly below the Generate step and is set to **Lock Screen**. If its image slot looks empty, tap it and pick the variable from the step above.")
         }
     }
 
@@ -533,14 +534,19 @@ struct ShortcutsSetupSheet: View {
     static func applyActions(generate: String) -> [String] {
         [
             generate,
-            "Add **Set Wallpaper** right below it, targeting **Lock Screen**. It picks up the image from the step above automatically. If it offers a **Show Preview** option, turn that off so it applies without asking you first.",
+            "Add **Set Wallpaper** right below it, targeting **Lock Screen**. It picks up the image from the step above automatically.",
+            "**Don\u{2019}t skip this one.** Open that action\u{2019}s options and turn off the preview/confirmation setting. Left on, iOS shows a \u{201C}change your wallpaper?\u{201D} sheet you have to tap every single morning - which is the one thing this whole setup exists to avoid.",
         ]
     }
 
     /// Shared "what happens when it runs" block reused by every recipe so the
     /// hands-off flow is explained consistently in one place.
     private static let autoApplyVerify =
-        "Lock your iPhone and look - the new wallpaper is already there. Don't want to wait for the trigger? Shortcuts → your automation → tap the ▶ triangle to run it now."
+        """
+        Lock your iPhone and look - the new wallpaper is already there. Don't want         to wait for the trigger? Open the shortcut and tap the ▶ triangle to run         it now.
+
+        If it asks you to confirm the change instead of just doing it, the preview         setting inside **Set Wallpaper** is still on - go back and turn it off.
+        """
 
     static let recipes: [AutomationRecipe] = [
         AutomationRecipe(
