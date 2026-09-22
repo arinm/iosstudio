@@ -815,7 +815,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudioWidget/LockScreenStudioWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudioWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -870,7 +870,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudioWidget/LockScreenStudioWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudioWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -892,7 +892,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -912,7 +912,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
