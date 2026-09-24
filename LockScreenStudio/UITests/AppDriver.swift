@@ -22,6 +22,7 @@ struct AppDriver {
         let app = XCUIApplication()
         app.launchArguments += [
             "--uitest-pro",
+            "--uitest-fresh-store",
             "-hasCompletedOnboarding", "YES",
         ]
         app.launch()
@@ -71,21 +72,42 @@ struct AppDriver {
     }
 }
 
-// MARK: - Not yet reachable
+// MARK: - Panel rows
 //
-// The Consistency panel's configuration sheet (Source picker, Show streak,
-// weeks stepper, Health permission row) has no UI coverage because the editor's
-// panel rows cannot be driven reliably.
+// `EditorView.panelRow` used to be a `Button` wrapping its visibility `Toggle`.
+// Accessibility merged the two into one `Switch`, so a VoiceOver user heard a
+// switch per row and had no way to reach a panel's settings at all, and a test
+// tapping the row hid the panel instead of configuring it.
 //
-// `EditorView.panelRow` is a `Button` wrapping a visibility `Toggle`, and
-// accessibility merges the two into a single `Switch` labelled
-// "<title> panel, visible, title shown". There is no `Button` to tap, tapping
-// the merged element hits the toggle and hides the panel instead of opening its
-// config, and a freshly added panel could not be located in the list at all.
+// The two are siblings now, each with its own identifier —
+// `panel-settings-<type>` and `panel-visible-<type>`. `PanelSettingsUITests`
+// asserts they stay distinct, because the failure mode is silent: the screen
+// still looks right, it just stops being operable.
 //
-// That merge is also an accessibility defect in its own right: a VoiceOver user
-// hears one switch per row and has no way to reach a panel's settings. Giving
-// the row and its toggle separate accessibility elements — an
-// `.accessibilityIdentifier` on the row plus an explicit label on the toggle —
-// fixes the app for those users and makes this screen testable at the same
-// time. Worth doing before writing these tests, not after.
+// MARK: - AddPanelSheet
+//
+// Its rows looked untappable from a test: taps as `Cell`, as `Button`, as
+// `StaticText` and by coordinate all left the sheet sitting there. A tap by
+// hand worked, which ruled out a dead control and pointed at the row's shape.
+//
+// The `HStack` had no `.contentShape(Rectangle())`, so only the glyph and the
+// title were tappable and the middle of the row was dead space. People hit it
+// because they aim at the words; a tap at the row's centre hit nothing. Adding
+// the content shape fixed the row for everyone and made `HealthAccessUITests`
+// possible. Each row also carries `add-panel-<type>` now, because the visible
+// text alone resolves to a container rather than the button.
+//
+// Three traps cost real time here and are worth knowing:
+//   * SwiftData survives app relaunch, so a panel added by one run was still
+//     there for the next: `panel-settings-<type>` stopped being unique and the
+//     suite passed or failed depending on what had run before it. Every UI test
+//     now launches with `--uitest-fresh-store`
+//     (`SharedContainer.uiTestFreshStoreArgument`), which swaps in a throwaway
+//     in-memory store. Add it to any new UI test.
+//   * "Add Panel" is both the editor's button and the sheet's title, so
+//     "is the sheet gone?" written against that label can never be true.
+//   * The system Health sheet renders our NSHealthShareUsageDescription, but
+//     the text is not an accessibility element — it is drawn out of process.
+//     It can be reviewed in a screenshot attachment; it cannot be asserted on.
+//     The data types (`Steps` under `Activity`) are exposed, so those are what
+//     the test checks.

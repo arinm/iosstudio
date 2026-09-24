@@ -19,7 +19,7 @@ enum AutomationPreferences {
     /// library.
     ///
     /// Off by default: the recommended recipe pipes the intent's returned
-    /// `IntentFile` straight into the system "Set Wallpaper" action, so a
+    /// `IntentFile` straight into the system "Set Wallpaper Photo" action, so a
     /// Photos copy is pure clutter — a daily automation would otherwise bury
     /// roughly 365 images a year in the user's library.
     ///
@@ -31,7 +31,7 @@ enum AutomationPreferences {
     }
 
     /// One-time migration for users upgrading from a version whose setup guide
-    /// had no "Set Wallpaper" step.
+    /// had no "Set Wallpaper Photo" step.
     ///
     /// Their existing shortcut ends at the generate action and relies on the
     /// Photos copy to apply the wallpaper by hand, so defaulting them to off

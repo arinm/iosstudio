@@ -12,7 +12,7 @@ struct GenerateTodayWallpaperIntent: AppIntent {
     static let title: LocalizedStringResource = "Generate Today's Wallpaper"
     static let description = IntentDescription(
         """
-        Builds a fresh lock screen wallpaper from today's agenda, priorities, and tasks, and returns it as an image. Follow this with the Set Wallpaper action to change your lock screen automatically.
+        Builds a fresh lock screen wallpaper from today's agenda, priorities, and tasks, and returns it as an image. Follow this with the Set Wallpaper Photo action to change your lock screen automatically.
         """,
         categoryName: "Wallpaper",
         searchKeywords: [
@@ -74,7 +74,7 @@ struct GenerateWallpaperIntent: AppIntent {
     static let title: LocalizedStringResource = "Generate Wallpaper"
     static let description = IntentDescription(
         """
-        Builds a lock screen wallpaper from a template you choose and returns it as an image. Follow this with the Set Wallpaper action to change your lock screen automatically.
+        Builds a lock screen wallpaper from a template you choose and returns it as an image. Follow this with the Set Wallpaper Photo action to change your lock screen automatically.
         """,
         categoryName: "Wallpaper",
         searchKeywords: [
@@ -157,7 +157,7 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
     static let title: LocalizedStringResource = "Generate Wallpaper (Advanced)"
     static let description = IntentDescription(
         """
-        Builds a lock screen wallpaper with full control over date, theme, device preset, and file format. Follow this with the Set Wallpaper action to change your lock screen automatically.
+        Builds a lock screen wallpaper with full control over date, theme, device preset, and file format. Follow this with the Set Wallpaper Photo action to change your lock screen automatically.
         """,
         categoryName: "Wallpaper",
         searchKeywords: [
@@ -257,7 +257,7 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
 /// generate intents so the behaviour can't drift between them.
 ///
 /// Photos is deliberately NOT on the critical path: the recommended recipe
-/// feeds the returned `IntentFile` straight into the system "Set Wallpaper"
+/// feeds the returned `IntentFile` straight into the system "Set Wallpaper Photo"
 /// action. See `AutomationPreferences.savesToPhotos`.
 @MainActor
 private func deliverWallpaperSideEffects(
@@ -278,7 +278,7 @@ private func deliverWallpaperSideEffects(
             outcome = .photosPermissionDenied
         } catch {
             // Disk full, iCloud error, etc. The IntentFile is still returned so
-            // a shortcut chaining "Set Wallpaper" still works; the notification
+            // a shortcut chaining "Set Wallpaper Photo" still works; the notification
             // just stays on the neutral .generatedOnly copy.
         }
     }

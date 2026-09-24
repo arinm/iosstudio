@@ -130,8 +130,8 @@ struct SettingsView: View {
             return "iOS picks an opportune moment within your chosen window - exact timing isn't guaranteed. A fresh wallpaper is saved to Photos and a notification lets you know it is ready. For precise scheduling (e.g. 7:00 AM sharp), use Shortcuts instead."
         case "shortcuts":
             return automationSavesToPhotos
-                ? "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. Pair it with the Shortcuts \"Set Wallpaper\" action and your Lock Screen updates itself, hands-free.\n\nEvery run also keeps a copy in Photos. Handy as a history, but a daily automation adds up fast."
-                : "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. Pair it with the Shortcuts \"Set Wallpaper\" action and your Lock Screen updates itself, hands-free.\n\nTurn on \"Also save to Photos\" only if you want a copy of every wallpaper in your library - the Set Wallpaper step doesn\'t need one."
+                ? "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. Pair it with the Shortcuts \"Set Wallpaper Photo\" action and your Lock Screen updates itself, hands-free.\n\nEvery run also keeps a copy in Photos. Handy as a history, but a daily automation adds up fast."
+                : "Pick a ready-made automation - morning refresh, alarm trigger, focus-mode theme switch - and run it exactly when you specify. Pair it with the Shortcuts \"Set Wallpaper Photo\" action and your Lock Screen updates itself, hands-free.\n\nTurn on \"Also save to Photos\" only if you want a copy of every wallpaper in your library - the Set Wallpaper Photo step doesn\'t need one."
         default:
             return "Off: your wallpaper won't update on its own. Pick Built-in for fire-and-forget, or Shortcuts for precise scheduling."
         }

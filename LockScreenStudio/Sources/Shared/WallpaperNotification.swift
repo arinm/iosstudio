@@ -23,7 +23,7 @@ enum WallpaperNotification {
         case savedToPhotos = "saved"
         case photosPermissionDenied = "photos_denied"
         /// Rendered but deliberately not archived — the user's shortcut applies
-        /// it directly through the system "Set Wallpaper" action.
+        /// it directly through the system "Set Wallpaper Photo" action.
         case generatedOnly = "generated_only"
     }
 

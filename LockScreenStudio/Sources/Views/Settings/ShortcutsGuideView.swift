@@ -13,7 +13,12 @@ struct ShortcutsSetupSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     intro
-                    if Self.usesInlineAutomations {
+                    // Suppressed once a ready-made link exists: the link does
+                    // the same job deterministically, and describing it out
+                    // loud is the path that most often produces a shortcut
+                    // that only opens the app. Two "start here" cards compete;
+                    // the reliable one wins.
+                    if Self.usesInlineAutomations && !offersReadyMadeShortcuts {
                         describeShortcutCard
                     }
                     recommendedRecipe
@@ -47,8 +52,8 @@ struct ShortcutsSetupSheet: View {
                     .font(.headline)
             }
 
-            Text(.init(ShortcutLibrary.hasAnyShareLink
-                ? "Teach the free **Shortcuts** app one job: build a fresh wallpaper every morning and put it straight on your Lock Screen. Pick a recipe below and add it in one tap."
+            Text(.init(offersReadyMadeShortcuts
+                ? "Teach the free **Shortcuts** app one job: build a fresh wallpaper every morning and put it straight on your Lock Screen. Pick a recipe below, add it, and switch it on - under a minute."
                 : "Teach the free **Shortcuts** app one job: build a fresh wallpaper every morning and put it straight on your Lock Screen. Set it up once, about 2 minutes."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -245,7 +250,7 @@ struct ShortcutsSetupSheet: View {
             .disabled(prominent)
 
             if isExpanded {
-                let shareLink = ShortcutLibrary.shareLink(for: recipe.id)
+                let shareLink = readyMadeLink(for: recipe.id)
                 VStack(alignment: .leading, spacing: 14) {
                     Divider()
 
@@ -258,7 +263,12 @@ struct ShortcutsSetupSheet: View {
                             .font(.caption.bold())
                             .foregroundStyle(.secondary)
                             .tracking(0.5)
-                        Text("Button names can differ slightly between iOS versions - pick the closest match.")
+                        // The old "names can differ, pick the closest match"
+                        // hedge is gone: the steps now branch by iOS version
+                        // and every name in them was read off the real screen,
+                        // so telling people to approximate reads as a lack of
+                        // confidence we no longer have.
+                        Text(Self.usesInlineAutomations ? "Written for iOS 27." : "Written for iOS 26.")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }
@@ -328,10 +338,17 @@ struct ShortcutsSetupSheet: View {
         )
     }
 
-    /// Primary path once a ready-made shortcut has been published: one tap to
-    /// import, instead of a seven-step walkthrough.
+    /// Primary path once a ready-made shortcut has been published: an import
+    /// instead of a seven-step walkthrough.
+    ///
+    /// Deliberately not sold as "one tap". iOS installs a shared automation
+    /// switched **off**, by design, so a user who stops after "Add Shortcut"
+    /// owns a shortcut that never runs and gets no error explaining why. That
+    /// makes enabling it a numbered step with its own heading, for the same
+    /// reason `Show Preview` inside `Set Wallpaper Photo` became one: the step that
+    /// fails silently is the step that has to be impossible to skim past.
     private func addToShortcutsButton(_ link: URL) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 12) {
             Button {
                 UIApplication.shared.open(link)
             } label: {
@@ -349,12 +366,44 @@ struct ShortcutsSetupSheet: View {
             }
             .buttonStyle(.plain)
 
-            Text(.init("Shortcuts opens with everything filled in. Tap **Add Shortcut**, then switch the automation on - iOS deliberately ships shared automations turned off."))
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(Array(Self.importSteps.enumerated()), id: \.offset) { idx, step in
+                    stepRow(number: idx + 1, text: .init(step))
+                }
+            }
+
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                // "That second step", not "step 2": the walkthrough below has
+                // its own numbered list on the same card.
+                Text(.init("Skip that second step and nothing happens tomorrow morning - and nothing tells you why. It is the only part of this worth double-checking."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(12)
+            .background(Color.orange.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            Text(.init("The schedule, both actions and the settings inside them all come with it - including the one that would otherwise ask you to confirm the change every single morning."))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
+
+    /// What happens after the link opens. Two steps, because that is genuinely
+    /// all there is — and because a list of two makes the second one unmissable.
+    static let importSteps: [String] = [
+        "Shortcuts opens with everything already filled in. Tap **Add Shortcut**.",
+        // Names the control seen on screen — the **Automation** toggle inside
+        // the expanded trigger block — rather than the "Automation is turned
+        // off" string from WorkflowEditor's table, which we never saw rendered.
+        // A name in the binary is not proof of a name on the screen.
+        "**Now check it is on.** Open the shortcut, tap the **chevron** on its trigger, and make sure **Automation** is switched on. A shared automation can arrive switched off - that is iOS protecting you from installing something that runs by itself, not a bug.",
+    ]
 
     // MARK: - Custom Setup (collapsed)
 
@@ -394,7 +443,7 @@ struct ShortcutsSetupSheet: View {
                     )
                     stepRow(
                         number: Self.openingSteps.count + 3,
-                        text: "Add the system **\"Set Wallpaper\"** action right below it, targeting **Lock Screen**. If it offers a **Show Preview** option, turn that off."
+                        text: "Add the system **Set Wallpaper Photo** action right below it, targeting **Lock Screen**, and turn its **Show Preview** option off."
                     )
                     ForEach(Array(Self.finishingSteps.enumerated()), id: \.offset) { idx, step in
                         stepRow(number: Self.openingSteps.count + 4 + idx, text: .init(step))
@@ -431,8 +480,9 @@ struct ShortcutsSetupSheet: View {
             tipRow(icon: "bell.badge", text: "Didn't get a notification? Make sure Lock Screen Studio has notification permission enabled in your iPhone's Settings app → Notifications → Lock Screen Studio.")
             tipRow(icon: "play.circle", text: "Test now without waiting: open the shortcut in the **Shortcuts** app and tap the ▶ triangle. No need to wait for the trigger.")
             tipRow(icon: "photo.on.rectangle", text: "Want a copy in Photos too? Automations don't save one by default. Turn on **Also save to Photos** in Settings → Automation, and allow Photos access when asked.")
-            tipRow(icon: "hand.tap", text: "Asked to confirm every morning? That is the preview setting inside **Set Wallpaper**. Turn it off and it applies silently.")
-            tipRow(icon: "photo.badge.checkmark", text: "Wallpaper didn't change at all? Check that **Set Wallpaper** sits directly below the Generate step and is set to **Lock Screen**. If its image slot looks empty, tap it and pick the variable from the step above.")
+            tipRow(icon: "hand.tap", text: "Asked to confirm every morning? That is **Show Preview**, inside **Set Wallpaper Photo**. Turn it off and it applies silently.")
+            tipRow(icon: "magnifyingglass", text: "Can't find the action? It is called **Set Wallpaper Photo**, not \"Set Wallpaper\" - searching for either finds it, but the row you want is the one with the Shortcuts icon, not one of ours.")
+            tipRow(icon: "photo.badge.checkmark", text: "Wallpaper didn't change at all? Check that **Set Wallpaper Photo** sits directly below the Generate step and is set to **Lock Screen**. If its image slot looks empty, tap it and pick the variable from the step above.")
         }
     }
 
@@ -480,9 +530,17 @@ struct ShortcutsSetupSheet: View {
         let icon: String
         let title: String
         let summary: String
-        /// The trigger and its options — the only part that differs between
-        /// recipes.
+        /// The trigger and its options on iOS 26 and earlier — the only part
+        /// that differs between recipes.
         let trigger: [String]
+        /// Replaces `trigger` on iOS 27+, where it differs.
+        ///
+        /// Most triggers are picked the same way on both, so this is usually
+        /// nil. It exists because two are genuinely different there: Sunset
+        /// stopped being a trigger of its own and became an **Event** option
+        /// inside Time of Day, and Focus became a heading over the individual
+        /// modes rather than a row you pick and then narrow.
+        var inlineTrigger: [String]? = nil
         /// What the shortcut does once triggered.
         let actions: [String]
         /// One-line description of what the user should observe to confirm it worked.
@@ -493,11 +551,27 @@ struct ShortcutsSetupSheet: View {
         /// five — iOS 27 moving automations out of their own tab broke every
         /// recipe at once when these were copy-pasted per recipe.
         var steps: [String] {
-            ShortcutsSetupSheet.openingSteps
-                + trigger
-                + actions
-                + ShortcutsSetupSheet.finishingSteps
+            ShortcutsSetupSheet.steps(
+                trigger: trigger,
+                inlineTrigger: inlineTrigger,
+                actions: actions,
+                inlineAutomations: ShortcutsSetupSheet.usesInlineAutomations
+            )
         }
+    }
+
+    /// Split from `AutomationRecipe.steps` so tests can compose both versions'
+    /// copy rather than only the simulator's — see `openingSteps(inlineAutomations:)`.
+    static func steps(
+        trigger: [String],
+        inlineTrigger: [String]?,
+        actions: [String],
+        inlineAutomations: Bool
+    ) -> [String] {
+        openingSteps(inlineAutomations: inlineAutomations)
+            + (inlineAutomations ? (inlineTrigger ?? trigger) : trigger)
+            + actions
+            + finishingSteps(inlineAutomations: inlineAutomations)
     }
 
     /// True on the iOS versions where automations live inside a shortcut rather
@@ -507,46 +581,98 @@ struct ShortcutsSetupSheet: View {
         return false
     }
 
+    /// A ready-made link, but only where importing one actually delivers a
+    /// working automation.
+    ///
+    /// These shortcuts carry their trigger as an action inside the shortcut,
+    /// which is an iOS 27 concept. What iOS 26 does with such a file is not
+    /// something we can promise — it may strip the trigger and leave a shortcut
+    /// that looks installed but never fires, which is a worse outcome than a
+    /// walkthrough. So older versions get the walkthrough, which is known to
+    /// work, and the offer simply doesn't appear.
+    private func readyMadeLink(for recipeID: String) -> URL? {
+        guard Self.usesInlineAutomations else { return nil }
+        return ShortcutLibrary.shareLink(for: recipeID)
+    }
+
+    /// Whether the guide can lead with importing rather than building.
+    private var offersReadyMadeShortcuts: Bool {
+        Self.usesInlineAutomations && ShortcutLibrary.hasAnyShareLink
+    }
+
     /// Getting to the trigger picker. Differs by iOS version.
-    static var openingSteps: [String] {
-        if usesInlineAutomations {
+    static var openingSteps: [String] { openingSteps(inlineAutomations: usesInlineAutomations) }
+
+    /// Split out from the property so tests can read both branches. Behind
+    /// `#available` only the running OS's copy is reachable, which means the
+    /// other half of this screen — the half most of our installed base sees —
+    /// would go unchecked on a simulator.
+    static func openingSteps(inlineAutomations: Bool) -> [String] {
+        guard inlineAutomations else {
             return [
                 "Open the **Shortcuts** app.",
-                "Tap **New Shortcut**. It opens a \"Describe a Shortcut\" text box first - tap the **three-line icon** to switch to the manual editor.",
-                "Tap **Edit**, then **Automation**.",
+                "Tap the **Automation** tab at the bottom, then **New Automation** (or **+** in the top right if you already have some).",
             ]
         }
         return [
             "Open the **Shortcuts** app.",
-            "Tap the **Automation** tab at the bottom, then **New Automation** (or **+** in the top right if you already have some).",
+            "Tap **New Shortcut**. It opens a \u{201C}Describe a Shortcut\u{201D} text box first - tap **Edit** in the top right for the manual editor. Tired of doing that every time? **Settings → Apps → Shortcuts → Open shortcuts to → Editor** makes the editor the default.",
+            "In the action list along the bottom, tap **Automation**. That filters the list down to triggers, grouped under **Daily Routine**, **Location** and so on.",
         ]
     }
 
     /// Saving the automation once the actions are in place.
-    static var finishingSteps: [String] {
-        [
-            "Set it to **Run Immediately** and leave **Notify When Run** off, then save.",
+    static var finishingSteps: [String] { finishingSteps(inlineAutomations: usesInlineAutomations) }
+
+    /// On iOS 27 these two controls live inside the trigger block and are
+    /// labelled **Automation** and **Notify**. The older **Run Immediately** /
+    /// **Notify When Run** wording still exists in Apple's string table on
+    /// iOS 27 — which is why a string-table match alone is not proof — but the
+    /// inline trigger does not use it.
+    static func finishingSteps(inlineAutomations: Bool) -> [String] {
+        guard inlineAutomations else {
+            return [
+                "Set it to **Run Immediately**, then save. The default is **Run After Confirmation**, which would ask you to approve it every single morning.",
+            ]
+        }
+        return [
+            "Tap the **chevron** on the trigger to open its settings. Leave **Automation** on and **Notify** off - that second one is what stops it announcing itself every morning.",
+            "Tap **Back**. There is no save button; changes apply as you make them.",
         ]
     }
 
     /// Shared by every recipe: generate, then apply. Only the template and theme
     /// differ, so those recipes pass their own version of the first line.
+    ///
+    /// The action is **Set Wallpaper Photo** and the toggle is **Show Preview**.
+    /// Both names are read from Apple's own `ActionKit` string table (keys
+    /// `Set Wallpaper Photo (Action Name)` and `WFWallpaperShowPreview`) and are
+    /// identical on iOS 26.1, 26.2 and 27, so there is nothing to branch on. The
+    /// guide previously said "Set Wallpaper", which does not exist under that
+    /// name — searching for it lands people on the right row only because the
+    /// real one starts with the same two words.
     static func applyActions(generate: String) -> [String] {
         [
             generate,
-            "Add **Set Wallpaper** right below it, targeting **Lock Screen**. It picks up the image from the step above automatically.",
-            "**Don\u{2019}t skip this one.** Open that action\u{2019}s options and turn off the preview/confirmation setting. Left on, iOS shows a \u{201C}change your wallpaper?\u{201D} sheet you have to tap every single morning - which is the one thing this whole setup exists to avoid.",
+            "Add **Set Wallpaper Photo** right below it, targeting **Lock Screen**. It picks up the image from the step above automatically.",
+            "**Don\u{2019}t skip this one.** Open that action\u{2019}s options and turn **Show Preview** off. Left on, iOS shows a \u{201C}change your wallpaper?\u{201D} sheet you have to tap every single morning - which is the one thing this whole setup exists to avoid.",
         ]
     }
 
     /// Shared "what happens when it runs" block reused by every recipe so the
     /// hands-off flow is explained consistently in one place.
+    ///
+    /// Written as concatenated single lines rather than a `"""` block: the
+    /// block form here had its newlines collapsed into the leading indentation
+    /// at some point, leaving runs of spaces that shipped as visible gaps in
+    /// the middle of sentences. `ShortcutsCopyTests` now guards against that.
     private static let autoApplyVerify =
-        """
-        Lock your iPhone and look - the new wallpaper is already there. Don't want         to wait for the trigger? Open the shortcut and tap the ▶ triangle to run         it now.
-
-        If it asks you to confirm the change instead of just doing it, the preview         setting inside **Set Wallpaper** is still on - go back and turn it off.
-        """
+        "Lock your iPhone and look - the new wallpaper is already there. "
+        + "Don't want to wait for the trigger? Open the shortcut and tap the "
+        + "▶ triangle to run it now.\n\n"
+        + "If it asks you to confirm the change instead of just doing it, "
+        + "**Show Preview** inside **Set Wallpaper Photo** is still on - go "
+        + "back and turn it off."
 
     static let recipes: [AutomationRecipe] = [
         AutomationRecipe(
@@ -556,10 +682,15 @@ struct ShortcutsSetupSheet: View {
             summary: "Wake up to a Lock Screen that already shows today.",
             trigger: [
                 "Pick **Time of Day**.",
-                "Set a time like **7:00 AM** and make sure **Daily** is selected.",
+                "Set a time like **7:00 AM** and, under **Repeat**, make sure **Daily** is selected.",
+            ],
+            inlineTrigger: [
+                "Pick **Time of Day**, under **Daily Routine**.",
+                "Tap the blue **Time** and set it to something like **7:00 AM**.",
+                "Tap the **chevron** beside it to check **Repeat** says **Every Day**.",
             ],
             actions: applyActions(
-                generate: "Add the action **Generate Today's Wallpaper** - search for it, it is listed under **Lock Screen Studio** (this app)."
+                generate: "Add the action **Generate Today's Wallpaper** - search for it and pick the row with the Lock Screen Studio icon."
             ),
             verify: autoApplyVerify
         ),
@@ -582,7 +713,12 @@ struct ShortcutsSetupSheet: View {
             title: "Switch wallpaper with Focus mode",
             summary: "Work Focus on, work wallpaper on.",
             trigger: [
-                "Pick **Focus**, tap the one you want (e.g. **Work**), and choose **Is Turned On**.",
+                "There is no single Focus trigger - scroll to the Focus group and pick the mode you want, such as **Do Not Disturb**.",
+                "Choose **Is Turned On**.",
+            ],
+            inlineTrigger: [
+                "Scroll to the **Focus** heading and pick the mode you want - **Do Not Disturb**, or one you have set up yourself.",
+                "Tap the **chevron** on the trigger and set it to run when that Focus **is turned on**.",
             ],
             actions: applyActions(
                 generate: "Add the action **Generate Wallpaper**, then pick your work template and the **Dark** theme."
@@ -598,6 +734,7 @@ struct ShortcutsSetupSheet: View {
             summary: "Walk in, and your Lock Screen is already on meetings.",
             trigger: [
                 "Pick **Arrive**, tap **Location**, search for your work address and select it.",
+                "Location automations need one system permission or they silently never run: **Settings → Privacy & Security → Location Services → System Services → Alerts & Shortcuts Automations**.",
             ],
             actions: applyActions(
                 generate: "Add the action **Generate Wallpaper** and pick the **Meeting Day** template."
@@ -610,7 +747,12 @@ struct ShortcutsSetupSheet: View {
             title: "Dark wallpaper at sunset",
             summary: "The Lock Screen dims when the day does.",
             trigger: [
-                "Pick **Sunset**.",
+                "There is no Sunset trigger of its own - pick **Time of Day**.",
+                "On the **When** screen, choose **Sunset** from the three options at the top.",
+            ],
+            inlineTrigger: [
+                "There is no Sunset trigger of its own here - pick **Time of Day**.",
+                "Tap the **chevron** on it, then change **Event** from **Time of Day** to **Sunset**.",
             ],
             actions: applyActions(
                 generate: "Add the action **Generate Wallpaper**, then pick a template and the **Dark** theme."

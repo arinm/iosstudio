@@ -27,7 +27,29 @@ enum SharedContainer {
 
     // MARK: - Construction
 
+    /// Launch argument that gives the process a throwaway in-memory store.
+    ///
+    /// UI tests need every launch to start from nothing. Without it, SwiftData
+    /// survives relaunch and each run inherits the last one's data: a panel
+    /// added by one test is still there for the next, `panel-settings-<type>`
+    /// stops being unique once two panels share a type, and assertions start
+    /// passing or failing for reasons unrelated to what they test. That is not
+    /// a flaky test — it is a test that was never isolated.
+    ///
+    /// `TemplateSeeder` fills an empty store on first render, so the gallery
+    /// still has its stock templates.
+    static let uiTestFreshStoreArgument = "--uitest-fresh-store"
+
     private static func buildContainer() -> ModelContainer {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains(uiTestFreshStoreArgument) {
+            let memConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            if let memContainer = try? ModelContainer(for: schema, configurations: [memConfig]) {
+                return memContainer
+            }
+        }
+        #endif
+
         let storeURL = sharedStoreURL()
         // Migration is the main app's responsibility; the widget's sandbox can't
         // see the legacy app-only Application Support directory anyway.

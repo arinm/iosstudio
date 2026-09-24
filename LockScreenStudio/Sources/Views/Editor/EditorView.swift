@@ -299,47 +299,68 @@ struct EditorView: View {
         }
     }
 
+    /// Two controls side by side, not one nested inside the other.
+    ///
+    /// This used to be a `Button` wrapping the visibility `Toggle`. SwiftUI
+    /// merged them into a single accessibility element of type Switch, which
+    /// meant a VoiceOver user heard one switch per row and had **no way to open
+    /// a panel's settings at all** — the button's action was unreachable. It
+    /// also made the row untestable: tapping the merged element hit the toggle
+    /// and hid the panel instead of configuring it.
+    ///
+    /// Keeping them as siblings gives each its own element, its own label and
+    /// its own identifier. The drag handle stays outside the button so reordering
+    /// still works.
     private func panelRow(_ panel: PanelConfiguration) -> some View {
-        Button {
-            showPanelConfig = panel
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "line.3.horizontal")
-                    .foregroundStyle(.tertiary)
-                    .font(.subheadline)
+        HStack(spacing: 12) {
+            Image(systemName: "line.3.horizontal")
+                .foregroundStyle(.tertiary)
+                .font(.subheadline)
+                .accessibilityHidden(true)
 
-                Image(systemName: panel.panelType.systemImage)
-                    .foregroundStyle(.indigo)
-                    .frame(width: 24)
+            Button {
+                showPanelConfig = panel
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: panel.panelType.systemImage)
+                        .foregroundStyle(.indigo)
+                        .frame(width: 24)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(panel.title)
-                        .font(.body)
-                        .foregroundStyle(.primary)
-                    Text(panel.isTitleShown ? "Title shown" : "Title hidden")
-                        .font(.caption2)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(panel.title)
+                            .font(.body)
+                            .foregroundStyle(.primary)
+                        Text(panel.isTitleShown ? "Title shown" : "Title hidden")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "gearshape")
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
-
-                Spacer()
-
-                Toggle("", isOn: Binding(
-                    get: { panel.isVisible },
-                    set: { panel.isVisible = $0 }
-                ))
-                .labelsHidden()
-                .tint(.indigo)
-
-                Image(systemName: "gearshape")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                // Without this the gap between the text and the gear is not
+                // tappable, leaving most of the row dead.
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("panel-settings-\(panel.panelType.rawValue)")
+            .accessibilityLabel("\(panel.title) panel settings, title \(panel.isTitleShown ? "shown" : "hidden")")
+            .accessibilityHint("Double tap to configure")
+
+            Toggle("", isOn: Binding(
+                get: { panel.isVisible },
+                set: { panel.isVisible = $0 }
+            ))
+            .labelsHidden()
+            .tint(.indigo)
+            .accessibilityIdentifier("panel-visible-\(panel.panelType.rawValue)")
+            .accessibilityLabel("\(panel.title) visible")
         }
-        .buttonStyle(.plain)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .accessibilityLabel("\(panel.title) panel, \(panel.isVisible ? "visible" : "hidden"), title \(panel.isTitleShown ? "shown" : "hidden")")
-        .accessibilityHint("Double tap to configure")
     }
 
     // MARK: - Quick Edit (Top 3)
@@ -1530,8 +1551,20 @@ struct AddPanelSheet: View {
                                     .clipShape(Capsule())
                             }
                         }
+                        // The row is mostly empty space between the title and
+                        // the trailing edge, and without this that space is not
+                        // tappable — only the glyph and the text are. People hit
+                        // it because they aim at the words; a tap at the row's
+                        // centre lands on nothing.
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    // Without this the row can only be addressed by its visible
+                    // text, which resolves to a container rather than the
+                    // button — the tap then lands on nothing and the sheet just
+                    // sits there. Confirmed by hand that a real tap works, so
+                    // this is purely about making the row addressable.
+                    .accessibilityIdentifier("add-panel-\(type.rawValue)")
                 }
             }
             .navigationTitle("Add Panel")
