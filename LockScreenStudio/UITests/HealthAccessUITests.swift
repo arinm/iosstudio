@@ -30,9 +30,8 @@ final class HealthAccessUITests: XCTestCase {
         XCTAssertTrue(card.waitForExistence(timeout: 10), "the Today Dashboard card is missing")
         card.tap()
 
-        // No stock template ships a Consistency panel, so add one. The Add
-        // Panel button is itself Pro-gated — without `--uitest-pro` this opens
-        // the paywall instead of the sheet.
+        // No stock template ships a Consistency panel, so add one. Consistency
+        // is a Pro panel — without `--uitest-pro` its row opens the paywall.
         let addPanel = app.buttons["Add Panel"]
         XCTAssertTrue(addPanel.waitForExistence(timeout: 10), "no Add Panel button")
         addPanel.tap()

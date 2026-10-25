@@ -18,6 +18,9 @@ struct ThemePickerSheet: View {
     @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var shuffleCount: Int = 0
     @State private var bgThumbnail: UIImage?
+    // Locked controls open the paywall. They used to do nothing at all, so a
+    // free user tapping a padlock couldn't tell a Pro feature from a broken one.
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
@@ -203,6 +206,9 @@ struct ThemePickerSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(source: "theme")
+            }
             .onChange(of: selectedPhotos) { _, newItems in
                 guard !newItems.isEmpty else { return }
                 Task {
@@ -237,7 +243,7 @@ struct ThemePickerSheet: View {
         let isLocked = option.isPro && !subscriptionManager.isPro
 
         return Button {
-            guard !isLocked else { return }
+            guard !isLocked else { showPaywall = true; return }
             selectedAccent = option.rawValue
         } label: {
             VStack(spacing: 6) {
@@ -282,7 +288,7 @@ struct ThemePickerSheet: View {
         let isLocked = !subscriptionManager.isPro
 
         return Button {
-            guard !isLocked else { return }
+            guard !isLocked else { showPaywall = true; return }
             backgroundMode = preset.backgroundModeValue
             selectedScheme = "dark"
         } label: {
@@ -356,49 +362,61 @@ struct ThemePickerSheet: View {
         .buttonStyle(.plain)
     }
 
+    @ViewBuilder
     private var bgPhotoButton: some View {
-        let isSelected = backgroundMode == "photo"
-        let isLocked = !subscriptionManager.isPro
-
-        return PhotosPicker(
-            selection: $selectedPhotos,
-            maxSelectionCount: 10,
-            matching: .images
-        ) {
-            VStack(spacing: 6) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.tertiarySystemBackground))
-                        .frame(width: 40, height: 40)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color(.systemGray4), lineWidth: 1)
-                        )
-
-                    if isLocked {
-                        Image(systemName: "lock.fill")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Image(systemName: "photo")
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                Text("Photo")
-                    .font(.caption2)
+        if subscriptionManager.isPro {
+            PhotosPicker(
+                selection: $selectedPhotos,
+                maxSelectionCount: 10,
+                matching: .images
+            ) {
+                bgPhotoLabel(isLocked: false)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(isSelected ? Color.indigo.opacity(0.15) : Color(.secondarySystemBackground))
-            .foregroundStyle(isSelected ? .indigo : (isLocked ? .secondary : .primary))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.indigo : .clear, lineWidth: 2)
-            )
+        } else {
+            Button {
+                showPaywall = true
+            } label: {
+                bgPhotoLabel(isLocked: true)
+            }
+            .buttonStyle(.plain)
         }
-        .disabled(isLocked)
+    }
+
+    private func bgPhotoLabel(isLocked: Bool) -> some View {
+        let isSelected = backgroundMode == "photo"
+
+        return VStack(spacing: 6) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.tertiarySystemBackground))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color(.systemGray4), lineWidth: 1)
+                    )
+
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Image(systemName: "photo")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Text("Photo")
+                .font(.caption2)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(isSelected ? Color.indigo.opacity(0.15) : Color(.secondarySystemBackground))
+        .foregroundStyle(isSelected ? .indigo : (isLocked ? .secondary : .primary))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isSelected ? Color.indigo : .clear, lineWidth: 2)
+        )
     }
 
     private func fontColorButton(_ option: FontColorOption) -> some View {

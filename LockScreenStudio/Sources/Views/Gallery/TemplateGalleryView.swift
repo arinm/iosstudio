@@ -153,59 +153,9 @@ struct TemplateGalleryView: View {
             GridItem(.flexible(), spacing: 16),
             GridItem(.flexible(), spacing: 16),
         ], spacing: 20) {
-            // Create custom template button
-            Button {
-                if subscriptionManager.isPro {
-                    createCustomTemplate()
-                } else {
-                    showPaywall = true
-                }
-            } label: {
-                VStack(alignment: .leading, spacing: 8) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(.tertiarySystemBackground))
-                            .frame(height: 200)
-
-                        VStack(spacing: 8) {
-                            Image(systemName: "plus.circle")
-                                .font(.system(size: 32, weight: .light))
-                                .foregroundStyle(.indigo)
-                            Text("Create Your Own")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.indigo.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [8, 4]))
-                    )
-
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 4) {
-                                Text("Custom")
-                                    .font(.subheadline.bold())
-                                    .lineLimit(1)
-                                if !subscriptionManager.isPro {
-                                    Text("PRO")
-                                        .font(.system(size: 9, weight: .bold))
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color.indigo)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                            Text("Build from scratch")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                    }
-                }
+            if subscriptionManager.isPro {
+                createTemplateTile
             }
-            .buttonStyle(.plain)
 
             ForEach(templates) { template in
                 if template.isPro && !subscriptionManager.isPro {
@@ -230,10 +180,73 @@ struct TemplateGalleryView: View {
                     .buttonStyle(.plain)
                 }
             }
+
+            if !subscriptionManager.isPro {
+                createTemplateTile
+            }
         }
         .navigationDestination(item: $newTemplate) { template in
             EditorView(template: template)
         }
+    }
+
+    /// First for Pro users — it is their only way to start a template, so it
+    /// should not sit below every stock card. Last for everyone else: it opens
+    /// the paywall, and as the first cell it made a new user's first tap a
+    /// paywall before they had seen a single template work.
+    private var createTemplateTile: some View {
+        Button {
+            if subscriptionManager.isPro {
+                createCustomTemplate()
+            } else {
+                showPaywall = true
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(.tertiarySystemBackground))
+                        .frame(height: 200)
+
+                    VStack(spacing: 8) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 32, weight: .light))
+                            .foregroundStyle(.indigo)
+                        Text("Create Your Own")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.indigo.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [8, 4]))
+                )
+
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            Text("Custom")
+                                .font(.subheadline.bold())
+                                .lineLimit(1)
+                            if !subscriptionManager.isPro {
+                                Text("PRO")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.indigo)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                        Text("Build from scratch")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private func createCustomTemplate() {

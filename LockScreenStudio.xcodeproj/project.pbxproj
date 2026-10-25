@@ -12,6 +12,7 @@
 		0AE899DD5A28E8C4338E2041 /* PanelConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FD0F2B4D2086D6BABBCA34 /* PanelConfigurationTests.swift */; };
 		0D1A79E4238A948E1318491D /* QuotePackLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D14D2BDDAD93598A852D49F /* QuotePackLibraryTests.swift */; };
 		0EE6D1BD08E3237ED59A86D0 /* AutomationTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E950970D2507EBF961DF8BC /* AutomationTemplate.swift */; };
+		11CC99E93A32D19DAA8ADBFA /* AppStoreScreensUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFAAF3C29242A446AE3A800 /* AppStoreScreensUITests.swift */; };
 		1679A9C1CF4FE8403B60B597 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1860A656819D52DA215175F /* EditorView.swift */; };
 		1840F8320311ABF667279334 /* PanelSettingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDF2C0A929F77CCCD0AF6BC /* PanelSettingsUITests.swift */; };
 		189D323ED81EA1FE7CC4AC26 /* MarkTodoDoneIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3935D90C5B8F62A4E06C91EE /* MarkTodoDoneIntent.swift */; };
@@ -37,6 +38,7 @@
 		5B3F6DF2980429F90D7B9748 /* PanelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1749CC5B776A2DDBD56C605B /* PanelConfiguration.swift */; };
 		5CF55B6B3ACB230C6F7F0696 /* ExportHistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EE77BC484C7D03F21A907B /* ExportHistoryItem.swift */; };
 		5F2CC4D4895794E300472BDE /* ExportPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 242188A911A2D1C4DB782FF9 /* ExportPreset.swift */; };
+		675576A5862579E87950B46C /* AppStoreWallpaperRenders.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0ECB45EFF07B11F1DA6E3D7 /* AppStoreWallpaperRenders.swift */; };
 		6C46AAA9BD438AC63CE5ABBA /* ConsistencyCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B1274F584E4CC08D269EE0 /* ConsistencyCalendar.swift */; };
 		6D84420A7C360A01D3CD8C17 /* AutomationPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA606EEB4C6088FAE8F661C /* AutomationPreferencesTests.swift */; };
 		6E2BD68CAAADA31CD2C2F2C4 /* QuotePackLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6EFAB01B8C7584C6D309B8 /* QuotePackLibrary.swift */; };
@@ -74,6 +76,7 @@
 		BE7AD6022D679967E060FB3C /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7947B12804A10A17869B94 /* BackgroundTaskManager.swift */; };
 		BF978F71B4DE7324B99ED81E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D93E2CEC642F6F2B39345B /* SettingsView.swift */; };
 		C35B73EAA9D28DB7CB50F5BC /* DashboardProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 993D5A534F20151FD8F0BE59 /* DashboardProject.swift */; };
+		CAC28D736764106E117D2B48 /* FreeUserUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CDFFF72C10C0F4665D92B3 /* FreeUserUITests.swift */; };
 		CAD3F65204F2B4FC3DC952A9 /* LockScreenStudioWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF394309A22888BBD7953B62 /* LockScreenStudioWidgetBundle.swift */; };
 		CAF0923B11F212AE17C7F07A /* RemindersService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7268FA29C831017D9763FB16 /* RemindersService.swift */; };
 		CE5026768CA82BA9E74138F8 /* AppIconOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AF28D0307605484ECFE0B8 /* AppIconOption.swift */; };
@@ -169,6 +172,7 @@
 		46F5D439768CA2CD0E32D760 /* AutomationStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationStatus.swift; sourceTree = "<group>"; };
 		480DF013705A1EEFCAE59C58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4D7947B12804A10A17869B94 /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
+		52CDFFF72C10C0F4665D92B3 /* FreeUserUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeUserUITests.swift; sourceTree = "<group>"; };
 		540EE66F78784812D8247549 /* ShortcutsGuideUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsGuideUITests.swift; sourceTree = "<group>"; };
 		5695A2872CF5294A1BD10036 /* LockScreenStudioStore.storekit */ = {isa = PBXFileReference; path = LockScreenStudioStore.storekit; sourceTree = "<group>"; };
 		5CDF2C0A929F77CCCD0AF6BC /* PanelSettingsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelSettingsUITests.swift; sourceTree = "<group>"; };
@@ -201,6 +205,7 @@
 		C5A4206D42660E5F348F437C /* WallpaperRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperRenderer.swift; sourceTree = "<group>"; };
 		C6B33633B740A28F639951BC /* ShortcutsGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsGuideView.swift; sourceTree = "<group>"; };
 		C9C9946BFF913B0051ECE8D7 /* LockScreenStudioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenStudioApp.swift; sourceTree = "<group>"; };
+		CAFAAF3C29242A446AE3A800 /* AppStoreScreensUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreScreensUITests.swift; sourceTree = "<group>"; };
 		CFEEDF1C2BF3F15801C00AE4 /* AnalyticsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsServiceTests.swift; sourceTree = "<group>"; };
 		D0CBE4E5AE08C56C5101CDAF /* GradientPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientPreset.swift; sourceTree = "<group>"; };
 		D3FD0F2B4D2086D6BABBCA34 /* PanelConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelConfigurationTests.swift; sourceTree = "<group>"; };
@@ -209,6 +214,7 @@
 		DEA47866F7E090BFC05C68AB /* ThemeConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfiguration.swift; sourceTree = "<group>"; };
 		DF9514901F1810413CBB8517 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
 		E0B1274F584E4CC08D269EE0 /* ConsistencyCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsistencyCalendar.swift; sourceTree = "<group>"; };
+		E0ECB45EFF07B11F1DA6E3D7 /* AppStoreWallpaperRenders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreWallpaperRenders.swift; sourceTree = "<group>"; };
 		E6EE77BC484C7D03F21A907B /* ExportHistoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportHistoryItem.swift; sourceTree = "<group>"; };
 		E7D750714A2F76AC3BBF14FC /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		E96272C8411EF64DC7E33D6E /* WallpaperIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperIntents.swift; sourceTree = "<group>"; };
@@ -251,7 +257,9 @@
 			isa = PBXGroup;
 			children = (
 				1A5D0CC8DD29B96AF4DE1D51 /* AppDriver.swift */,
+				CAFAAF3C29242A446AE3A800 /* AppStoreScreensUITests.swift */,
 				3A68357583DE3083F7698DE1 /* AutomationSettingsUITests.swift */,
+				52CDFFF72C10C0F4665D92B3 /* FreeUserUITests.swift */,
 				244372555FF3A7EE69099834 /* HealthAccessUITests.swift */,
 				5CDF2C0A929F77CCCD0AF6BC /* PanelSettingsUITests.swift */,
 				540EE66F78784812D8247549 /* ShortcutsGuideUITests.swift */,
@@ -360,6 +368,7 @@
 			isa = PBXGroup;
 			children = (
 				CFEEDF1C2BF3F15801C00AE4 /* AnalyticsServiceTests.swift */,
+				E0ECB45EFF07B11F1DA6E3D7 /* AppStoreWallpaperRenders.swift */,
 				8AF9C546F771F9109FE5E1FA /* AutomationFixesTests.swift */,
 				2FA606EEB4C6088FAE8F661C /* AutomationPreferencesTests.swift */,
 				79BE8EB6F3C0407FE26D8357 /* ConsistencyCalendarTests.swift */,
@@ -719,6 +728,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				88986F0E1DF1724BCAED4B5D /* AnalyticsServiceTests.swift in Sources */,
+				675576A5862579E87950B46C /* AppStoreWallpaperRenders.swift in Sources */,
 				4A377309F878AEE198D248E1 /* AutomationFixesTests.swift in Sources */,
 				6D84420A7C360A01D3CD8C17 /* AutomationPreferencesTests.swift in Sources */,
 				ABD9B798E3464CC80537AAD1 /* ConsistencyCalendarTests.swift in Sources */,
@@ -740,7 +750,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E64958A489550913D0BD286 /* AppDriver.swift in Sources */,
+				11CC99E93A32D19DAA8ADBFA /* AppStoreScreensUITests.swift in Sources */,
 				B49D8153AC1BA1DDD3AEB37F /* AutomationSettingsUITests.swift in Sources */,
+				CAC28D736764106E117D2B48 /* FreeUserUITests.swift in Sources */,
 				98D132ED542A42B2A19C6C80 /* HealthAccessUITests.swift in Sources */,
 				1840F8320311ABF667279334 /* PanelSettingsUITests.swift in Sources */,
 				E5F5EE4D454EF3AC8AE75DDB /* ShortcutsGuideUITests.swift in Sources */,
@@ -841,7 +853,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudioWidget/LockScreenStudioWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudioWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -849,7 +861,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app.widget;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -896,7 +908,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudioWidget/LockScreenStudioWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudioWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -904,7 +916,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app.widget;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -918,14 +930,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -938,14 +950,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LockScreenStudio/LockScreenStudio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LockScreenStudio/Sources/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockscreenstudio.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

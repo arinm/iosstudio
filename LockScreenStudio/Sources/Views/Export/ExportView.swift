@@ -157,7 +157,10 @@ struct ExportView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.indigo)
-            .disabled(isExporting || !subscriptionManager.canExport)
+            // Not disabled when the free exports run out: `saveToPhotos` opens
+            // the paywall then. A greyed-out button explained nothing and left
+            // that path unreachable.
+            .disabled(isExporting)
 
             ShareLink(item: Image(uiImage: image), preview: SharePreview("Wallpaper", image: Image(uiImage: image))) {
                 HStack {

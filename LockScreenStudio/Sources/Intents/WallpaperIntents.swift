@@ -40,7 +40,7 @@ struct GenerateTodayWallpaperIntent: AppIntent {
         // template is Pro. A free choice, or no choice, renders without it.
         var isPro = false
         if let rememberedID, templates.contains(where: { $0.id == rememberedID && $0.isPro }) {
-            let subManager = SubscriptionManager()
+            let subManager = SubscriptionManager(startStoreKitTasks: false)
             await subManager.updatePurchasedProducts()
             isPro = subManager.isPro
         }
@@ -111,7 +111,7 @@ struct GenerateWallpaperIntent: AppIntent {
         // Fail fast on pro templates if the user isn't subscribed, before any
         // SwiftData fetch or render work.
         if templateName.requiresPro {
-            let subManager = SubscriptionManager()
+            let subManager = SubscriptionManager(startStoreKitTasks: false)
             await subManager.updatePurchasedProducts()
             guard subManager.isPro else {
                 throw IntentError.proRequired
@@ -210,7 +210,7 @@ struct GenerateWallpaperWithParametersIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
         // Pro-only intent
-        let subManager = SubscriptionManager()
+        let subManager = SubscriptionManager(startStoreKitTasks: false)
         await subManager.updatePurchasedProducts()
         guard subManager.isPro else {
             throw IntentError.proRequired

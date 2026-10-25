@@ -21,14 +21,17 @@ struct MainTabView: View {
     /// matters — the automation has already refreshed the wallpaper on a
     /// second morning — happens while the app is closed.
     private func askForReviewIfAutomationHasProvedItself() async {
-        let shouldAsk = ReviewRequestManager.shouldPromptAfterAutomation(
-            firstRun: AutomationStatus.firstRunDate(),
-            lastRun: AutomationStatus.lastRunDate
-        )
-        guard shouldAsk else { return }
         // Let the app finish appearing first; a prompt over a launch
         // transition reads as an interruption, not a question.
-        try? await Task.sleep(for: .seconds(2))
+        do { try await Task.sleep(for: .seconds(2)) } catch { return }
+        // Checked after the wait, not before: asking spends this version's one
+        // prompt, and an app that was closed in those two seconds would spend
+        // it on nobody.
+        guard UIApplication.shared.applicationState == .active else { return }
+        guard ReviewRequestManager.shouldPromptAfterAutomation(
+            firstRun: AutomationStatus.firstRunDate(),
+            lastRun: AutomationStatus.lastRunDate
+        ) else { return }
         requestReview()
     }
 }

@@ -59,13 +59,19 @@ struct PaywallView: View {
                 Text(errorMessage)
             }
             .onAppear {
-                selectedPlan = subscriptionManager.yearlyProduct
                 AnalyticsService.shared.track(
                     .paywallViewed,
                     properties: ["source": source]
                 )
             }
-            .task {
+            // Keyed on the product so it runs again when products arrive: the
+            // sheet can open before they have loaded, or load them through
+            // Retry. Read once on appear, that left no plan selected and no
+            // trial offered until the paywall was closed and reopened.
+            .task(id: subscriptionManager.yearlyProduct?.id) {
+                if selectedPlan == nil {
+                    selectedPlan = subscriptionManager.yearlyProduct
+                }
                 // Eligibility is per subscription group, so asking once covers
                 // both plans.
                 isEligibleForTrial = await subscriptionManager.yearlyProduct?
@@ -109,7 +115,7 @@ struct PaywallView: View {
             featureRow(icon: "infinity", text: "Unlimited exports")
             featureRow(icon: "paintbrush", text: "Premium gradients & photo backgrounds")
             featureRow(icon: "bolt.fill", text: "Advanced Shortcuts (custom template & date)")
-            featureRow(icon: "plus.circle", text: "Add custom panels")
+            featureRow(icon: "plus.circle", text: "Create your own templates")
         }
         .padding(.horizontal, 8)
     }

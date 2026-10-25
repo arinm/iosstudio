@@ -267,28 +267,17 @@ struct EditorView: View {
             .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-            // Add Panel button
+            // Add Panel button. Open to everyone: six of the nine panel types
+            // are free, and the sheet badges and gates the other three one by
+            // one. Gating the button too hid the free ones behind a paywall.
             Button {
-                if subscriptionManager.isPro {
-                    showAddPanel = true
-                } else {
-                    showPaywall = true
-                }
+                showAddPanel = true
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(.indigo)
                     Text("Add Panel")
                         .font(.subheadline)
-                    if !subscriptionManager.isPro {
-                        Text("PRO")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.indigo)
-                            .clipShape(Capsule())
-                    }
                     Spacer()
                 }
                 .padding(14)
