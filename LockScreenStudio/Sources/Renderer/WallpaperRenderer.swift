@@ -79,7 +79,14 @@ final class WallpaperRenderer {
         let safeArea = request.devicePreset.safeArea
         let theme = request.theme
 
-        let renderer = UIGraphicsImageRenderer(size: size)
+        // One pixel per point, because the preset's resolution is already in
+        // pixels. The default format draws at the screen's scale, which made
+        // every wallpaper three times too large each way on a 3x iPhone —
+        // 3960x8604 for a 1320x2868 screen, a ~136 MB bitmap for the
+        // background automation to hold.
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
         let image = renderer.image { context in
             let cgContext = context.cgContext
             let rect = CGRect(origin: .zero, size: size)
@@ -127,25 +134,22 @@ final class WallpaperRenderer {
 
             // 4. Render panels sequentially (apply bipolar vertical offset)
             var currentY = startY + verticalOffset
+            // The slack the layout has always allowed below the content area.
+            let bottom = contentRect.maxY + 20
 
             for (index, panelData) in request.panels.enumerated() {
-                let panelHeight = panelData.estimatedHeight(forWidth: contentRect.width, theme: theme)
-                let panelRect = CGRect(
-                    x: contentRect.minX,
-                    y: currentY,
-                    width: contentRect.width,
-                    height: panelHeight
-                )
+                // A panel that runs past the bottom is cut short, not left out.
+                // With exact heights, leaving out every panel that overran
+                // dropped a whole To-Do panel from a small screen at a large
+                // text size, over a single line too many. A panel is skipped
+                // only when not even its title and first line fit.
+                let room = bottom - currentY
+                guard room >= panelData.minimumHeight(forWidth: contentRect.width, theme: theme) else { break }
 
-                // Don't render if panel extends beyond content area
-                guard panelRect.maxY <= contentRect.maxY + 20 else { break }
-
-                drawPanel(panelData, in: panelRect, theme: theme, context: cgContext)
-                currentY = panelRect.maxY
-
-                // Draw separator line between panels (not after the last one)
-                if theme.showSeparators && index < request.panels.count - 1 {
-                    let separatorY = currentY + theme.panelSpacing * 0.5
+                // Drawn above the panel rather than below the previous one, so
+                // there is never a divider with nothing under it.
+                if theme.showSeparators && index > 0 {
+                    let separatorY = currentY - theme.panelSpacing * 0.5
                     cgContext.saveGState()
                     cgContext.setStrokeColor(theme.separatorColor.cgColor)
                     cgContext.setLineWidth(1.0)
@@ -156,7 +160,17 @@ final class WallpaperRenderer {
                     cgContext.restoreGState()
                 }
 
-                currentY += theme.panelSpacing
+                let panelHeight = panelData.estimatedHeight(forWidth: contentRect.width, theme: theme)
+                let panelRect = CGRect(
+                    x: contentRect.minX,
+                    y: currentY,
+                    width: contentRect.width,
+                    height: min(panelHeight, room)
+                )
+                drawPanel(panelData, in: panelRect, theme: theme, context: cgContext)
+
+                guard panelHeight <= room else { break }
+                currentY = panelRect.maxY + theme.panelSpacing
             }
         }
 
@@ -183,8 +197,14 @@ final class WallpaperRenderer {
         )
     }
 
-    /// Quick render for preview (lower resolution, always PNG).
-    /// Scales both the device preset AND the theme proportionally.
+    /// The preview, drawn exactly as the export is: same size, same type.
+    ///
+    /// It used to be typeset at a third of the size, where the system font's
+    /// optical sizing sets text measurably wider, so lines wrapped in the
+    /// preview that didn't in the export — and with the layout measuring
+    /// wrapped text, the two could disagree about where every panel sat. At
+    /// one pixel per point the full-size render has the same pixels the
+    /// third-size one had at 3x.
     func renderPreview(
         panels: [PanelRenderData],
         theme: RenderTheme,
@@ -197,38 +217,18 @@ final class WallpaperRenderer {
         photoBlur: CGFloat = 0,
         photoDim: CGFloat = 0.45
     ) throws -> UIImage {
-        let scale: CGFloat = 1.0 / 3.0
-
-        let scaledPreset = DevicePreset(
-            id: devicePreset.id,
-            name: devicePreset.name,
-            screenWidth: Int(CGFloat(devicePreset.screenWidth) * scale),
-            screenHeight: Int(CGFloat(devicePreset.screenHeight) * scale),
-            safeArea: .init(
-                top: devicePreset.safeArea.top * scale,
-                bottom: devicePreset.safeArea.bottom * scale,
-                leading: devicePreset.safeArea.leading * scale,
-                trailing: devicePreset.safeArea.trailing * scale
-            ),
-            hasDynamicIsland: devicePreset.hasDynamicIsland
-        )
-
-        let scaledTheme = theme.scaled(by: scale)
-
-        let request = RenderRequest(
+        try render(RenderRequest(
             panels: panels,
-            theme: scaledTheme,
-            devicePreset: scaledPreset,
+            theme: theme,
+            devicePreset: devicePreset,
             contentPosition: contentPosition,
-            clockTopPadding: clockTopPadding * scale,
+            clockTopPadding: clockTopPadding,
             backgroundImage: backgroundImage,
             photoOffsetX: photoOffsetX,
             photoOffsetY: photoOffsetY,
             photoBlur: photoBlur,
             photoDim: photoDim
-        )
-
-        return try render(request).image
+        )).image
     }
 
     // MARK: - Private Drawing Methods
@@ -334,115 +334,22 @@ final class WallpaperRenderer {
         // Panel title (small caps style header)
         var currentY = rect.minY
         if let title = panel.title {
-            let titleAttrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: theme.titleFontSize, weight: .semibold),
-                .foregroundColor: theme.titleColor,
-                .kern: theme.titleFontSize * 0.15, // Letter spacing for small-caps feel
-            ]
-            let titleString = NSAttributedString(string: title.uppercased(), attributes: titleAttrs)
-            let titleSize = titleString.boundingRect(
-                with: CGSize(width: rect.width, height: .greatestFiniteMagnitude),
-                options: .usesLineFragmentOrigin,
-                context: nil
-            )
+            let titleString = Self.titleString(title, theme: theme)
             titleString.draw(at: CGPoint(x: rect.minX, y: currentY))
-            currentY += titleSize.height + theme.titleBottomSpacing
+            currentY += Self.measuredHeight(titleString, width: rect.width) + theme.titleBottomSpacing
         }
 
         // Panel content lines
-        for line in panel.lines {
-            let lineString: NSAttributedString
+        // A line stops at the panel's edge: heights are exact, so only a panel
+        // cut short at the bottom of the wallpaper has lines that don't fit.
+        lines: for line in panel.lines {
             switch line {
-            case .text(let text):
-                // Check if it's a date header (all-caps, no title = date panel)
-                let isDateHeader = panel.title == nil
-                if isDateHeader && text == text.uppercased() && text.count > 2 {
-                    // Day of week — render large bold
-                    let attrs: [NSAttributedString.Key: Any] = [
-                        .font: UIFont.systemFont(ofSize: theme.heroFontSize, weight: .heavy),
-                        .foregroundColor: theme.textColor,
-                        .kern: theme.heroFontSize * 0.03,
-                    ]
-                    lineString = NSAttributedString(string: text, attributes: attrs)
-                } else if isDateHeader {
-                    // Date line — render medium, visible
-                    let attrs: [NSAttributedString.Key: Any] = [
-                        .font: UIFont.systemFont(ofSize: theme.dateFontSize, weight: .light),
-                        .foregroundColor: theme.textColor.withAlphaComponent(0.6),
-                    ]
-                    lineString = NSAttributedString(string: text, attributes: attrs)
-                } else {
-                    let attrs: [NSAttributedString.Key: Any] = [
-                        .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
-                        .foregroundColor: theme.textColor,
-                    ]
-                    lineString = NSAttributedString(string: text, attributes: attrs)
-                }
-
-            case .event(let time, let title):
-                let timeAttrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.monospacedDigitSystemFont(ofSize: theme.bodyFontSize, weight: .medium),
-                    .foregroundColor: theme.accentUIColor,
-                ]
-                let titleAttrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
-                    .foregroundColor: theme.textColor,
-                ]
-                let combined = NSMutableAttributedString(string: time, attributes: timeAttrs)
-                combined.append(NSAttributedString(string: "  ", attributes: timeAttrs))
-                combined.append(NSAttributedString(string: title, attributes: titleAttrs))
-                lineString = combined
-
-            case .priority(let rank, let text):
-                let rankAttrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .bold),
-                    .foregroundColor: theme.accentUIColor,
-                ]
-                let textAttrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
-                    .foregroundColor: theme.textColor,
-                ]
-                let combined = NSMutableAttributedString(string: "\(rank). ", attributes: rankAttrs)
-                combined.append(NSAttributedString(string: text, attributes: textAttrs))
-                lineString = combined
-
-            case .todoItem(let text, let completed):
-                let checkmark = completed ? "\u{2611}" : "\u{2610}"
-                let checkAttrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
-                    .foregroundColor: completed ? theme.secondaryTextColor : theme.accentUIColor,
-                ]
-                let textColor = completed ? theme.secondaryTextColor : theme.textColor
-                let textAttrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
-                    .foregroundColor: textColor,
-                    .strikethroughStyle: completed ? NSUnderlineStyle.single.rawValue : 0,
-                    .strikethroughColor: theme.secondaryTextColor,
-                ]
-                let combined = NSMutableAttributedString(string: checkmark + " ", attributes: checkAttrs)
-                combined.append(NSAttributedString(string: text, attributes: textAttrs))
-                lineString = combined
-
-            case .heroText(let text):
-                let attrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: theme.heroFontSize * 1.2, weight: .heavy),
-                    .foregroundColor: theme.accentUIColor,
-                    .kern: theme.heroFontSize * 0.02,
-                ]
-                lineString = NSAttributedString(string: text, attributes: attrs)
-
-            case .subtitle(let text):
-                let attrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .medium),
-                    .foregroundColor: theme.secondaryTextColor,
-                ]
-                lineString = NSAttributedString(string: text, attributes: attrs)
-
             case .heatmapGrid(let weeks, let data):
                 // Draw a GitHub-style contribution heatmap grid
                 let (cellSize, gap) = Self.heatmapMetrics(
                     weeks: weeks, width: rect.width, theme: theme
                 )
+                guard currentY + 7 * (cellSize + gap) <= rect.maxY + 1 else { break lines }
                 let cornerRadius: CGFloat = cellSize * 0.25
 
                 for week in 0..<weeks {
@@ -488,6 +395,9 @@ final class WallpaperRenderer {
                     (rect.width - CGFloat(cols - 1) * gap) / CGFloat(cols),
                     theme.bodyFontSize * 1.2
                 )
+                let totalRows = ((daysInMonth - 1 + firstWeekday) / cols) + 1
+                guard currentY + cellSize * 0.6 + gap + CGFloat(totalRows) * (cellSize + gap)
+                        <= rect.maxY + 1 else { break lines }
                 let totalGridWidth = CGFloat(cols) * cellSize + CGFloat(cols - 1) * gap
                 let gridOffsetX = rect.minX
 
@@ -561,22 +471,150 @@ final class WallpaperRenderer {
                     }
                 }
 
-                let totalRows = ((daysInMonth - 1 + firstWeekday) / cols) + 1
                 currentY += CGFloat(totalRows) * (cellSize + gap) + theme.lineSpacing
                 continue
+            default:
+                break
             }
 
-            // Measure and draw
-            let lineSize = lineString.boundingRect(
-                with: CGSize(width: rect.width, height: .greatestFiniteMagnitude),
-                options: .usesLineFragmentOrigin,
-                context: nil
+            guard let lineString = Self.attributedLine(line, panelTitle: panel.title, theme: theme) else {
+                continue
+            }
+            // Measured exactly as `PanelRenderData.estimatedHeight` measures it,
+            // so the line lands inside the rect the layout gave this panel.
+            let lineRect = CGRect(
+                x: rect.minX,
+                y: currentY,
+                width: rect.width,
+                height: Self.measuredHeight(lineString, width: rect.width)
             )
-            let lineRect = CGRect(x: rect.minX, y: currentY, width: rect.width, height: lineSize.height)
-            guard lineRect.maxY <= rect.maxY + 40 else { break }
+            guard lineRect.maxY <= rect.maxY + 1 else { break }
             lineString.draw(in: lineRect)
             currentY = lineRect.maxY + theme.lineSpacing
         }
+    }
+
+    // MARK: - Typesetting
+
+    /// Drawing and layout both measure text through these, so a panel is laid
+    /// out at the height it is drawn at. The layout used to assume one font
+    /// size per line while drawing used the font's real line height, about a
+    /// fifth taller: over five or six lines the panel outgrew its slot, the
+    /// separator cut through its last line, and lines past the slot were
+    /// dropped — at the XL text size, the last event or to-do went missing.
+    nonisolated static func titleString(_ title: String, theme: RenderTheme) -> NSAttributedString {
+        let titleAttrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: theme.titleFontSize, weight: .semibold),
+            .foregroundColor: theme.titleColor,
+            .kern: theme.titleFontSize * 0.15, // Letter spacing for small-caps feel
+        ]
+        return NSAttributedString(string: title.uppercased(), attributes: titleAttrs)
+    }
+
+    /// The typeset text for a line, or nil for the grids, which are drawn
+    /// rather than typeset.
+    nonisolated static func attributedLine(
+        _ line: PanelLine,
+        panelTitle: String?,
+        theme: RenderTheme
+    ) -> NSAttributedString? {
+        switch line {
+        case .text(let text):
+            // Check if it's a date header (all-caps, no title = date panel)
+            let isDateHeader = panelTitle == nil
+            if isDateHeader && text == text.uppercased() && text.count > 2 {
+                // Day of week — render large bold
+                let attrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: theme.heroFontSize, weight: .heavy),
+                    .foregroundColor: theme.textColor,
+                    .kern: theme.heroFontSize * 0.03,
+                ]
+                return NSAttributedString(string: text, attributes: attrs)
+            } else if isDateHeader {
+                // Date line — render medium, visible
+                let attrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: theme.dateFontSize, weight: .light),
+                    .foregroundColor: theme.textColor.withAlphaComponent(0.6),
+                ]
+                return NSAttributedString(string: text, attributes: attrs)
+            } else {
+                let attrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
+                    .foregroundColor: theme.textColor,
+                ]
+                return NSAttributedString(string: text, attributes: attrs)
+            }
+
+        case .event(let time, let title):
+            let timeAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.monospacedDigitSystemFont(ofSize: theme.bodyFontSize, weight: .medium),
+                .foregroundColor: theme.accentUIColor,
+            ]
+            let titleAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
+                .foregroundColor: theme.textColor,
+            ]
+            let combined = NSMutableAttributedString(string: time, attributes: timeAttrs)
+            combined.append(NSAttributedString(string: "  ", attributes: timeAttrs))
+            combined.append(NSAttributedString(string: title, attributes: titleAttrs))
+            return combined
+
+        case .priority(let rank, let text):
+            let rankAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .bold),
+                .foregroundColor: theme.accentUIColor,
+            ]
+            let textAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
+                .foregroundColor: theme.textColor,
+            ]
+            let combined = NSMutableAttributedString(string: "\(rank). ", attributes: rankAttrs)
+            combined.append(NSAttributedString(string: text, attributes: textAttrs))
+            return combined
+
+        case .todoItem(let text, let completed):
+            let checkmark = completed ? "\u{2611}" : "\u{2610}"
+            let checkAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
+                .foregroundColor: completed ? theme.secondaryTextColor : theme.accentUIColor,
+            ]
+            let textColor = completed ? theme.secondaryTextColor : theme.textColor
+            let textAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .regular),
+                .foregroundColor: textColor,
+                .strikethroughStyle: completed ? NSUnderlineStyle.single.rawValue : 0,
+                .strikethroughColor: theme.secondaryTextColor,
+            ]
+            let combined = NSMutableAttributedString(string: checkmark + " ", attributes: checkAttrs)
+            combined.append(NSAttributedString(string: text, attributes: textAttrs))
+            return combined
+
+        case .heroText(let text):
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: theme.heroFontSize * 1.2, weight: .heavy),
+                .foregroundColor: theme.accentUIColor,
+                .kern: theme.heroFontSize * 0.02,
+            ]
+            return NSAttributedString(string: text, attributes: attrs)
+
+        case .subtitle(let text):
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: theme.bodyFontSize, weight: .medium),
+                .foregroundColor: theme.secondaryTextColor,
+            ]
+            return NSAttributedString(string: text, attributes: attrs)
+
+        case .heatmapGrid, .calendarGrid:
+            return nil
+        }
+    }
+
+    nonisolated static func measuredHeight(_ string: NSAttributedString, width: CGFloat) -> CGFloat {
+        string.boundingRect(
+            with: CGSize(width: width, height: .greatestFiniteMagnitude),
+            options: .usesLineFragmentOrigin,
+            context: nil
+        ).height
     }
 }
 
@@ -587,25 +625,22 @@ struct PanelRenderData {
     let title: String?
     let lines: [PanelLine]
 
+    /// The least of a panel worth drawing: its title and first line.
+    func minimumHeight(forWidth width: CGFloat, theme: RenderTheme) -> CGFloat {
+        PanelRenderData(title: title, lines: Array(lines.prefix(1)))
+            .estimatedHeight(forWidth: width, theme: theme)
+    }
+
     func estimatedHeight(forWidth width: CGFloat, theme: RenderTheme) -> CGFloat {
         var height: CGFloat = 0
 
-        if title != nil {
-            height += theme.titleFontSize + theme.titleBottomSpacing + 4
+        if let title {
+            let titleString = WallpaperRenderer.titleString(title, theme: theme)
+            height += WallpaperRenderer.measuredHeight(titleString, width: width) + theme.titleBottomSpacing
         }
 
         for line in lines {
             switch line {
-            case .text(let text) where title == nil && text == text.uppercased():
-                // Hero text (day of week)
-                height += theme.heroFontSize + theme.lineSpacing
-            case .text where title == nil:
-                // Date text
-                height += theme.dateFontSize + theme.lineSpacing
-            case .heroText:
-                height += theme.heroFontSize * 1.2 + theme.lineSpacing
-            case .subtitle:
-                height += theme.bodyFontSize + theme.lineSpacing
             case .heatmapGrid(let weeks, _):
                 let (cellSize, gap) = WallpaperRenderer.heatmapMetrics(
                     weeks: weeks, width: width, theme: theme
@@ -617,7 +652,9 @@ struct PanelRenderData {
                 // header row + up to 6 week rows
                 height += cellSize * 0.6 + gap + 6 * (cellSize + gap) + theme.lineSpacing
             default:
-                height += theme.bodyFontSize + theme.lineSpacing
+                if let string = WallpaperRenderer.attributedLine(line, panelTitle: title, theme: theme) {
+                    height += WallpaperRenderer.measuredHeight(string, width: width) + theme.lineSpacing
+                }
             }
         }
 
@@ -739,38 +776,6 @@ struct RenderTheme {
         panelCornerRadius: 20,
         margins: UIEdgeInsets(top: 40, left: 72, bottom: 80, right: 72)
     )
-
-    /// Returns a new theme with all sizes scaled by the given factor.
-    /// Used for preview rendering at lower resolutions.
-    func scaled(by factor: CGFloat) -> RenderTheme {
-        RenderTheme(
-            backgroundColor: backgroundColor,
-            backgroundGradient: backgroundGradient,
-            textColor: textColor,
-            secondaryTextColor: secondaryTextColor,
-            titleColor: titleColor,
-            accentUIColor: accentUIColor,
-            panelBackgroundColor: panelBackgroundColor,
-            showPanelBackground: showPanelBackground,
-            separatorColor: separatorColor,
-            showSeparators: showSeparators,
-            heroFontSize: heroFontSize * factor,
-            dateFontSize: dateFontSize * factor,
-            titleFontSize: titleFontSize * factor,
-            titleBottomSpacing: titleBottomSpacing * factor,
-            bodyFontSize: bodyFontSize * factor,
-            lineSpacing: lineSpacing * factor,
-            panelSpacing: panelSpacing * factor,
-            panelPadding: panelPadding * factor,
-            panelCornerRadius: panelCornerRadius * factor,
-            margins: UIEdgeInsets(
-                top: margins.top * factor,
-                left: margins.left * factor,
-                bottom: margins.bottom * factor,
-                right: margins.right * factor
-            )
-        )
-    }
 
     /// Returns a new theme with only font sizes and line spacing scaled.
     /// Used for user font size preference (doesn't affect layout/margins).

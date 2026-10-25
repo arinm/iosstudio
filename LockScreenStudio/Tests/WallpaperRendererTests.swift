@@ -48,6 +48,11 @@ final class WallpaperRendererTests: XCTestCase {
 
         XCTAssertEqual(result.resolution.width, 1320)
         XCTAssertEqual(result.resolution.height, 2868)
+        // Pixels, not points: the image used to be drawn at the screen's
+        // scale, so a 1320x2868 export came out 3960x8604.
+        XCTAssertEqual(result.image.cgImage?.width, 1320)
+        XCTAssertEqual(result.image.cgImage?.height, 2868)
+        XCTAssertEqual(UIImage(data: result.imageData)?.cgImage?.width, 1320)
     }
 
     // MARK: - Deterministic Output
@@ -159,19 +164,79 @@ final class WallpaperRendererTests: XCTestCase {
 
     // MARK: - Preview Render
 
-    func testPreviewRenderProducesReducedSize() throws {
+    /// The preview used to be typeset at a third of the size, where the system
+    /// font is set wider, so a line could wrap in the preview and not in the
+    /// export. It is now the same drawing.
+    func testPreviewIsDrawnExactlyLikeTheExport() throws {
         let preset = DevicePreset.allPresets.first { $0.id == "iphone15pro" }!
-        let panels = [PanelRenderData(title: "Test", lines: [.text("Preview")])]
+        let panels = [PanelRenderData(title: "Agenda", lines: [
+            .event(time: "09:30", title: "Quarterly planning review with the design and product teams"),
+        ])]
 
-        let image = try renderer.renderPreview(
-            panels: panels,
-            theme: .defaultDark,
-            devicePreset: preset
-        )
+        let preview = try renderer.renderPreview(panels: panels, theme: .defaultDark, devicePreset: preset)
+        let export = try renderer.render(.init(panels: panels, theme: .defaultDark, devicePreset: preset))
 
-        // Preview should be 1/3 resolution
-        XCTAssertEqual(image.size.width, 393, accuracy: 1)
-        XCTAssertEqual(image.size.height, 852, accuracy: 1)
+        XCTAssertEqual(preview.cgImage?.width, 1179)
+        XCTAssertEqual(preview.pngData(), export.image.pngData())
+    }
+
+    // MARK: - Layout
+
+    /// The layout used to give each line one font size of height, while every
+    /// line is drawn at the font's full line height, about a fifth taller. On a
+    /// long panel the difference added up: the separator cut through the last
+    /// line, and lines past the panel's slot were not drawn at all.
+    func testPanelHeightCoversEveryLineAtTheLargestTextSize() {
+        let theme = RenderTheme.defaultDark.withFontScale(1.4)
+        let lines = (1...8).map { PanelLine.todoItem(text: "Task \($0)", completed: false) }
+        let panel = PanelRenderData(title: "To-Do", lines: lines)
+
+        let height = panel.estimatedHeight(forWidth: 1000, theme: theme)
+
+        let lineHeight = UIFont.systemFont(ofSize: theme.bodyFontSize).lineHeight
+        XCTAssertGreaterThanOrEqual(height, 8 * (lineHeight + theme.lineSpacing))
+    }
+
+    /// A panel that runs past the bottom of the wallpaper is cut short. With
+    /// exact heights the layout used to leave it out whole: on a small screen
+    /// at a large text size, a To-Do panel vanished over one line too many.
+    func testPanelThatRunsPastTheBottomIsCutShortNotLeftOut() throws {
+        let preset = DevicePreset.allPresets.first { $0.id == "iphone15pro" }!
+        let theme = RenderTheme.defaultDark
+        let panels = [
+            PanelRenderData(title: "Today", lines: [.text("Design review"), .text("Lunch")]),
+            PanelRenderData(title: "To-Do", lines: (1...60).map {
+                .todoItem(text: "Task \($0)", completed: false)
+            }),
+        ]
+
+        let result = try renderer.render(.init(panels: panels, theme: theme, devicePreset: preset))
+
+        let ink = inkedRows(in: result.image)
+        let contentBottom = Int(preset.resolution.height - preset.safeArea.bottom - theme.margins.bottom)
+        XCTAssertTrue(ink[(contentBottom - 300)..<contentBottom].contains(true),
+                      "the panel that didn't fit was left out instead of cut short")
+        XCTAssertFalse(ink[(contentBottom + 22)...].contains(true),
+                       "lines were drawn past the bottom of the content area")
+    }
+
+    /// For each row of pixels, whether anything differs from the row's left
+    /// edge, which is always background.
+    private func inkedRows(in image: UIImage) -> [Bool] {
+        guard let cg = image.cgImage else { return [] }
+        let (w, h) = (cg.width, cg.height)
+        var px = [UInt8](repeating: 0, count: w * h * 4)
+        let ctx = CGContext(data: &px, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                            space: CGColorSpaceCreateDeviceRGB(),
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        return (0..<h).map { y in
+            let row = y * w * 4
+            return stride(from: 0, to: w, by: 2).contains { x in
+                let i = row + x * 4
+                return (0..<3).reduce(0) { $0 + abs(Int(px[i + $1]) - Int(px[row + $1])) } > 60
+            }
+        }
     }
 
     // MARK: - Panel Line Types
