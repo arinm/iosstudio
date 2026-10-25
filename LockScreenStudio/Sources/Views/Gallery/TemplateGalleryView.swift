@@ -123,7 +123,10 @@ struct TemplateGalleryView: View {
                     Text("Unlock All Templates")
                         .font(.subheadline.bold())
                         .foregroundStyle(.primary)
-                    Text("Get Pro for unlimited exports & automation")
+                    // Not "automation": daily automation is free, and saying otherwise
+                    // tells people to pay for the one thing that would show them
+                    // the app is worth paying for.
+                    Text("Get Pro for unlimited exports, gradients & photo backgrounds")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

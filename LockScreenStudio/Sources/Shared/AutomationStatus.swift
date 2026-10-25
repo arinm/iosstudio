@@ -5,20 +5,41 @@ import Foundation
 /// Shortcuts/widget process wrote.
 enum AutomationStatus {
     private static let lastRunKey = "lastAutomationRun"
+    private static let firstRunKey = "firstAutomationRun"
 
-    private static var defaults: UserDefaults {
+    static var sharedDefaults: UserDefaults {
         UserDefaults(suiteName: SharedContainer.appGroupID) ?? .standard
     }
+
+    private static var defaults: UserDefaults { sharedDefaults }
 
     /// Call from inside an AppIntent's perform() when the run completes
     /// successfully. Records the current date so the editor can surface a
     /// "Last auto-run: …" status.
-    static func recordRun() {
-        defaults.set(Date(), forKey: lastRunKey)
+    ///
+    /// The first run is kept too, so "it has worked on two different days" can
+    /// be told apart from a single test tap. Installs that predate this key
+    /// seed it from their existing last run, so people already relying on the
+    /// automation count from when they actually started, not from this update.
+    static func recordRun(at now: Date = .now, defaults: UserDefaults = sharedDefaults) {
+        if defaults.object(forKey: firstRunKey) == nil {
+            let existing = defaults.object(forKey: lastRunKey) as? Date
+            defaults.set(existing ?? now, forKey: firstRunKey)
+        }
+        defaults.set(now, forKey: lastRunKey)
     }
 
     /// Most recent successful automation run, or nil if it has never run.
     static var lastRunDate: Date? {
+        defaults.object(forKey: lastRunKey) as? Date
+    }
+
+    /// Earliest recorded successful run, or nil if it has never run.
+    static func firstRunDate(defaults: UserDefaults = sharedDefaults) -> Date? {
+        defaults.object(forKey: firstRunKey) as? Date
+    }
+
+    static func lastRunDate(defaults: UserDefaults) -> Date? {
         defaults.object(forKey: lastRunKey) as? Date
     }
 

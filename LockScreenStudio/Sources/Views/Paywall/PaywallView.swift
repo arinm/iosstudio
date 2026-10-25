@@ -12,6 +12,11 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedPlan: Product?
+    /// Whether this Apple ID can still take the free trial. Starts false so a
+    /// trial is never promised before StoreKit has confirmed it — the safe
+    /// failure is "Subscribe" briefly, not "Start Free Trial" followed by an
+    /// immediate charge for someone who already used theirs.
+    @State private var isEligibleForTrial = false
     @State private var isPurchasing = false
     @State private var showError = false
     @State private var errorMessage = ""
@@ -59,6 +64,12 @@ struct PaywallView: View {
                     .paywallViewed,
                     properties: ["source": source]
                 )
+            }
+            .task {
+                // Eligibility is per subscription group, so asking once covers
+                // both plans.
+                isEligibleForTrial = await subscriptionManager.yearlyProduct?
+                    .subscription?.isEligibleForIntroOffer ?? false
             }
         }
     }
@@ -192,10 +203,11 @@ struct PaywallView: View {
                         .foregroundStyle(.secondary)
 
                     if product.id == SubscriptionManager.yearlyProductID,
+                       isEligibleForTrial,
                        let sub = product.subscription,
                        let introOffer = sub.introductoryOffer,
                        introOffer.paymentMode == .freeTrial {
-                        Text("\(introOffer.period.value)-\(introOffer.period.unit == .day ? "day" : "week") free trial")
+                        Text(Self.trialLabel(value: introOffer.period.value, unit: introOffer.period.unit))
                             .font(.caption)
                             .foregroundStyle(.indigo)
                     }
@@ -287,6 +299,7 @@ struct PaywallView: View {
         guard let plan = selectedPlan else { return "Subscribe" }
 
         if plan.id == SubscriptionManager.yearlyProductID,
+           isEligibleForTrial,
            let sub = plan.subscription,
            let intro = sub.introductoryOffer,
            intro.paymentMode == .freeTrial {
@@ -294,6 +307,21 @@ struct PaywallView: View {
         }
 
         return "Subscribe"
+    }
+
+    /// "7-day free trial", "1-month free trial". The old inline version mapped
+    /// every unit that wasn't `.day` to "week", so a monthly trial would have
+    /// been advertised as weekly.
+    static func trialLabel(value: Int, unit: Product.SubscriptionPeriod.Unit) -> String {
+        let unitName: String
+        switch unit {
+        case .day: unitName = "day"
+        case .week: unitName = "week"
+        case .month: unitName = "month"
+        case .year: unitName = "year"
+        @unknown default: unitName = "period"
+        }
+        return "\(value)-\(unitName) free trial"
     }
 
     // MARK: - Purchase

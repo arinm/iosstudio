@@ -31,11 +31,23 @@ struct GenerateTodayWallpaperIntent: AppIntent {
         let service = ExportService()
         let context = ModelContext(SharedContainer.makeModelContainer())
 
-        let descriptor = FetchDescriptor<WallpaperTemplate>(
-            predicate: #Predicate { !$0.isPro },
-            sortBy: [SortDescriptor(\.sortOrder)]
+        let templates = try context.fetch(
+            FetchDescriptor<WallpaperTemplate>(sortBy: [SortDescriptor(\.sortOrder)])
         )
-        guard let template = try context.fetch(descriptor).first else {
+        let rememberedID = AutomationTemplate.rememberedID()
+
+        // Only ask StoreKit when the answer changes the outcome: the remembered
+        // template is Pro. A free choice, or no choice, renders without it.
+        var isPro = false
+        if let rememberedID, templates.contains(where: { $0.id == rememberedID && $0.isPro }) {
+            let subManager = SubscriptionManager()
+            await subManager.updatePurchasedProducts()
+            isPro = subManager.isPro
+        }
+
+        let candidates = templates.map { AutomationTemplate.Candidate(id: $0.id, isPro: $0.isPro) }
+        guard let chosenID = AutomationTemplate.resolve(candidates, rememberedID: rememberedID, isPro: isPro),
+              let template = templates.first(where: { $0.id == chosenID }) else {
             throw IntentError.noTemplateFound
         }
 

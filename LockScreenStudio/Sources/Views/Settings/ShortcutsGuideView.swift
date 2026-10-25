@@ -483,6 +483,11 @@ struct ShortcutsSetupSheet: View {
             tipRow(icon: "hand.tap", text: "Asked to confirm every morning? That is **Show Preview**, inside **Set Wallpaper Photo**. Turn it off and it applies silently.")
             tipRow(icon: "magnifyingglass", text: "Can't find the action? It is called **Set Wallpaper Photo**, not \"Set Wallpaper\" - searching for either finds it, but the row you want is the one with the Shortcuts icon, not one of ours.")
             tipRow(icon: "photo.badge.checkmark", text: "Wallpaper didn't change at all? Check that **Set Wallpaper Photo** sits directly below the Generate step and is set to **Lock Screen**. If its image slot looks empty, tap it and pick the variable from the step above.")
+            // The error text is quoted verbatim from Apple's ActionKit string
+            // table so people can match it to what Shortcuts actually shows.
+            // Which wallpaper types refuse a photo comes from Iconfactory's
+            // support docs and developer reports; Apple doesn't list them.
+            tipRow(icon: "exclamationmark.triangle", text: "Shortcuts says \u{201C}Photos cannot be set on the selected wallpaper\u{201D}? Your current Lock Screen has to be a regular photo. **Set Wallpaper Photo** can't replace a Photo Shuffle, Live Photo, Weather, Astronomy or plain-colour wallpaper - set any normal photo once, and the automation takes it from there.")
         }
     }
 

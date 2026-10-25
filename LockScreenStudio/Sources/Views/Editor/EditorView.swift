@@ -715,6 +715,7 @@ struct EditorView: View {
 
     private var automationButton: some View {
         Button {
+            makeThisTheAutomatedTemplate()
             showShortcutsWizard = true
         } label: {
             HStack(spacing: 10) {
@@ -740,11 +741,20 @@ struct EditorView: View {
         .buttonStyle(.plain)
     }
 
+    /// Says which wallpaper the automation renders, because that used to be
+    /// invisible: it silently used the first free template whatever the user
+    /// had chosen. Tapping the row makes this template the automated one.
     private var automationSubtitle: String {
+        let isAutomated = AutomationTemplate.rememberedID() == template.id
+        let lead = isAutomated ? "Automates this wallpaper" : "Tap to automate this wallpaper"
         if let description = AutomationStatus.lastRunDescription() {
-            return "Last auto-run: \(description)"
+            return "\(lead) · last run \(description)"
         }
-        return "Auto-generate via Shortcuts"
+        return lead
+    }
+
+    private func makeThisTheAutomatedTemplate() {
+        AutomationTemplate.remember(template.id)
     }
 
     @ViewBuilder
@@ -763,6 +773,7 @@ struct EditorView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Button {
+                        makeThisTheAutomatedTemplate()
                         showShortcutsWizard = true
                     } label: {
                         Text("Set it up →")
@@ -798,8 +809,11 @@ struct EditorView: View {
             if template.isPro && !subscriptionManager.isPro {
                 showPaywall = true
             } else {
-                // Save panels for background auto-refresh
+                // Save panels for background auto-refresh, and point the
+                // Shortcuts automation at the same template so the two
+                // refresh paths can't disagree about which wallpaper is yours.
                 BackgroundTaskManager.savePanelsForRefresh(sortedPanels)
+                makeThisTheAutomatedTemplate()
                 hasGeneratedOnce = true
                 showPreview = true
             }
